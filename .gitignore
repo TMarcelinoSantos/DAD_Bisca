@@ -22,5 +22,6 @@
 /api/Homestead.json
 /api/Homestead.yaml
 /api/Thumbs.db
+/api/database
 /websockets/node_modules
 /websockets/package-lock.json
