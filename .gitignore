@@ -23,5 +23,6 @@
 /api/Homestead.yaml
 /api/Thumbs.db
 /api/database
+/frontend/src/cards
 /websockets/node_modules
 /websockets/package-lock.json
