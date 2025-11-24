@@ -10,8 +10,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/me', function (Request $request) {
     return $request->user();
     });
+
     Route::post('logout', [AuthController::class, 'logout']);
-    });
+
+    Route::apiResources([
+		'users' => UserController::class,
+	]);
+});
 
 Route::get('/metadata', function (Request $request) {
     //abort(500, 'Something went wrong');
