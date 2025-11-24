@@ -3,15 +3,32 @@
         <div class="w-full max-w-md space-y-8">
             <div>
                 <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-                    Sign in to your account
+                    Create a new account
                 </h2>
                 <p class="mt-2 text-center text-sm text-gray-600">
-                    Enter your credentials to access your account
+                    Enter your credentials to register your account
                 </p>
             </div>
 
             <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
                 <div class="space-y-4 rounded-md shadow-sm">
+
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+                            Name
+                        </label>
+                        <Input id="name" v-model="formData.name" type="text" autocomplete="name" required
+                            placeholder="John Doe" />
+                    </div>
+
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                            Username
+                        </label>
+                        <Input id="username" v-model="formData.username" type="text" autocomplete="username" required
+                            placeholder="biscateEnjoyer123" />
+                    </div>
+
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
                             Email address
@@ -31,13 +48,13 @@
 
 
                 <div>
-                    <Button type="submit" class="w-full"> Sign in </Button>
+                    <Button type="submit" class="w-full"> Sign up </Button>
                 </div>
 
                 <div class="text-center text-sm">
-                    <span class="text-gray-600">Don't have an account? </span>
-                    <a href="#" class="font-medium text-blue-600 hover:text-blue-500">
-                        Sign up
+                    <span class="text-gray-600">Already have an account? </span>
+                    <a href="../login" class="font-medium text-blue-600 hover:text-blue-500">
+                        Login In
                     </a>
                 </div>
             </form>
@@ -58,6 +75,8 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 const formData = ref({
+    name: '',
+    username: '',
     email: '',
     password: ''
 })
@@ -70,7 +89,7 @@ const handleSubmit = async () => {
         success: (data) => {
             return `Login Sucessfull - ${data?.name}`
         },
-        error: (data) => `[API] Error saving game - ${data?.response?.data?.message}`,
+        error: (data) => `[API] Error signing in - ${data?.response?.data?.message}`,
     })
 
 

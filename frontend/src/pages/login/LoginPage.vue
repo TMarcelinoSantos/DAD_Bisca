@@ -36,7 +36,7 @@
 
                 <div class="text-center text-sm">
                     <span class="text-gray-600">Don't have an account? </span>
-                    <a href="#" class="font-medium text-blue-600 hover:text-blue-500">
+                    <a href="../register" class="font-medium text-blue-600 hover:text-blue-500">
                         Sign up
                     </a>
                 </div>
@@ -70,7 +70,7 @@ const handleSubmit = async () => {
         success: (data) => {
             return `Login Sucessfull - ${data?.name}`
         },
-        error: (data) => `[API] Error saving game - ${data?.response?.data?.message}`,
+        error: (data) => `[API] Error loging in - ${data?.response?.data?.message}`,
     })
 
 
