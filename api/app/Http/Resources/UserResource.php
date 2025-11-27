@@ -20,6 +20,8 @@ class UserResource extends JsonResource
         'email' => $this->email,
         'photo_url' => $this->photo_url,
         'role' => $this->role,
+        'coins_balance' => $this->coins_balance,
+        'card_theme' => $this->card_theme,
         ];
     }
 }

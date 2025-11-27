@@ -52,4 +52,51 @@ class UserController extends Controller
     {
         //
     }
+
+    //Update user card theme
+    public function updateTheme(Request $request)
+    {
+            $request->validate([
+            'theme' => 'required|string',
+            'price' => 'required|integer|min:0',
+        ]);
+
+        $user = $request->user();
+
+        if ($user->coins_balance < $request->price) {
+            return response()->json(['message' => 'Saldo insuficiente'], 400);
+        }
+
+        $user->coins_balance -= $request->price;
+        $user->card_theme = $request->theme; 
+        $user->save();
+
+        return response()->json([
+            'message' => 'Carta comprada com sucesso!',
+            'user' => $user
+        ]);
+    }
+
+    public function updateAvatar(Request $request)
+    {
+            $request->validate([
+            'img' => 'required|string',
+            'price' => 'required|integer|min:0',
+        ]);
+
+        $user = $request->user();
+
+        if ($user->coins_balance < $request->price) {
+            return response()->json(['message' => 'Saldo insuficiente'], 400);
+        }
+
+        $user->coins_balance -= $request->price;
+        $user->photo_avatar_filename = $request->img; 
+        $user->save();
+
+        return response()->json([
+            'message' => 'Carta comprada com sucesso!',
+            'user' => $user
+        ]);
+    }
 }
