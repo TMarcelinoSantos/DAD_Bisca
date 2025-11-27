@@ -9,10 +9,6 @@ const props = defineProps({
   card: {
     type: Object,
     required: false
-  },
-  faceDown: {
-    type: Boolean,
-    default: false
   }
 
 });

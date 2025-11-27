@@ -1,6 +1,10 @@
 <script setup>
+import { ref } from 'vue'
 import BiscaGame from './BiscaGame.vue';
 import semFace from '@/cards/semFace.png'
+import { useGameStore } from '@/stores/game'
+
+const gameStore = useGameStore()
 
 const props = defineProps({
   opponentCards: {
@@ -21,6 +25,8 @@ const props = defineProps({
     default: () => null
   },
 })
+
+
 </script>
 
 <template>
@@ -33,19 +39,19 @@ const props = defineProps({
             <img
                 v-for="(card,i) in opponentCards"
                 :key="i"
-                :src="semFace"
+                :src="card.src"
                 class="card card-img"
             />
         </div>
 
         <div class="w-full max-w-3xl flex items-start gap-6 px-4">  
             <div class="flex flex-col items-center gap-1">
-                <span class="text-black font-bold text-lg">{{ deck.length  + 1}} cartas</span>
+                <span class="text-black font-bold text-lg">{{ deck.length}} cartas</span>
                 <div class="relative w-20 h-36" :style="{ width:'90px', height:'135px' }">
                     <div class="absolute top-0 left-0 z-1">
                         <img
                             v-if="deck.length > 0"
-                            :src="semFace"
+                            :src="deck[deck.length - 1].src"
                             class="card"
                         />
                     </div>
@@ -57,7 +63,7 @@ const props = defineProps({
                 </div>
             </div>
                 <div class="trump mt-2" >
-                    <div v-if="trumpCard" class="relative" style="margin-left: -80px; margin-top: 23px;">
+                    <div v-if="trumpCard && !trumpCard.hidden" class="relative" style="margin-left: -80px; margin-top: 23px;">
                         <img
                             :src="trumpCard.src"
                             class="card card-img"
@@ -65,7 +71,14 @@ const props = defineProps({
                         />
                     </div>
                 </div>
-            <div class="flex-1 h-40 border-2 border-dashed rounded-lg bg-transparent flex items-center justify-center">   
+            <!-- play zone -->
+            <div class="flex-1 h-40 border-2 border-dashed rounded-lg bg-transparent flex items-center justify-center gap-4">
+                <img 
+                    v-for="(card,i) in gameStore.playedCards"
+                    :key="i"
+                    :src="card.src"
+                    class="card card-img"
+                />
             </div>
         </div>
 
@@ -75,6 +88,7 @@ const props = defineProps({
                 :key="i"
                 :src="card.src"
                 class="card card-img cursor-pointer"
+                @click="gameStore.playCard(card)"
             />
         </div>
     </div>
