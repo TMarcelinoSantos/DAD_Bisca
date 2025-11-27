@@ -26,6 +26,7 @@ class User extends Authenticatable
         'password',
         'type',
         'coins_balance',
+        'card_theme',
         'photo_url',
     ];
 
