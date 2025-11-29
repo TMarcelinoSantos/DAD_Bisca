@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SingleGameController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -27,3 +28,7 @@ Route::get('/metadata', function (Request $request) {
     //abort(500, 'Something went wrong');
     return ["name" => "DAD 2025/26 Worksheet API", "version" => "0.0.1"];
 });
+
+Route::apiResources([
+    'games_single' => SingleGameController::class
+]);

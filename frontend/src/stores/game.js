@@ -1,7 +1,13 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useAuthStore } from './auth'
+import { useAPIStore } from './api'
+import { toast } from 'vue-sonner'
 
 export const useGameStore = defineStore('game', () => {
+    const apiStore = useAPIStore()
+    const authStore = useAuthStore()
+
     const hands = [
         { value: '9', label: 'Hand of 9' },
         { value: '3', label: 'Hand of 3' },
@@ -16,6 +22,8 @@ export const useGameStore = defineStore('game', () => {
     const playerCardWon = ref([])
     const opponentCardWon = ref([])
     const turn = ref('player') 
+    const beganAt = ref(undefined)
+    const endedAt = ref(undefined)
 
     const shuffle = (array) => {
         const a = array.slice()
@@ -134,13 +142,19 @@ export const useGameStore = defineStore('game', () => {
 
     const nextTurn = async () => {
         if(turn.value === 'opponent' && opponentHand.value.length > 0){
-            await delay(1000)
+            await delay(200)
             await playOpponentCard()
             if(playedCards.value.length === 2){
-                await delay(1000)
+                await delay(200)
                 getCardsWon()
                 await nextTurn()
             }
+        }
+        if (deck.value.length === 0 && playerHand.value.length === 0 && 
+            opponentHand.value.length === 0 && playedCards.value.length === 2) 
+        {
+            await delay(200)
+            getCardsWon()
         }
     }
 
@@ -154,7 +168,7 @@ export const useGameStore = defineStore('game', () => {
         playedCards.value.push({ ...playerCard, player: 'player' })
 
         turn.value = 'opponent'
-        await delay(1000)
+        await delay(200)
         await nextTurn()
     }
 
@@ -206,7 +220,7 @@ export const useGameStore = defineStore('game', () => {
         opponentHand.value = opponentHand.value.filter(c => c.id !== cardToPlay.id);
         playedCards.value.push({ ...cardToPlay, player: 'opponent' });
 
-        await delay(1000);
+        await delay(200);
         turn.value = 'player';
     }
 
@@ -225,7 +239,50 @@ export const useGameStore = defineStore('game', () => {
         }
 
         trumpCard.value = deck.value.pop()
+        beganAt.value = new Date()
     }
+
+    const saveGame = async () => {
+        const playerPoints = getBiscaPoints(playerCardWon.value)
+        const botPoints = getBiscaPoints(opponentCardWon.value)
+        const currentUser = authStore.currentUser
+
+        const playerId = currentUser?.id ?? null
+        const winnerUserId = (currentUser && playerPoints > botPoints) ? currentUser.id : null
+
+
+        const game = {
+            type: hand.value,
+            status: 'E',
+            player_points: playerPoints,
+            bot_points: botPoints,
+            began_at: beganAt.value,
+            ended_at: endedAt.value,
+            total_time: Math.ceil((endedAt.value - beganAt.value) / 1000),
+            winner_user_id: winnerUserId,
+            player1_user_id: playerId,
+        }
+        toast.promise(apiStore.postSingleGame(game), {
+            loading: 'Sending data to API...',
+            success: () => {
+                return `[API] Game saved successfully`
+            },
+            error: (data) => `[API] Error saving game - ${data?.response?.data?.message}`,
+        })
+    }
+
+    const isGameComplete = computed(() => {
+        return deck.value.length === 0 &&
+            playerHand.value.length === 0 &&
+            opponentHand.value.length === 0 &&
+            playedCards.value.length === 0
+    })
+
+    watch(isGameComplete, (value) => {
+        if (value) {
+            endedAt.value = new Date()
+        }
+    })
 
     return {
         hands,
@@ -240,5 +297,8 @@ export const useGameStore = defineStore('game', () => {
         playerCardWon,
         opponentCardWon,
         turn,
+        saveGame,
+        isGameComplete,
+        getBiscaPoints
     }
 })
