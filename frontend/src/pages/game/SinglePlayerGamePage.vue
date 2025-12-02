@@ -8,12 +8,14 @@
 
     watch(() => gameStore.isGameComplete, (isComplete) => {
         if (isComplete) {
-            const p = gameStore.getBiscaPoints(gameStore.playerCardWon)
-            const o = gameStore.getBiscaPoints(gameStore.opponentCardWon)
-            if (p < o)
-                toast.error(`Game Completed - You lost ${p} to ${o}`)
-            else{
-                toast.success(`Game Completed - You won ${p} to ${o}`)
+            const playerPoints = gameStore.getBiscaPoints(gameStore.playerCardWon)
+            const opponentPoints = gameStore.getBiscaPoints(gameStore.opponentCardWon)
+            if (playerPoints < opponentPoints)
+                toast.error(`Game Completed - You lost ${playerPoints} to ${opponentPoints}`)
+            else if (playerPoints > opponentPoints){
+                toast.success(`Game Completed - You won ${playerPoints} to ${opponentPoints}`)
+            } else {
+                toast(`Game Completed - It's a tie ${playerPoints} to ${opponentPoints}`)
             }
             gameStore.saveGame()
         }

@@ -284,6 +284,51 @@ export const useGameStore = defineStore('game', () => {
         }
     })
 
+    //-----------------------MATCHES---------------------------------
+
+    const playerMarks = ref(0)
+    const opponentMarks = ref(0)
+
+    const getPointsMatches = () =>{
+        const playerPoints = getBiscaPoints(playerCardWon.value)
+        const opponentPoints = getBiscaPoints(opponentCardWon.value)
+
+        const winnerPoints = playerPoints > opponentPoints ? playerPoints : opponentPoints
+
+        if(playerPoints == opponentPoints) return 0
+
+        if(winnerPoints >= 61 && winnerPoints <= 90){
+            return 1
+        }
+        else if(winnerPoints > 90 && winnerPoints < 120){
+            return 2
+        } else if(winnerPoints >= 120){
+            return 4
+        }
+
+        return 0
+    }
+
+    const resetMatch = () => {
+        playerMarks.value = 0
+        opponentMarks.value = 0
+    }
+
+    const addMatchPoints = () => {
+        const playerPoints = getBiscaPoints(playerCardWon.value)
+        const opponentPoints = getBiscaPoints(opponentCardWon.value)
+
+        const marks = getPointsMatches()
+
+        if (playerPoints > opponentPoints) {
+            playerMarks.value += marks
+        } else if (opponentPoints > playerPoints) {
+            opponentMarks.value += marks
+        }
+        playerCardWon.value = []
+        opponentCardWon.value = []
+    }
+
     return {
         hands,
         hand,
@@ -299,6 +344,10 @@ export const useGameStore = defineStore('game', () => {
         turn,
         saveGame,
         isGameComplete,
-        getBiscaPoints
+        getBiscaPoints,
+        addMatchPoints,
+        resetMatch,
+        playerMarks,
+        opponentMarks,
     }
 })
