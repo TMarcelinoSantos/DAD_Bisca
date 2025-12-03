@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SingleGameController;
+use App\Http\Controllers\SingleMatchesController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -32,3 +33,9 @@ Route::get('/metadata', function (Request $request) {
 Route::apiResources([
     'games_single' => SingleGameController::class
 ]);
+
+Route::apiResources([
+    'single_match' => SingleMatchesController::class
+]);
+
+//Route::post('/single_match', [SingleMatchesController::class, 'store']);

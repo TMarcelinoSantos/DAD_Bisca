@@ -15,11 +15,18 @@ export const useAPIStore = defineStore('api', () => {
     return axios.post(`${API_BASE_URL}/games_single`, game)
   }
 
+  const postSingleMatch = (match) => {
+    return axios.post(`${API_BASE_URL}/single_match`, match)
+  }
+
   const getGames = () => {
     return axios.get(`${API_BASE_URL}/games`)
   }
   const getSingleGames = () => {
     return axios.get(`${API_BASE_URL}/games_single`)
+  }
+  const getSingleMatch = () => {
+    return axios.get(`${API_BASE_URL}/single_match`)
   }
 
   // AUTH
@@ -43,8 +50,10 @@ export const useAPIStore = defineStore('api', () => {
   return {
     postGame,
     postSingleGame,
+    postSingleMatch,
     getGames,
     getSingleGames,
+    getSingleMatch,
     postLogin,
     postLogout,
     getAuthUser

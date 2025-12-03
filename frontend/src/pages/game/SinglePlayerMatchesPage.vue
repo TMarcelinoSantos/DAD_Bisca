@@ -26,14 +26,16 @@
         if (gameStore.playerMarks >= 2) {
             toast.success("Match Completed — You WIN the match!")
             isMatchOver.value = true
+            gameStore.saveMatch()
             return
         }else if (gameStore.opponentMarks >= 2) {
             toast.error("Match Completed — You LOST the match!")
             isMatchOver.value = true
+            gameStore.saveMatch()
             return
         }
         console.log(`Starting new round. Current Score - Player: ${gameStore.playerMarks}, Opponent: ${gameStore.opponentMarks}`)
-
+        gameStore.saveGame()
         gameStore.setBoard()
                  
     })

@@ -329,6 +329,36 @@ export const useGameStore = defineStore('game', () => {
         opponentCardWon.value = []
     }
 
+    const saveMatch = async () => {
+        const playerPoints = getBiscaPoints(playerCardWon.value)
+        const botPoints = getBiscaPoints(opponentCardWon.value)
+        const currentUser = authStore.currentUser
+
+        const playerId = currentUser?.id ?? null
+        const winnerUserId = (currentUser && playerPoints > botPoints) ? currentUser.id : null
+
+
+        const match = {
+            type: hand.value,
+            status: 'E',
+            began_at: beganAt.value,
+            ended_at: endedAt.value,
+            total_time: Math.ceil((endedAt.value - beganAt.value) / 1000),
+            winner_user_id: winnerUserId,
+            player1_user_id: playerId,
+            player1_marks: playerMarks.value,
+            opponent_marks: opponentMarks.value,
+        }
+        toast.promise(apiStore.postSingleMatch(match), {
+            loading: 'Sending data to API...',
+            success: () => {
+                return `[API] Match saved successfully`
+            },
+            error: (data) => `[API] Error saving match - ${data?.response?.data?.message}`,
+        })
+    }
+
+
     return {
         hands,
         hand,
@@ -349,5 +379,6 @@ export const useGameStore = defineStore('game', () => {
         resetMatch,
         playerMarks,
         opponentMarks,
+        saveMatch,
     }
 })

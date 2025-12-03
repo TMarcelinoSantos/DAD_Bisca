@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreSingleGameRequest extends FormRequest
+class StoreMatchesRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,21 +22,20 @@ class StoreSingleGameRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+         return [
             'player1_user_id' => [
                 'sometimes',
                 'integer',
                 'exists:users,id',
             ],
             'type' => ['required', Rule::in(['3', '9'])],
-            'is_draw' => ['nullable', 'integer'],
             'status' => ['required', Rule::in(['PE', 'PL', 'E', 'I'])],
-            'player_points' => ['nullable', 'integer'],
-            'bot_points' => ['nullable', 'integer'],
+            'stake' => ['sometimes', 'integer'],
+            'player1_marks' => ['nullable', 'integer'],
+            'opponent_marks' => ['nullable', 'integer'],
             'began_at' => ['nullable', 'date'],
             'ended_at' => ['nullable', 'date'],
             'total_time' => ['nullable', 'integer'],
-            'match_id' => ['nullable', 'integer'],
         ];
     }
 
