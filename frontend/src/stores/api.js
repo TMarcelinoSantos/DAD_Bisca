@@ -29,6 +29,10 @@ export const useAPIStore = defineStore('api', () => {
     return axios.get(`${API_BASE_URL}/single_match`)
   }
 
+  const updateSingleMatch = (matchId, data) => {
+    return axios.put(`${API_BASE_URL}/single_match/${matchId}`, data)
+  }
+
   // AUTH
   const postLogin = async (credentials) => {
     const response = await axios.post(`${API_BASE_URL}/login`, credentials)
@@ -56,6 +60,7 @@ export const useAPIStore = defineStore('api', () => {
     getSingleMatch,
     postLogin,
     postLogout,
-    getAuthUser
+    getAuthUser,
+    updateSingleMatch
   }
 })

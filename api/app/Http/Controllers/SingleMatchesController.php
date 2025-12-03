@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SingleMatches;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreMatchesRequest; 
+use App\Http\Requests\UpdateSingleMatchesRequest;
 
 class SingleMatchesController extends Controller
 {
@@ -36,10 +37,14 @@ class SingleMatchesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreMatchesRequest $request, SingleGame $matches_single)
+    public function update(UpdateSingleMatchesRequest $request, SingleMatches $single_match)
     {
-        $matches_single->update($request->validated());
-        return response()->json($matches_single);
+        \Log::info('Update request validated:', $request->validated());
+        $single_match->update($request->validated());
+        
+        \Log::info('After update:', $single_match->fresh()->toArray());
+        \Log::info('Match updated:', $single_match->toArray());
+        return response()->json($single_match);
 
     }
 

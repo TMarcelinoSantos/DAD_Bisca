@@ -243,6 +243,7 @@ export const useGameStore = defineStore('game', () => {
     }
 
     const saveGame = async () => {
+        if (!authStore.currentUser) return
         const playerPoints = getBiscaPoints(playerCardWon.value)
         const botPoints = getBiscaPoints(opponentCardWon.value)
         const currentUser = authStore.currentUser
@@ -250,10 +251,13 @@ export const useGameStore = defineStore('game', () => {
         const playerId = currentUser?.id ?? null
         const winnerUserId = (currentUser && playerPoints > botPoints) ? currentUser.id : null
 
+        const isDraw = playerPoints === botPoints
 
         const game = {
+            match_id: currentMatchId.value,
             type: hand.value,
-            status: 'E',
+            status: isDraw? 'I': 'E',
+            is_draw: isDraw? 1 : 0,
             player_points: playerPoints,
             bot_points: botPoints,
             began_at: beganAt.value,
@@ -286,8 +290,12 @@ export const useGameStore = defineStore('game', () => {
 
     //-----------------------MATCHES---------------------------------
 
+    const isAuthenticated = computed(() => !!authStore.currentUser)
+
     const playerMarks = ref(0)
     const opponentMarks = ref(0)
+
+    const currentMatchId = ref(null)
 
     const getPointsMatches = () =>{
         const playerPoints = getBiscaPoints(playerCardWon.value)
@@ -329,7 +337,28 @@ export const useGameStore = defineStore('game', () => {
         opponentCardWon.value = []
     }
 
+    const startMatch = async () => {
+        if (!authStore.currentUser) return
+        if (currentMatchId.value) return currentMatchId.value
+
+        const currentUser = authStore.currentUser
+        const playerId = currentUser?.id ?? null
+
+        const match = {
+            type: hand.value,
+            status: 'PL',
+            player1_user_id: playerId,
+            began_at: beganAt.value,
+        }
+
+        console.log("📤 Enviando MATCH para API:", match)
+
+        const response = await apiStore.postSingleMatch(match)
+        currentMatchId.value = response.data.id
+    }
+
     const saveMatch = async () => {
+        if (!authStore.currentUser) return
         const playerPoints = getBiscaPoints(playerCardWon.value)
         const botPoints = getBiscaPoints(opponentCardWon.value)
         const currentUser = authStore.currentUser
@@ -337,11 +366,10 @@ export const useGameStore = defineStore('game', () => {
         const playerId = currentUser?.id ?? null
         const winnerUserId = (currentUser && playerPoints > botPoints) ? currentUser.id : null
 
+        const matchId = currentMatchId.value
 
-        const match = {
-            type: hand.value,
+        const matchUpdate = {
             status: 'E',
-            began_at: beganAt.value,
             ended_at: endedAt.value,
             total_time: Math.ceil((endedAt.value - beganAt.value) / 1000),
             winner_user_id: winnerUserId,
@@ -349,8 +377,8 @@ export const useGameStore = defineStore('game', () => {
             player1_marks: playerMarks.value,
             opponent_marks: opponentMarks.value,
         }
-        toast.promise(apiStore.postSingleMatch(match), {
-            loading: 'Sending data to API...',
+        toast.promise(apiStore.updateSingleMatch(matchId, matchUpdate), {
+            loading: 'Upating match...',
             success: () => {
                 return `[API] Match saved successfully`
             },
@@ -380,5 +408,7 @@ export const useGameStore = defineStore('game', () => {
         playerMarks,
         opponentMarks,
         saveMatch,
+        startMatch,
+        isAuthenticated,
     }
 })

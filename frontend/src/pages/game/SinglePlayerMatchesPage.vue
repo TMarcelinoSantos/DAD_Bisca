@@ -4,9 +4,11 @@
     import { onMounted, watch, ref } from 'vue'
     import BiscaGame from '@/components/game/BiscaGame.vue'
     import { toast } from 'vue-sonner'
+    import { useRouter } from 'vue-router'
 
     const gameStore = useGameStore()
     const isMatchOver = ref(false)
+    const router = useRouter()
 
     watch(() => gameStore.isGameComplete, (isComplete) => {
         if (!isComplete) return
@@ -20,29 +22,29 @@
         }else{
             toast(`Game Completed - It's a tie ${playerPoints} to ${opponentPoints}`)
         }
-
+        if (gameStore.isAuthenticated) gameStore.saveGame()
         gameStore.addMatchPoints()
 
-        if (gameStore.playerMarks >= 2) {
+        if (gameStore.playerMarks >= 3) {
             toast.success("Match Completed — You WIN the match!")
             isMatchOver.value = true
-            gameStore.saveMatch()
+            if (gameStore.isAuthenticated) gameStore.saveMatch()
             return
-        }else if (gameStore.opponentMarks >= 2) {
+        }else if (gameStore.opponentMarks >= 3) {
             toast.error("Match Completed — You LOST the match!")
             isMatchOver.value = true
-            gameStore.saveMatch()
+            if (gameStore.isAuthenticated) gameStore.saveMatch()
             return
         }
         console.log(`Starting new round. Current Score - Player: ${gameStore.playerMarks}, Opponent: ${gameStore.opponentMarks}`)
-        gameStore.saveGame()
         gameStore.setBoard()
                  
     })
 
-    onMounted(() => {
-        gameStore.resetMatch()
+    onMounted(async () => {
         gameStore.setBoard()
+        await gameStore.startMatch()
+        gameStore.resetMatch()
     })
 
     const goDashboard = () => {
