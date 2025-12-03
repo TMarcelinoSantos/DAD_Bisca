@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SingleGameController;
 use App\Http\Controllers\SingleMatchesController;
+use App\Http\Controllers\RoundController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -35,7 +36,8 @@ Route::apiResources([
 ]);
 
 Route::apiResources([
-    'single_match' => SingleMatchesController::class
+    'single_match' => SingleMatchesController::class,
+    'rounds' => RoundController::class
 ]);
 
 //Route::post('/single_match', [SingleMatchesController::class, 'store']);
