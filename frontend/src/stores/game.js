@@ -26,9 +26,9 @@ export const useGameStore = defineStore('game', () => {
     const endedAt = ref(undefined)
     const currentGameId = ref(null)
     const totalRounds = ref(0)
-    const playerPointsTotal = ref(0)
-    const opponentPointsTotal = ref(0)
-    //const roundSaved = ref(false)
+    const playerTotalPoints = ref(0)
+    const opponentTotalPoints = ref(0)
+    const roundSaved = ref(false)
     
 
     const shuffle = (array) => {
@@ -150,16 +150,16 @@ export const useGameStore = defineStore('game', () => {
             playerCardWon.value.push(card1, card2)
             turn.value = 'player'
             lastRoundWinner.value = 'player'
-            playerPointsTotal.value += roundPoints
+            playerTotalPoints.value += roundPoints
         }else{
             opponentCardWon.value.push(card1, card2)
             turn.value = 'opponent'
             lastRoundWinner.value = 'opponent'
-            opponentPointsTotal.value += roundPoints
+            opponentTotalPoints.value += roundPoints
         }
 
-        //if(roundSaved) return;
-        //roundSaved = true
+        if(roundSaved.value) return;
+        roundSaved.value = true
 
         if (currentGameId.value) {
             await saveRound({
@@ -178,7 +178,7 @@ export const useGameStore = defineStore('game', () => {
         console.log("My Points:", getBiscaPoints(playerCardWon.value))
         console.log("Opponent Points:", getBiscaPoints(opponentCardWon.value))
 
-        //roundSaved = false
+        roundSaved.value = false
     }
 
     const getDeckCard = () => {
@@ -213,7 +213,7 @@ export const useGameStore = defineStore('game', () => {
             await playOpponentCard()
             if(playedCards.value.length === 2){
                 await delay(200)
-                getCardsWon()
+                await getCardsWon()
                 await nextTurn()
             }
         }
@@ -221,7 +221,7 @@ export const useGameStore = defineStore('game', () => {
             opponentHand.value.length === 0 && playedCards.value.length === 2) 
         {
             await delay(200)
-            getCardsWon()
+            await getCardsWon()
         }
     }
 
@@ -377,6 +377,24 @@ export const useGameStore = defineStore('game', () => {
         await apiStore.postRound(roundData)
     }
 
+    const playAgain = async () => {
+        playerHand.value = []
+        opponentHand.value = []
+        deck.value = []
+        playedCards.value = []
+        playerCardWon.value = []
+        opponentCardWon.value = []
+        turn.value = 'player'
+        beganAt.value = undefined
+        endedAt.value = undefined
+        totalRounds.value = 0
+        playerTotalPoints.value = 0
+        opponentTotalPoints.value = 0
+        roundSaved.value = false
+        await startGame()
+        setBoard()
+    }
+
     //-----------------------MATCHES---------------------------------
 
     const isAuthenticated = computed(() => !!authStore.currentUser)
@@ -492,6 +510,9 @@ export const useGameStore = defineStore('game', () => {
         saveGame,
         startGame,
         isGameComplete,
+        playerTotalPoints,
+        opponentTotalPoints,
+        playAgain,
         getBiscaPoints,
         addMatchPoints,
         resetMatch,
