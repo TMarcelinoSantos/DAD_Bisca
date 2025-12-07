@@ -11,20 +11,28 @@ export const useAPIStore = defineStore('api', () => {
     return axios.post(`${API_BASE_URL}/games`, game)
   }
 
+  const getGames = () => {
+    return axios.get(`${API_BASE_URL}/games`)
+  }
+
+  //SINGLEGAME
   const postSingleGame = (game) => {
     return axios.post(`${API_BASE_URL}/games_single`, game)
   }
 
+  const getSingleGames = () => {
+    return axios.get(`${API_BASE_URL}/games_single`)
+  }
+
+  const updateSingleGame = (gameId, data) => {
+    return axios.put(`${API_BASE_URL}/games_single/${gameId}`, data)
+  }
+
+  //MATCH
   const postSingleMatch = (match) => {
     return axios.post(`${API_BASE_URL}/single_match`, match)
   }
 
-  const getGames = () => {
-    return axios.get(`${API_BASE_URL}/games`)
-  }
-  const getSingleGames = () => {
-    return axios.get(`${API_BASE_URL}/games_single`)
-  }
   const getSingleMatch = () => {
     return axios.get(`${API_BASE_URL}/single_match`)
   }
@@ -34,17 +42,16 @@ export const useAPIStore = defineStore('api', () => {
   }
 
   //ROUND
-
   const postRound= (round) => {
-    return axios.post(`${API_BASE_URL}/round`, round)
+    return axios.post(`${API_BASE_URL}/rounds`, round)
   }
 
   const getRound = () => {
-    return axios.get(`${API_BASE_URL}/round`)
+    return axios.get(`${API_BASE_URL}/rounds`)
   }
 
   const updateRound = (roundId, data) => {
-    return axios.put(`${API_BASE_URL}/round/${roundId}`, data)
+    return axios.put(`${API_BASE_URL}/rounds/${roundId}`, data)
   }
 
   // AUTH
@@ -67,15 +74,16 @@ export const useAPIStore = defineStore('api', () => {
 
   return {
     postGame,
-    postSingleGame,
-    postSingleMatch,
     getGames,
+    postSingleGame,
     getSingleGames,
+    updateSingleGame,
+    postSingleMatch,
     getSingleMatch,
+    updateSingleMatch,
     postLogin,
     postLogout,
     getAuthUser,
-    updateSingleMatch,
     postRound,
     getRound,
     updateRound

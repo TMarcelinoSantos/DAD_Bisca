@@ -24,6 +24,12 @@ export const useGameStore = defineStore('game', () => {
     const turn = ref('player') 
     const beganAt = ref(undefined)
     const endedAt = ref(undefined)
+    const currentGameId = ref(null)
+    const totalRounds = ref(0)
+    const playerPointsTotal = ref(0)
+    const opponentPointsTotal = ref(0)
+    //const roundSaved = ref(false)
+    
 
     const shuffle = (array) => {
         const a = array.slice()
@@ -49,6 +55,45 @@ export const useGameStore = defineStore('game', () => {
         return imgs
     }
 
+    const startGame = async () => {
+        if (!authStore.currentUser) return
+        if (currentGameId.value) return currentGameId.value
+
+        const currentUser = authStore.currentUser
+        const playerId = currentUser?.id ?? null
+
+        const game = {
+            type: hand.value,
+            status: 'PL',
+            player1_user_id: playerId,
+            began_at: beganAt.value,
+        }
+
+        console.log("Enviando Game para API:", game)
+
+        const response = await apiStore.postSingleGame(game)
+        console.log("RESPONSE API:", response)
+        currentGameId.value = response.data.data.id
+        console.log("Current Game id: " + currentGameId.value)
+    }
+
+    const setBoard = () => {
+        const imgs = loadImagesAsDeck()
+        const shuffled = shuffle(imgs)
+
+        deck.value = shuffled.slice()
+        playerHand.value = []
+        opponentHand.value = []
+
+        for (let i = 0; i < parseInt(hand.value); i++) {
+            playerHand.value.push(deck.value.pop())
+            opponentHand.value.push(deck.value.pop())
+        }
+
+        trumpCard.value = deck.value.pop()
+        beganAt.value = new Date()
+    }
+
     const getBiscaPoints = (cards) => {
         let total = 0
         cards.forEach(card => {
@@ -67,7 +112,7 @@ export const useGameStore = defineStore('game', () => {
         return total
     }
 
-    const getCardsWon = () => {
+    const getCardsWon = async () => {
         if (playedCards.value.length < 2) return
 
         let winner = null
@@ -78,12 +123,12 @@ export const useGameStore = defineStore('game', () => {
         const card1Suit = card1.id[0]
         const card2Suit = card2.id[0]
         
-        if (card1.id[0] === trumpSuit && card2.id[0] !== trumpSuit) {
+        if (card1Suit === trumpSuit && card2Suit !== trumpSuit) {
             winner = card1.player
-        }else if (card2.id[0] === trumpSuit && card1.id[0] !== trumpSuit) {
+        }else if (card2Suit === trumpSuit && card1Suit !== trumpSuit) {
             winner = card2.player
         }
-        else if (card1.id[0] === card2.id[0]) {
+        else if (card1Suit === card2Suit) {
             //both cards are of the same suit, higher card wins
             const pointsCard1 = getBiscaPoints([card1])
             const pointsCard2 = getBiscaPoints([card2])
@@ -99,19 +144,41 @@ export const useGameStore = defineStore('game', () => {
             }
         }
 
+        const roundPoints = getBiscaPoints([card1, card2])
+
         if(winner === 'player'){
             playerCardWon.value.push(card1, card2)
             turn.value = 'player'
+            lastRoundWinner.value = 'player'
+            playerPointsTotal.value += roundPoints
         }else{
             opponentCardWon.value.push(card1, card2)
             turn.value = 'opponent'
+            lastRoundWinner.value = 'opponent'
+            opponentPointsTotal.value += roundPoints
         }
+
+        //if(roundSaved) return;
+        //roundSaved = true
+
+        if (currentGameId.value) {
+            await saveRound({
+                played: playedCards.value.slice(),
+                playerHandSnapshot: playerHand.value.concat(),
+                opponentHandSnapshot: opponentHand.value.concat(),
+                trumpCardSnapshot: trumpCard.value
+            })
+        }
+
+        totalRounds.value ++
         playedCards.value = []
 
         getDeckCard()
 
         console.log("My Points:", getBiscaPoints(playerCardWon.value))
         console.log("Opponent Points:", getBiscaPoints(opponentCardWon.value))
+
+        //roundSaved = false
     }
 
     const getDeckCard = () => {
@@ -225,23 +292,6 @@ export const useGameStore = defineStore('game', () => {
     }
 
 
-    const setBoard = () => {
-        const imgs = loadImagesAsDeck()
-        const shuffled = shuffle(imgs)
-
-        deck.value = shuffled.slice()
-        playerHand.value = []
-        opponentHand.value = []
-
-        for (let i = 0; i < parseInt(hand.value); i++) {
-            playerHand.value.push(deck.value.pop())
-            opponentHand.value.push(deck.value.pop())
-        }
-
-        trumpCard.value = deck.value.pop()
-        beganAt.value = new Date()
-    }
-
     const saveGame = async () => {
         if (!authStore.currentUser) return
         const playerPoints = getBiscaPoints(playerCardWon.value)
@@ -252,22 +302,20 @@ export const useGameStore = defineStore('game', () => {
         const winnerUserId = (currentUser && playerPoints > botPoints) ? currentUser.id : null
 
         const isDraw = playerPoints === botPoints
+        const gameId = currentGameId.value
 
-        const game = {
-            match_id: currentMatchId.value,
-            type: hand.value,
-            status: isDraw? 'I': 'E',
-            is_draw: isDraw? 1 : 0,
-            player_points: playerPoints,
-            bot_points: botPoints,
-            began_at: beganAt.value,
+        const gameUpdate = {
+            status: 'E',
             ended_at: endedAt.value,
             total_time: Math.ceil((endedAt.value - beganAt.value) / 1000),
             winner_user_id: winnerUserId,
-            player1_user_id: playerId,
+            is_draw: isDraw? 1 : 0,
+            player_points: playerPoints,
+            bot_points: botPoints,
+            winner_user_id: winnerUserId,
         }
-        toast.promise(apiStore.postSingleGame(game), {
-            loading: 'Sending data to API...',
+        toast.promise(apiStore.updateSingleGame(gameId, gameUpdate), {
+            loading: 'Upating game...',
             success: () => {
                 return `[API] Game saved successfully`
             },
@@ -287,6 +335,47 @@ export const useGameStore = defineStore('game', () => {
             endedAt.value = new Date()
         }
     })
+
+    const lastRoundWinner = ref(null)
+
+    const saveRound = async ({played, playerHandSnapshot, opponentHandSnapshot, trumpCardSnapshot}) => {
+        if (!currentGameId.value) return
+
+    const roundPoints = getBiscaPoints(played.map(c => ({ id: c.id })))
+
+    const playerRoundPoints = lastRoundWinner.value === 'player' ? roundPoints : 0    
+    const opponentRoundPoints = lastRoundWinner.value === 'opponent' ? roundPoints : 0
+
+        console.log("Saving round...")
+        const roundData = {
+            single_game_id: currentGameId.value,
+
+            round_number: totalRounds.value + 1,
+
+            player_hand: playerHandSnapshot.map(c => c.id),
+            opponent_hand: opponentHandSnapshot.map(c => c.id),
+
+            trump_card: trumpCardSnapshot?.id ?? null,
+            deck_cards: deck.value.map(c => c.id),
+
+            played_cards: played.map(c => ({
+                id: c.id,
+                player: c.player
+            })),
+
+            player_cards_won: playerCardWon.value.map(c => c.id),
+            opponent_cards_won: opponentCardWon.value.map(c => c.id),
+
+            winner_user_id: lastRoundWinner.value === "player"
+                ? authStore.currentUser?.id ?? null
+                : null,
+
+            player_points: playerRoundPoints,
+            opponent_points: opponentRoundPoints,
+        }
+
+        await apiStore.postRound(roundData)
+    }
 
     //-----------------------MATCHES---------------------------------
 
@@ -401,6 +490,7 @@ export const useGameStore = defineStore('game', () => {
         opponentCardWon,
         turn,
         saveGame,
+        startGame,
         isGameComplete,
         getBiscaPoints,
         addMatchPoints,

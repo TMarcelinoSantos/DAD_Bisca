@@ -17,6 +17,8 @@ class Round extends Model
         'trump_card',
         'deck_cards',
         'played_cards',
+        'player_cards_won',
+        'opponent_cards_won',
         'winner_user_id',
         'player_points',
         'opponent_points',
@@ -27,6 +29,8 @@ class Round extends Model
         'opponent_hand' => 'array',
         'deck_cards' => 'array',
         'played_cards' => 'array',
+        'player_cards_won' => 'array',
+        'opponent_cards_won' => 'array',
     ];
 
     public function game(): BelongsTo

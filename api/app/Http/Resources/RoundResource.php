@@ -23,6 +23,8 @@ class RoundResource extends JsonResource
             'trump_card' => $this->trump_card,
             'deck_cards' => $this->deck_cards,
             'played_cards' => $this->played_cards,
+            'player_cards_won' => $this->player_cards_won,
+            'opponent_cards_won' => $this->opponent_cards_won,
             'winner_user_id' => $this->winner_user_id,
             'player_points' => $this->player_points,
             'opponent_points' => $this->opponent_points,

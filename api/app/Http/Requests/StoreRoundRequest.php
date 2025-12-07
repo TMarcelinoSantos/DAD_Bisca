@@ -34,6 +34,8 @@ class StoreRoundRequest extends FormRequest
             'trump_card' => ['nullable', 'string'],
             'deck_cards' => ['nullable', 'array'],
             'played_cards' => ['nullable', 'array'],
+            'player_cards_won' => ['nullable', 'array'],
+            'opponent_cards_won' => ['nullable', 'array'],
             'winner_user_id' => ['nullable', 'integer'],
             'player_points' => ['nullable', 'integer'],
             'opponent_points' => ['nullable', 'integer'],

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\SingleGame;
+use App\Http\Resources\SingleGameResource;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreSingleGameRequest;
+use App\Http\Requests\UpdateSingleGameRequest;
 
 class SingleGameController extends Controller
 {
@@ -22,7 +24,7 @@ class SingleGameController extends Controller
     public function store(StoreSingleGameRequest $request)
     {
         $game_single = SingleGame::create($request->validated());
-        return response()->json($game_single, 201);
+        return new SingleGameResource($game_single);
     }
 
     /**
@@ -30,16 +32,17 @@ class SingleGameController extends Controller
      */
     public function show(SingleGame $game_single)
     {
-        return $game_single;
+        return new SingleGameResource($game_single);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreSingleGameRequest $request, SingleGame $game_single)
+    public function update(UpdateSingleGameRequest $request, SingleGame $games_single)
     {
-        $game_single->update($request->validated());
-        return response()->json($game_single);
+        \Log::info('SingleGame update payload', $request->validated());
+        $games_single->update($request->validated());
+        return new SingleGameResource($games_single);
 
     }
 

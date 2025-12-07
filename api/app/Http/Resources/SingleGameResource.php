@@ -15,12 +15,18 @@ class SingleGameResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'player1_user_id' => new UserResource($this->player1_user_id),
+            'id' => $this->id,
+            'player1_user_id' => $this->player1_user_id, 
+            'winner_user_id' => $this->winner_user_id,  
             'type' => $this->type,
+            'is_draw' => $this->is_draw,
             'status' => $this->status,
             'player_points' => $this->player_points,
             'bot_points' => $this->bot_points,
+            'began_at' => $this->began_at,
+            'ended_at' => $this->ended_at,
             'total_time' => $this->total_time,
+            'match_id' => $this->match_id,
         ];
     }
 }

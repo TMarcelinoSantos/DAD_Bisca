@@ -16,12 +16,17 @@ class SingleGame extends Model
         'type',
         'is_draw',
         'status',
+        'player_points',
+        'bot_points',
         'began_at',
         'ended_at',
         'total_time',
-        'player_points',
-        'bot_points',
         'match_id',
+    ];
+    protected $casts = [
+        'began_at' => 'datetime',
+        'ended_at' => 'datetime',
+        'is_draw' => 'boolean',
     ];
 
     public function player1(): BelongsTo

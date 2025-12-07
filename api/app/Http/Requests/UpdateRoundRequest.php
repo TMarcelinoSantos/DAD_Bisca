@@ -31,6 +31,8 @@ class UpdateRoundRequest extends FormRequest
             'trump_card' => ['sometimes','nullable', 'string'],
             'deck_cards' => ['sometimes','nullable', 'array'],
             'played_cards' => ['sometimes','nullable', 'array'],
+            'player_cards_won' => ['sometimes','nullable', 'array'],
+            'opponent_cards_won' => ['sometimes','nullable', 'array'],
             'winner_user_id' => ['sometimes','nullable', 'integer'],
             'player_points' => ['sometimes','nullable', 'integer'],
             'opponent_points' => ['sometimes','nullable', 'integer'],
