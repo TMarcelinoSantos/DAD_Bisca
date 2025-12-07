@@ -351,7 +351,7 @@ export const useGameStore = defineStore('game', () => {
             began_at: beganAt.value,
         }
 
-        console.log("📤 Enviando MATCH para API:", match)
+        console.log("Enviando MATCH para API:", match)
 
         const response = await apiStore.postSingleMatch(match)
         currentMatchId.value = response.data.id

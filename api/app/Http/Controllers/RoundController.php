@@ -6,6 +6,7 @@ use App\Models\Round;
 use Illuminate\Http\Request;
 use App\Http\Resources\RoundResource;
 use App\Http\Requests\StoreRoundRequest;
+use App\Http\Requests\UpdateRoundRequest;
 
 class RoundController extends Controller
 {
@@ -23,7 +24,6 @@ class RoundController extends Controller
     public function store(StoreRoundRequest $request)
     {
         $round = Round::create($request->validated());
-        $round->saveOrFail();
         return new RoundResource($round);
     }
 
@@ -38,7 +38,7 @@ class RoundController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreRoundRequest $request, Round $round)
+    public function update(UpdateRoundRequest $request, Round $round)
     {
         $round->update($request->validated());
         return new RoundResource($round);

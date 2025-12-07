@@ -39,11 +39,7 @@ class SingleMatchesController extends Controller
      */
     public function update(UpdateSingleMatchesRequest $request, SingleMatches $single_match)
     {
-        \Log::info('Update request validated:', $request->validated());
         $single_match->update($request->validated());
-        
-        \Log::info('After update:', $single_match->fresh()->toArray());
-        \Log::info('Match updated:', $single_match->toArray());
         return response()->json($single_match);
 
     }

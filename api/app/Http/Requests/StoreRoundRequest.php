@@ -22,7 +22,7 @@ class StoreRoundRequest extends FormRequest
      */
     public function rules(): array
     {
-         return [
+        return [
             'single_game_id' => [
                 'required',
                 'integer',

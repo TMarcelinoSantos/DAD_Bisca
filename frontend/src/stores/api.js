@@ -33,6 +33,20 @@ export const useAPIStore = defineStore('api', () => {
     return axios.put(`${API_BASE_URL}/single_match/${matchId}`, data)
   }
 
+  //ROUND
+
+  const postRound= (round) => {
+    return axios.post(`${API_BASE_URL}/round`, round)
+  }
+
+  const getRound = () => {
+    return axios.get(`${API_BASE_URL}/round`)
+  }
+
+  const updateRound = (roundId, data) => {
+    return axios.put(`${API_BASE_URL}/round/${roundId}`, data)
+  }
+
   // AUTH
   const postLogin = async (credentials) => {
     const response = await axios.post(`${API_BASE_URL}/login`, credentials)
@@ -61,6 +75,9 @@ export const useAPIStore = defineStore('api', () => {
     postLogin,
     postLogout,
     getAuthUser,
-    updateSingleMatch
+    updateSingleMatch,
+    postRound,
+    getRound,
+    updateRound
   }
 })
