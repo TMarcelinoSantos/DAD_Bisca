@@ -29,7 +29,7 @@ export const useGameStore = defineStore('game', () => {
     const playerTotalPoints = ref(0)
     const opponentTotalPoints = ref(0)
     const roundSaved = ref(false)
-    
+    const lastRoundWinner = ref(null)
 
     const shuffle = (array) => {
         const a = array.slice()
@@ -67,9 +67,10 @@ export const useGameStore = defineStore('game', () => {
             status: 'PL',
             player1_user_id: playerId,
             began_at: beganAt.value,
+            match_id: currentMatchId.value?? null
         }
 
-        console.log("Enviando Game para API:", game)
+        console.log("Enviar Game para API:", game)
 
         const response = await apiStore.postSingleGame(game)
         console.log("RESPONSE API:", response)
@@ -92,6 +93,7 @@ export const useGameStore = defineStore('game', () => {
 
         trumpCard.value = deck.value.pop()
         beganAt.value = new Date()
+        turn.value = lastRoundWinner.value? lastRoundWinner.value: 'player'
     }
 
     const getBiscaPoints = (cards) => {
@@ -209,10 +211,10 @@ export const useGameStore = defineStore('game', () => {
 
     const nextTurn = async () => {
         if(turn.value === 'opponent' && opponentHand.value.length > 0){
-            await delay(200)
+            await delay(100)
             await playOpponentCard()
             if(playedCards.value.length === 2){
-                await delay(200)
+                await delay(100)
                 await getCardsWon()
                 await nextTurn()
             }
@@ -220,7 +222,7 @@ export const useGameStore = defineStore('game', () => {
         if (deck.value.length === 0 && playerHand.value.length === 0 && 
             opponentHand.value.length === 0 && playedCards.value.length === 2) 
         {
-            await delay(200)
+            await delay(100)
             await getCardsWon()
         }
     }
@@ -235,7 +237,7 @@ export const useGameStore = defineStore('game', () => {
         playedCards.value.push({ ...playerCard, player: 'player' })
 
         turn.value = 'opponent'
-        await delay(200)
+        await delay(100)
         await nextTurn()
     }
 
@@ -287,7 +289,7 @@ export const useGameStore = defineStore('game', () => {
         opponentHand.value = opponentHand.value.filter(c => c.id !== cardToPlay.id);
         playedCards.value.push({ ...cardToPlay, player: 'opponent' });
 
-        await delay(200);
+        await delay(100);
         turn.value = 'player';
     }
 
@@ -321,6 +323,13 @@ export const useGameStore = defineStore('game', () => {
             },
             error: (data) => `[API] Error saving game - ${data?.response?.data?.message}`,
         })
+        if (playerPoints > botPoints) {
+            lastRoundWinner.value = 'player'
+        } else if (botPoints > playerPoints) {
+            lastRoundWinner.value = 'opponent'
+        } else {
+            lastRoundWinner.value = null
+        }
     }
 
     const isGameComplete = computed(() => {
@@ -336,7 +345,6 @@ export const useGameStore = defineStore('game', () => {
         }
     })
 
-    const lastRoundWinner = ref(null)
 
     const saveRound = async ({played, playerHandSnapshot, opponentHandSnapshot, trumpCardSnapshot}) => {
         if (!currentGameId.value) return
@@ -462,6 +470,7 @@ export const useGameStore = defineStore('game', () => {
 
         const response = await apiStore.postSingleMatch(match)
         currentMatchId.value = response.data.id
+        startGame()
     }
 
     const saveMatch = async () => {

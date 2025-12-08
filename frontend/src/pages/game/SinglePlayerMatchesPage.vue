@@ -10,7 +10,7 @@
     const isMatchOver = ref(false)
     const router = useRouter()
 
-    watch(() => gameStore.isGameComplete, (isComplete) => {
+    watch(() => gameStore.isGameComplete, async(isComplete) => {
         if (!isComplete) return
             
         const playerPoints = gameStore.getBiscaPoints(gameStore.playerCardWon)
@@ -22,7 +22,9 @@
         }else{
             toast(`Game Completed - It's a tie ${playerPoints} to ${opponentPoints}`)
         }
-        if (gameStore.isAuthenticated) gameStore.saveGame()
+        if (gameStore.isAuthenticated){
+            await gameStore.saveGame()
+        } 
         gameStore.addMatchPoints()
 
         if (gameStore.playerMarks >= 3) {
@@ -37,7 +39,9 @@
             return
         }
         console.log(`Starting new round. Current Score - Player: ${gameStore.playerMarks}, Opponent: ${gameStore.opponentMarks}`)
-        gameStore.setBoard()
+        gameStore.playAgain()
+        //await gameStore.startGame()
+        //gameStore.setBoard()
                  
     })
 
@@ -46,6 +50,11 @@
         await gameStore.startMatch()
         gameStore.resetMatch()
     })
+
+    const playAgain = () =>{
+        gameStore.playAgain()
+        isMatchOver.value = false
+    }
 
     const goDashboard = () => {
         router.push({ name: 'home' })
@@ -59,18 +68,18 @@
     <transition name="fade">
         <div v-if="isMatchOver" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-11/12 max-w-sm p-6 relative">
-                <div class="flex flex-col items-center gap-2">
-                    <div class="text-lg font-semibold text-gray-800 dark:text-gray-100">🎉 Match terminado</div>
-                    <div class="flex gap-4">
-                        <div class="text-gray-500 font-semibold">Jogador: <span class="text-gray-600">{{ gameStore.playerMarks }}</span></div>
-                        <div class="text-gray-500 font-semibold">Oponente: <span class="text-gray-600">{{ gameStore.opponentMarks }}</span></div>
+                <div class="flex gap-4 mt-4">
+                        <button 
+                            @click="playAgain"
+                            class="py-2 px-6 rounded-lg bg-green-600 text-white hover:bg-green-700">
+                            Jogar Match novamente
+                        </button>
+                        <button 
+                            @click="goDashboard"
+                            class="py-2 px-6 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
+                            Dashboard
+                        </button>
                     </div>
-                    <button 
-                        @click="goDashboard"
-                        class="mt-4 py-2 px-6 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
-                        OK
-                    </button>
-                </div>
             </div>
         </div>
     </transition>
