@@ -34,13 +34,13 @@
         gameStore.addMatchPoints()
         isGameOver.value = true
 
-        if (gameStore.playerMarks >= 1) {
+        if (gameStore.playerMarks >= 4) {
             toast.success("Match Completed — You WIN the match!")
             isMatchOver.value = true
             matchWinner.value = 'player'
             if (gameStore.isAuthenticated) gameStore.saveMatch()
             return
-        }else if (gameStore.opponentMarks >= 1) {
+        }else if (gameStore.opponentMarks >= 4) {
             toast.error("Match Completed — You LOST the match!")
             isMatchOver.value = true
             matchWinner.value = 'opponent'

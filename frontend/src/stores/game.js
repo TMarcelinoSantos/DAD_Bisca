@@ -445,6 +445,23 @@ export const useGameStore = defineStore('game', () => {
     const resetMatch = () => {
         playerMarks.value = 0
         opponentMarks.value = 0
+        currentMatchId.value = null
+        currentGameId.value = null
+
+        playerHand.value = []
+        opponentHand.value = []
+        deck.value = []
+        playedCards.value = []
+        playerCardWon.value = []
+        opponentCardWon.value = []
+        turn.value = 'player'
+        beganAt.value = undefined
+        endedAt.value = undefined
+        totalRounds.value = 0
+        playerTotalPoints.value = 0
+        opponentTotalPoints.value = 0
+        roundSaved.value = false
+        lastGameWinner.value = null
     }
 
     const addMatchPoints = () => {
