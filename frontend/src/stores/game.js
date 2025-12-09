@@ -411,6 +411,7 @@ export const useGameStore = defineStore('game', () => {
     const opponentMarks = ref(0)
 
     const currentMatchId = ref(null)
+    const getWinType = ref(null)
 
     const getPointsMatches = () =>{
         const playerPoints = getBiscaPoints(playerCardWon.value)
@@ -424,8 +425,10 @@ export const useGameStore = defineStore('game', () => {
             return 1
         }
         else if(winnerPoints > 90 && winnerPoints < 120){
+            getWinType.value = "capote"
             return 2
         } else if(winnerPoints >= 120){
+            getWinType.value = "bandeira"
             return 4
         }
 
@@ -450,6 +453,9 @@ export const useGameStore = defineStore('game', () => {
         }
         playerCardWon.value = []
         opponentCardWon.value = []
+
+        playerTotalPoints.value = playerPoints
+        opponentTotalPoints.value = opponentPoints
     }
 
     const startMatch = async () => {
@@ -472,6 +478,7 @@ export const useGameStore = defineStore('game', () => {
         currentMatchId.value = response.data.id
         startGame()
     }
+
 
     const saveMatch = async () => {
         if (!authStore.currentUser) return
@@ -525,6 +532,7 @@ export const useGameStore = defineStore('game', () => {
         getBiscaPoints,
         addMatchPoints,
         resetMatch,
+        getWinType,
         playerMarks,
         opponentMarks,
         saveMatch,
