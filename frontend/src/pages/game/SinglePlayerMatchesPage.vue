@@ -11,6 +11,7 @@
     const router = useRouter()
     const isGameOver = ref(false)
     const gameWinner = ref(null)
+    const matchWinner = ref(null)
 
     watch(() => gameStore.isGameComplete, async(isComplete) => {
         if (!isComplete) return
@@ -33,14 +34,16 @@
         gameStore.addMatchPoints()
         isGameOver.value = true
 
-        if (gameStore.playerMarks >= 3) {
+        if (gameStore.playerMarks >= 1) {
             toast.success("Match Completed — You WIN the match!")
             isMatchOver.value = true
+            matchWinner.value = 'player'
             if (gameStore.isAuthenticated) gameStore.saveMatch()
             return
-        }else if (gameStore.opponentMarks >= 3) {
+        }else if (gameStore.opponentMarks >= 1) {
             toast.error("Match Completed — You LOST the match!")
             isMatchOver.value = true
+            matchWinner.value = 'opponent'
             if (gameStore.isAuthenticated) gameStore.saveMatch()
             return
         }
@@ -54,11 +57,18 @@
     onMounted(async () => {
         gameStore.setBoard()
         await gameStore.startMatch()
-        gameStore.resetMatch()
     })
 
-    const playAgain = () =>{
+    const playAgain = async () =>{
         gameStore.playAgain()
+        await gameStore.startMatch()
+        isMatchOver.value = false
+        isGameOver.value = false
+    }
+
+    const startNewMatch = async () => {
+        gameStore.resetMatch()
+        await gameStore.startMatch()
         isMatchOver.value = false
         isGameOver.value = false
     }
@@ -124,9 +134,24 @@
     <transition name="fade">
         <div v-if="isMatchOver" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-11/12 max-w-sm p-6 relative">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-11/12 max-w-sm p-6 relative">
+                <h2 class="text-xl font-bold text-center mb-3 text-gray-800 dark:text-gray-100">
+                Resultado da Match </h2>
+                <div class="text-center text-lg mb-2">
+                    <span v-if="matchWinner === 'player'" class="text-green-600 font-bold">
+                        Ganhou o match!
+                    </span>
+                    <span v-else-if="matchWinner === 'opponent'" class="text-red-600 font-bold">
+                        Perdeu o match!
+                    </span>
+                </div>
+                <div class="text-center mb-3 text-gray-700 dark:text-gray-300">
+                    <div>Jogador: <strong>{{ gameStore.playerMarks }}</strong></div>
+                    <div>Oponente: <strong>{{ gameStore.opponentMarks }}</strong></div>
+                </div>
                 <div class="flex gap-4 mt-4">
                         <button 
-                            @click="playAgain"
+                            @click="startNewMatch"
                             class="py-2 px-6 rounded-lg bg-green-600 text-white hover:bg-green-700">
                             Jogar Match novamente
                         </button>
@@ -136,6 +161,7 @@
                             Dashboard
                         </button>
                     </div>
+                </div>
             </div>
         </div>
     </transition>

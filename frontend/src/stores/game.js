@@ -30,6 +30,7 @@ export const useGameStore = defineStore('game', () => {
     const opponentTotalPoints = ref(0)
     const roundSaved = ref(false)
     const lastRoundWinner = ref(null)
+    const lastGameWinner = ref(null)
 
     const shuffle = (array) => {
         const a = array.slice()
@@ -93,7 +94,11 @@ export const useGameStore = defineStore('game', () => {
 
         trumpCard.value = deck.value.pop()
         beganAt.value = new Date()
-        turn.value = lastRoundWinner.value? lastRoundWinner.value: 'player'
+        turn.value = lastGameWinner.value? lastGameWinner.value: 'player'
+
+        if(turn.value === 'opponent'){
+            nextTurn()
+        }
     }
 
     const getBiscaPoints = (cards) => {
@@ -324,11 +329,11 @@ export const useGameStore = defineStore('game', () => {
             error: (data) => `[API] Error saving game - ${data?.response?.data?.message}`,
         })
         if (playerPoints > botPoints) {
-            lastRoundWinner.value = 'player'
+            lastGameWinner.value = 'player'
         } else if (botPoints > playerPoints) {
-            lastRoundWinner.value = 'opponent'
+            lastGameWinner.value = 'opponent'
         } else {
-            lastRoundWinner.value = null
+            lastGameWinner.value = null
         }
     }
 
@@ -399,6 +404,8 @@ export const useGameStore = defineStore('game', () => {
         playerTotalPoints.value = 0
         opponentTotalPoints.value = 0
         roundSaved.value = false
+        currentGameId.value = null
+        lastGameWinner.value = null
         await startGame()
         setBoard()
     }
@@ -451,11 +458,12 @@ export const useGameStore = defineStore('game', () => {
         } else if (opponentPoints > playerPoints) {
             opponentMarks.value += marks
         }
-        playerCardWon.value = []
-        opponentCardWon.value = []
 
         playerTotalPoints.value = playerPoints
         opponentTotalPoints.value = opponentPoints
+
+        playerCardWon.value = []
+        opponentCardWon.value = []
     }
 
     const startMatch = async () => {
