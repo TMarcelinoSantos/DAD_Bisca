@@ -24,6 +24,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/user/theme', [UserController::class, 'updateTheme']);
     Route::post('/user/avatar', [UserController::class, 'updateAvatar']);
+    
+    Route::post('/user/coins', [UserController::class, 'updateUserCoins']);
 });
 
 Route::get('/metadata', function (Request $request) {

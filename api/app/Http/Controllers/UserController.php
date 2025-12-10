@@ -99,4 +99,27 @@ class UserController extends Controller
             'user' => $user
         ]);
     }
+
+    
+    public function updateUserCoins(Request $request)
+    {
+        $request->validate([
+            'stake' => 'required|integer|min:0',
+        ]);
+
+        $user = $request->user();
+
+        if ($user->coins_balance < $request->stake) {
+            return response()->json(['message' => 'Saldo insuficiente'], 400);
+        }
+
+        $user->coins_balance -= $request->stake;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Stake reduced!',
+            'coins_balance' => $user->coins_balance,
+        ]);
+    }
+
 }
