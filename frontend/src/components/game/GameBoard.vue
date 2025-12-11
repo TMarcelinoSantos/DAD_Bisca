@@ -26,7 +26,7 @@ const props = defineProps({
   },
 })
 
-
+const isCardPlayable = (id) => gameStore.getValidPlayerCards().includes(id)
 </script>
 
 <template>
@@ -88,7 +88,11 @@ const props = defineProps({
                 :key="i"
                 :src="card.src"
                 class="card card-img cursor-pointer"
-                @click="gameStore.playCard(card)"
+                @click="isCardPlayable(card.id) && gameStore.playCard(card)"
+                :class="{
+                'opacity-100 cursor-pointer': isCardPlayable(card.id),
+                'opacity-40 cursor-not-allowed': !isCardPlayable(card.id)
+                }"
             />
         </div>
     </div>
