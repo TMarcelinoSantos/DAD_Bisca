@@ -299,25 +299,19 @@ export const useGameStore = defineStore('game', () => {
     }
 
     const getValidPlayerCards = () => {
-        // antes da fase final → tudo permitido
-        if (deck.value.length > 0) {
+        if (deck.value.length > 0)
             return playerHand.value.map(c => c.id)
-            //return playCard(playerCard)
-        }
 
-        if (playedCards.value.length === 0) {
+        if (playedCards.value.length === 0)
             return playerHand.value.map(c => c.id)
-        }
 
         const opponentCard = playedCards.value[0]  
         const suit = opponentCard.id[0]           
 
-        // cartas do mesmo naipe
         const matchingSuit = playerHand.value.filter(c => c.id[0] === suit)
 
-        if (matchingSuit.length > 0) {
+        if (matchingSuit.length > 0) 
             return matchingSuit.map(c => c.id)
-        }
 
         return playerHand.value.map(c => c.id)
     }

@@ -122,4 +122,21 @@ class UserController extends Controller
         ]);
     }
 
+    public function updateRewardCoins(Request $request)
+    {
+        $request->validate([
+            'reward' => 'required|integer|min:0',
+        ]);
+
+        $user = $request->user();
+
+        $user->coins_balance += $request->reward;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Coins Added!',
+            'coins_balance' => $user->coins_balance,
+        ]);
+    }
+
 }

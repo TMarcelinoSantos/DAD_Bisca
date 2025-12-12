@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/avatar', [UserController::class, 'updateAvatar']);
     
     Route::post('/user/coins', [UserController::class, 'updateUserCoins']);
+    Route::post('/user/coins/reward', [UserController::class, 'updateRewardCoins']);
 });
 
 Route::get('/metadata', function (Request $request) {
