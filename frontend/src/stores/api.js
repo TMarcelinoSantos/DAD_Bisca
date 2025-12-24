@@ -68,8 +68,20 @@ export const useAPIStore = defineStore('api', () => {
   }
 
   // Users
+  const postUser = (user) =>{
+    return axios.post(`${API_BASE_URL}/users`, user)
+  }
+
+  const getUsers = () => {
+    return axios.get(`${API_BASE_URL}/users`)
+  }
+
   const getAuthUser = () => {
     return axios.get(`${API_BASE_URL}/users/me`)
+  }
+
+  const putUser = (user) => {
+    return axios.put(`${API_BASE_URL}/users/${user.id}`, user)
   }
 
   return {
@@ -83,7 +95,10 @@ export const useAPIStore = defineStore('api', () => {
     updateSingleMatch,
     postLogin,
     postLogout,
+    postUser,
+    getUsers,
     getAuthUser,
+    putUser,
     postRound,
     getRound,
     updateRound
