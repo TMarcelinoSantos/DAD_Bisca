@@ -33,9 +33,20 @@
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem v-else>
-          <NavigationMenuLink>
-            <a @click.prevent="logout">Logout</a>
-          </NavigationMenuLink>
+          <NavigationMenuTrigger>Account</NavigationMenuTrigger>
+          <NavigationMenuContent>
+            <li>
+              <NavigationMenuLink as-child>
+                <RouterLink to="/profile">Profile</RouterLink>
+              </NavigationMenuLink>
+              <NavigationMenuLink as-child>
+                <RouterLink to="/store">Store</RouterLink>
+              </NavigationMenuLink>
+              <NavigationMenuLink as-child>
+                <a @click.prevent="logout" class="cursor-pointer">Logout</a>
+              </NavigationMenuLink>
+            </li>
+          </NavigationMenuContent>
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>

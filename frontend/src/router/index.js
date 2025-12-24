@@ -3,8 +3,10 @@ import HomePage from '@/pages/home/HomePage.vue'
 import AboutPage from '@/pages/about/AboutPage.vue'
 import LoginPage from '@/pages/login/LoginPage.vue'
 import RegisterPage from '@/pages/register/RegisterPage.vue'
+import ProfilePage from '@/pages/profile/ProfilePage.vue'
 import SinglePlayerGamePage from '../pages/game/SinglePlayerGamePage.vue'
 import SinglePlayerMatchesPage from '../pages/game/SinglePlayerMatchesPage.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -45,11 +47,29 @@ const router = createRouter({
       component: RegisterPage,
     },
     {
+      path: '/profile',
+      name: 'profile',
+      component: ProfilePage,
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/about',
       name: 'about',
       component: AboutPage,
     },
   ],
+})
+
+// navigation guard: redirect to login if route requires auth and user not authenticated
+router.beforeEach((to, from, next) => {
+  const auth = useAuthStore()
+  if (to.matched.some(record => record.meta?.requiresAuth)) {
+    if (auth.isLoggedIn) {
+      return next()
+    }
+    return next({ name: 'login' })
+  }
+  next()
 })
 
 export default router
