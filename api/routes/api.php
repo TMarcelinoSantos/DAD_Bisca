@@ -20,6 +20,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('logout', [AuthController::class, 'logout']);
 
+    Route::prefix('files')->group(function () {
+        Route::post('userphoto', [FileController::class, 'uploadUserPhoto']);
+    });
+
+    Route::patch('/users/{user}/photo-url', [UserController::class, 'patchPhotoURL']);
+
     Route::apiResource('users', UserController::class)->except(['store']);
 
     Route::post('/user/theme', [UserController::class, 'updateTheme']);

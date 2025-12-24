@@ -8,6 +8,7 @@ import GameBoard from './components/game/GameBoard.vue'
 import router from './router'
 
 const API_BASE_URL = 'http://localhost:8000/api'
+const SERVER_BASE_URL = 'http://localhost:8000'
 //const app = createApp(AboutPage)
 const app = createApp(App)
 //const app = createApp(GameBoard)
@@ -15,6 +16,7 @@ const app = createApp(App)
 const socket = io('http://localhost:3000')
 app.provide('socket', socket)
 app.provide('apiBaseURL', API_BASE_URL)
+app.provide('serverBaseURL', SERVER_BASE_URL)
 
 app.use(createPinia())
 app.use(router)

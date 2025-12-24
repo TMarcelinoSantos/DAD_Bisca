@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { ref, inject } from 'vue'
+import { toast } from 'vue-sonner'
 
 export const useAPIStore = defineStore('api', () => {
   const API_BASE_URL = inject('apiBaseURL')
@@ -84,6 +85,29 @@ export const useAPIStore = defineStore('api', () => {
     return axios.put(`${API_BASE_URL}/users/${user.id}`, user)
   }
 
+  const patchUserPhoto = (id, photo_avatar_filename) => {
+    return axios.patch(`${API_BASE_URL}/users/${id}/photo-url`, { photo_avatar_filename })
+  }
+
+  // Files
+
+  const uploadProfilePhoto = async (file) => {
+    const formData = new FormData()
+    formData.append('photo', file)
+
+    const uploadPromise = axios.post(`${API_BASE_URL}/files/userphoto`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+
+    toast.promise(uploadPromise, {
+      loading: 'Uploading profile photo...',
+      success: () => `Profile photo uploaded successfully`,
+      error: (data) => `Error uploading photo - ${data?.response?.data?.message}`,
+    })
+
+    return uploadPromise
+  }
+
   return {
     postGame,
     getGames,
@@ -99,8 +123,10 @@ export const useAPIStore = defineStore('api', () => {
     getUsers,
     getAuthUser,
     putUser,
+    patchUserPhoto,
     postRound,
     getRound,
-    updateRound
+    updateRound,
+    uploadProfilePhoto,
   }
 })

@@ -12,8 +12,8 @@
                     <div class="flex flex-col sm:flex-row items-start gap-6">
                         <div class="flex-shrink-0">
                             <Avatar class="w-32 h-32">
-                                <AvatarImage v-if="authStore.currentUser.photo_url"
-                                    :src="`${serverBaseURL}/storage/photos/${authStore.currentUser.photo_url}`"
+                                <AvatarImage v-if="authStore.currentUser.photo_avatar_filename"
+                                    :src="`${serverBaseURL}/storage/photos/${authStore.currentUser.photo_avatar_filename}`"
                                     :alt="authStore.currentUser.name" />
                                 <AvatarFallback class="text-4xl">
                                     {{ authStore.currentUser.name?.charAt(0).toUpperCase() }}
@@ -113,8 +113,8 @@ const uploadPhoto = async () => {
     try {
         const response = await apiStore.uploadProfilePhoto(files.value[0])
 
-        if (response.data && response.data.photo_url) {
-            await apiStore.patchUserPhoto(authStore.currentUser.id, response.data.photo_url)
+        if (response.data && response.data.photo_avatar_filename) {
+            await apiStore.patchUserPhoto(authStore.currentUser.id, response.data.photo_avatar_filename)
             await authStore.getUser()
 
             toast.success("Profile photo updated successfully")

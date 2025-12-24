@@ -139,4 +139,17 @@ class UserController extends Controller
         ]);
     }
 
+    public function patchPhotoURL(Request $request, User $user)
+    {
+        $data = $request->validate(['photo_avatar_filename' => 'required|string']);
+        if ($user->photo_avatar_filename) {
+            if (Storage::disk('public')->exists('photos/' . $user->photo_avatar_filename)) {
+                Storage::disk('public')->delete('photos/' . $user->photo_avatar_filename);
+            }
+        }
+        $user->photo_avatar_filename = basename($data['photo_avatar_filename']);
+        $user->save();
+        return new UserResource($user);
+    }
+
 }
