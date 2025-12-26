@@ -147,7 +147,7 @@ class UserController extends Controller
                 Storage::disk('public')->delete('photos/' . $user->photo_avatar_filename);
             }
         }
-        $user->photo_avatar_filename = basename($data['photo_avatar_filename']);
+        $user->photo_avatar_filename = $data['photo_avatar_filename'];
         $user->save();
         return new UserResource($user);
     }

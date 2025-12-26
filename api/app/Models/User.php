@@ -27,7 +27,7 @@ class User extends Authenticatable
         'type',
         'coins_balance',
         'card_theme',
-        'photo_url',
+        'photo_avatar_filename',
     ];
 
     /**

@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SingleGameController;
 use App\Http\Controllers\SingleMatchesController;
 use App\Http\Controllers\RoundController;
+use App\Http\Controllers\FileController;
 
 Route::post('/login', [AuthController::class, 'login']);
 

@@ -14,11 +14,9 @@ class FileController extends Controller
 
         $file = $request->file('photo');
         $path = $file->store('photos', 'public');
-        $filename = $file->hashName();
-        $file->storeAs('photos', $filename, 'public');
 
         return response()->json([
-            'photo_avatar_filename' => $filename,
+            'filename' => basename($path),
         ], 200);
     }
 

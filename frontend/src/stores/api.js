@@ -85,8 +85,8 @@ export const useAPIStore = defineStore('api', () => {
     return axios.put(`${API_BASE_URL}/users/${user.id}`, user)
   }
 
-  const patchUserPhoto = (id, photo_avatar_filename) => {
-    return axios.patch(`${API_BASE_URL}/users/${id}/photo-url`, { photo_avatar_filename })
+  const patchUserPhoto = (id, filename) => {
+    return axios.patch(`${API_BASE_URL}/users/${id}/photo-url`, filename)
   }
 
   // Files

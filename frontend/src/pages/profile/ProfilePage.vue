@@ -68,7 +68,7 @@
 </template>
 
 <script setup>
-import { ref, inject, watch } from 'vue'
+import { ref, inject, watch, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAPIStore } from '@/stores/api'
 import { useFileDialog } from '@vueuse/core'
@@ -107,14 +107,19 @@ const { files, open, reset } = useFileDialog({
     multiple: false
 })
 
+const preview = computed(() =>
+  files.value?.[0] ? URL.createObjectURL(files.value[0]) : null
+)
+
 
 const uploadPhoto = async () => {
 
     try {
         const response = await apiStore.uploadProfilePhoto(files.value[0])
 
-        if (response.data && response.data.photo_avatar_filename) {
-            await apiStore.patchUserPhoto(authStore.currentUser.id, response.data.photo_avatar_filename)
+        if (response.data && response.data.filename) {
+            const filename = response.data.filename
+            await apiStore.patchUserPhoto(authStore.currentUser.id, {photo_avatar_filename: filename})
             await authStore.getUser()
 
             toast.success("Profile photo updated successfully")
@@ -123,7 +128,7 @@ const uploadPhoto = async () => {
         }
     } catch (error) {
         console.error('Failed to upload photo:', error)
-        toast.success("Failed to upload photo. Please try again.")
+        toast.error("Failed to upload photo. Please try again.")
     }
 }
 
