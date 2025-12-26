@@ -1,24 +1,36 @@
 <template>
-    <div class="max-w-4xl mx-auto p-6">
+    <div class="min-h-screen bg-[radial-gradient(circle_at_top,#14532d,#052e16)]">
+        <div class="max-w-4xl mx-auto p-6">
         <h1 class="text-3xl font-bold mb-8">My Profile</h1>
 
         <div v-if="authStore.currentUser" class="space-y-6">
-            <Card>
+            <Card class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
                 <CardHeader>
                     <CardTitle>Profile Photo</CardTitle>
                     <CardDescription>Update your profile picture</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div class="flex flex-col sm:flex-row items-start gap-6">
-                        <div class="flex-shrink-0">
-                            <Avatar class="w-32 h-32">
-                                <AvatarImage v-if="authStore.currentUser.photo_avatar_filename"
+                        <div class="flex flex-row gap-6 items-center">
+                            <div class="flex flex-col items-center gap-2">
+                                <span class="text-sm text-muted-foreground">Current</span>
+                                <Avatar class="w-32 h-32 ring-2 ring-primary">
+                                <AvatarImage
+                                    v-if="authStore.currentUser.photo_avatar_filename"
                                     :src="`${serverBaseURL}/storage/photos/${authStore.currentUser.photo_avatar_filename}`"
-                                    :alt="authStore.currentUser.name" />
+                                />
                                 <AvatarFallback class="text-4xl">
                                     {{ authStore.currentUser.name?.charAt(0).toUpperCase() }}
                                 </AvatarFallback>
-                            </Avatar>
+                                </Avatar>
+                            </div>
+
+                            <div v-if="preview" class="flex flex-col items-center gap-2">
+                                <span class="text-sm text-muted-foreground">New</span>
+                                <Avatar class="w-32 h-32 ring-2 ring-primary">
+                                <AvatarImage :src="preview" />
+                                </Avatar>
+                            </div>
                         </div>
 
                         <div class="flex-1 space-y-3">
@@ -36,7 +48,7 @@
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
                 <CardHeader>
                     <CardTitle>Account Information</CardTitle>
                     <CardDescription>Update your personal details</CardDescription>
@@ -44,19 +56,19 @@
                 <CardContent class="space-y-4">
                     <div class="space-y-2">
                         <Label for="name">Name</Label>
-                        <Input id="name" v-model="formData.name" placeholder="Enter your name" />
+                        <Input class="bg-white/70" id="name" v-model="formData.name" placeholder="Enter your name" />
                     </div>
                     <div class="space-y-2">
                         <Label for="nickname">Nickname</Label>
-                        <Input id="nickname" v-model="formData.nickname" placeholder="Enter your nickname" />
+                        <Input class="bg-white/70" id="nickname" v-model="formData.nickname" placeholder="Enter your nickname" />
                     </div>
                     <div class="space-y-2">
                         <Label for="email">Email</Label>
-                        <Input id="email" v-model="formData.email" type="email" placeholder="Enter your email" />
+                        <Input class="bg-white/70" id="email" v-model="formData.email" type="email" placeholder="Enter your email" />
                     </div>
                     <div class="space-y-2">
                         <Label for="password">Password</Label>
-                        <Input id="password" v-model="formData.password" placeholder="Change your password" />
+                        <Input class="bg-white/70" id="password" v-model="formData.password" placeholder="Change your password" />
                     </div>
                 </CardContent>
                 <CardFooter class="flex justify-between">
@@ -64,6 +76,7 @@
                 </CardFooter>
             </Card>
         </div>
+    </div>
     </div>
 </template>
 
