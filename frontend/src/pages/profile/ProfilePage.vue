@@ -76,6 +76,29 @@
                 </CardFooter>
             </Card>
         </div>
+        <div v-if="canDelete" class="mt-6 items-center justify-center flex">
+            <Button @click="showDeleteModal = true"> Delete Account </Button>
+        </div>  
+        
+        <transition name="fade">
+        <div v-if="showDeleteModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-2xl p-6 w-96 max-w-full shadow-lg">
+            <h2 class="text-xl font-bold mb-4">Confirm Account Deletion</h2>
+            <p class="mb-4">Please, insert your password to confirm the account deletion:</p>
+            <input 
+              type="password" 
+              v-model="deletePassword" 
+              class="w-full p-2 border rounded mb-4" 
+              placeholder="Password" 
+            />
+            <div class="flex justify-end gap-2">
+              <Button @click="confirmDelete" variant="destructive">Confirm</Button>
+              <Button @click="closeDeleteModal" variant="ghost">Cancel</Button>
+            </div>
+          </div>
+        </div>
+      </transition>
+        
     </div>
     </div>
 </template>
@@ -84,6 +107,7 @@
 import { ref, inject, watch, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAPIStore } from '@/stores/api'
+import {useRouter} from 'vue-router'
 import { useFileDialog } from '@vueuse/core'
 import { toast } from 'vue-sonner'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -94,6 +118,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 const authStore = useAuthStore()
 const apiStore = useAPIStore()
+const router = useRouter()
+
+const showDeleteModal = ref(false)
+const deletePassword = ref('')
 
 const serverBaseURL = inject("serverBaseURL")
 
@@ -123,7 +151,6 @@ const { files, open, reset } = useFileDialog({
 const preview = computed(() =>
   files.value?.[0] ? URL.createObjectURL(files.value[0]) : null
 )
-
 
 const uploadPhoto = async () => {
 
@@ -165,4 +192,50 @@ const saveProfile = async () => {
         toast.error("Failed to update profile. Please try again.")
     }
 }
+
+const canDelete = computed(() => {
+    return authStore.currentUser?.type !== 'A'
+})
+
+const closeDeleteModal = () => {
+    deletePassword.value = ''
+    showDeleteModal.value = false
+}
+
+const confirmDelete = async () => {
+    if (!deletePassword.value) {
+        toast.error("Por favor, insira a password")
+        return
+    }
+
+    const passwordOk = await apiStore.verifyPassword(authStore.currentUser.id, deletePassword.value)
+    if (!passwordOk) {
+        toast.error("Password incorreta")
+        closeDeleteModal()
+        return
+    }
+
+    try {
+        await apiStore.deleteUser(authStore.currentUser.id)
+        toast.success("Profile deleted successfully")
+        closeDeleteModal()
+        authStore.currentUser = undefined
+        await router.push({ name: 'home' })
+    } catch (error) {
+        console.error('Failed to delete profile:', error)
+        toast.error("Failed to delete profile. Please try again.")
+        closeDeleteModal()
+    }
+}
+
 </script>
+
+
+<style>
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+</style>

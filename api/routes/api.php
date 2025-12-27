@@ -21,6 +21,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('logout', [AuthController::class, 'logout']);
 
+    Route::post('/users/verify-password', [UserController::class, 'verifyPassword']);
+
     Route::prefix('files')->group(function () {
         Route::post('userphoto', [FileController::class, 'uploadUserPhoto']);
     });

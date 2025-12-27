@@ -50,7 +50,8 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        $user->delete();
+        return response()->json(['message' => 'User deleted successfully'], 200);
     }
 
     //Update user card theme
@@ -152,4 +153,18 @@ class UserController extends Controller
         return new UserResource($user);
     }
 
+    public function verifyPassword(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        $user = $request->user();
+
+        if (!\Hash::check($request->password, $user->password)) {
+            return response()->json(['verified' => false], 400);
+        }
+
+        return response()->json(['verified' => true], 200);
+    }
 }

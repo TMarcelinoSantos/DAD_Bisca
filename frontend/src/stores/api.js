@@ -89,6 +89,22 @@ export const useAPIStore = defineStore('api', () => {
     return axios.patch(`${API_BASE_URL}/users/${id}/photo-url`, filename)
   }
 
+  const deleteUser = (userId) => {
+    return axios.delete(`${API_BASE_URL}/users/${userId}`)
+  }
+
+  const verifyPassword = async (userId, password) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/users/verify-password`, {
+        password,
+      });
+      return response.data.verified;
+    } catch (error) {
+      //console.error('Failed to verify password', error);
+      return false;
+    }
+  } 
+
   // Files
 
   const uploadProfilePhoto = async (file) => {
@@ -124,6 +140,8 @@ export const useAPIStore = defineStore('api', () => {
     getAuthUser,
     putUser,
     patchUserPhoto,
+    deleteUser,
+    verifyPassword,
     postRound,
     getRound,
     updateRound,
