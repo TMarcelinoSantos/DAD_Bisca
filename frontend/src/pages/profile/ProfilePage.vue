@@ -173,17 +173,19 @@ const uploadPhoto = async () => {
 }
 
 const saveProfile = async () => {
-
     try {
+        const userData = {
+            id: authStore.currentUser.id,
+            name: formData.value.name,
+            nickname: formData.value.nickname,
+            email: formData.value.email,
+        }
 
-        const user = Object.assign({}, authStore.currentUser)
+        if (formData.value.password && formData.value.password.trim()) {
+            userData.password = formData.value.password
+        }
 
-        user.name = formData.value.name
-        user.nickname = formData.value.nickname
-        user.email = formData.value.email
-        user.password = formData.value.password
-
-        await apiStore.putUser(user)
+        await apiStore.putUser(userData)
         await authStore.getUser()
         toast.success("Profile updated successfully")
 
