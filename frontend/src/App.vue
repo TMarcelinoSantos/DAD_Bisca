@@ -7,37 +7,25 @@
       <RouterLink to="/" class="inline-flex items-center">
         <img src="/logo.png" alt="Bisca(te) logo" class="h-10 w-auto rounded-full" />
       </RouterLink>
-      <span class="text-xs" v-if="authStore.currentUser">&nbsp;&nbsp;&nbsp;
-            ({{ authStore.currentUser?.name }})
+      <span class="text-xl font-semibold text-amber-100" v-if="authStore.currentUser">&nbsp;&nbsp;&nbsp;
+            {{ authStore.currentUser?.nickname }}
       </span>
     </div>
     <NavigationMenu>
       <NavigationMenuList class="justify-around gap-20 text-amber-100">
-        <NavigationMenuItem>
-          <NavigationMenuTrigger class="text-amber-100 hover:text-white hover:bg-white/10">Games</NavigationMenuTrigger>
-          <NavigationMenuContent class="bg-emerald-950/95 text-amber-100 border border-amber-400/30 shadow-2xl">
-            <li>
-              <NavigationMenuLink as-child>
-                <RouterLink to="/games/singleplayer" class="hover:text-amber-200">SinglePlayer</RouterLink>
-              </NavigationMenuLink>
-              <NavigationMenuLink as-child>
-                <RouterLink to="/" class="hover:text-amber-200">MultiPlayer</RouterLink>
-              </NavigationMenuLink>
-            </li>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuLink class="text-amber-100 hover:text-white">
-            <RouterLink to="/about" class="hover:text-amber-200">About</RouterLink>
-          </NavigationMenuLink>
-        </NavigationMenuItem>
         <NavigationMenuItem v-if="!authStore.isLoggedIn">
           <NavigationMenuLink class="text-amber-100 hover:text-white">
             <RouterLink to="/login" class="hover:text-amber-200">Login</RouterLink>
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem v-else>
-          <NavigationMenuTrigger class="text-amber-100 hover:text-white hover:bg-white/10">Account</NavigationMenuTrigger>
+          <NavigationMenuTrigger class="text-amber-100 bg-emerald-950 hover:text-white hover:bg-white/10">
+            <img
+              :src="authStore.currentUser?.avatar || '/default-avatar.png'"
+              alt="User Avatar"
+              class="inline-block h-6 w-6 rounded-full mr-2"
+            />
+            {{ authStore.currentUser?.nickname }}</NavigationMenuTrigger>
           <NavigationMenuContent class="bg-emerald-950/95 text-amber-100 border border-amber-400/30 shadow-2xl">
             <li>
               <NavigationMenuLink as-child>
