@@ -16,9 +16,9 @@
             <RouterLink to="/login" class="hover:text-amber-200">Login</RouterLink>
           </NavigationMenuLink>
         </NavigationMenuItem>
-        <NavigationMenuItem v-else class="flex items-center gap-4">
+        <NavigationMenuItem v-else class ="flex">
           <span
-            class="inline-flex items-center gap-1 rounded-full border border-amber-200/30 bg-amber-100/10 px-3 py-1 text-sm text-amber-50"
+            class="inline-flex items-center gap-1 rounded-full border border-amber-200/30 bg-amber-100/10 px-3 py-1 mx-5 text-sm text-amber-50"
           >
             {{ authStore.currentUser?.coins_balance ?? 0 }} 🪙
           </span>
