@@ -5,11 +5,9 @@
   >
     <div class="flex items-center gap-2 text-xl">
       <RouterLink to="/" class="inline-flex items-center">
-        <img src="/logo.png" alt="Bisca(te) logo" class="h-10 w-auto rounded-full" />
+        <img src="/logo.png" alt="Bisca(te) logo" class="h-10 w-auto rounded-full border-2 border-amber-100" />
+        <span class="ml-2 font-bold text-2xl text-amber-100 hover:text-white">Bisca(te)</span>
       </RouterLink>
-      <span class="text-xl font-semibold text-amber-100" v-if="authStore.currentUser">&nbsp;&nbsp;&nbsp;
-            {{ authStore.currentUser?.nickname }}
-      </span>
     </div>
     <NavigationMenu>
       <NavigationMenuList class="justify-around gap-20 text-amber-100">
@@ -29,13 +27,13 @@
           <NavigationMenuContent class="bg-emerald-950/95 text-amber-100 border border-amber-400/30 shadow-2xl">
             <li>
               <NavigationMenuLink as-child>
-                <RouterLink to="/profile" class="hover:text-amber-200">Profile</RouterLink>
+                <RouterLink to="/profile" class="hover:text-black">Profile</RouterLink>
               </NavigationMenuLink>
               <NavigationMenuLink as-child>
-                <RouterLink to="/store" class="hover:text-amber-200">Store</RouterLink>
+                <RouterLink to="/store" class="hover:text-black">Store</RouterLink>
               </NavigationMenuLink>
               <NavigationMenuLink as-child>
-                <a @click.prevent="logout" class="cursor-pointer hover:text-amber-200">Logout</a>
+                <a @click.prevent="logout" class="cursor-pointer hover:text-black">Logout</a>
               </NavigationMenuLink>
             </li>
           </NavigationMenuContent>
