@@ -72,7 +72,10 @@ import { toast } from 'vue-sonner'
 import 'vue-sonner/style.css'
 import { RouterLink, RouterView } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import {useRouter} from 'vue-router'
+
 const authStore = useAuthStore()
+const router = useRouter()
 
 const logout = () => {
   toast.promise(authStore.logout(), {
@@ -82,6 +85,8 @@ const logout = () => {
     },
     error: (data) => `[API] Error saving game - ${data?.response?.data?.message}`,
   })
+
+  router.push({ name: 'home' })
 }
 
 </script>
