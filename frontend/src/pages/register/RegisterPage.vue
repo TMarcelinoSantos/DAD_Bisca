@@ -52,6 +52,37 @@
                 placeholder="Enter your password"
                 required
             />
+
+            <Label class="block text-left text-gray-700 dark:text-gray-300 mb-2" for="photo">Photo (optional)</Label>
+            <div class="flex items-center gap-6 mb-6">
+            <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-indigo-500 flex items-center justify-center bg-gray-200">
+                <img
+                v-if="preview"
+                :src="preview"
+                class="w-full h-full object-cover"
+                />
+                <span v-else class="text-3xl text-gray-500">
+                {{ formData.nickname?.charAt(0)?.toUpperCase() || '?' }}
+                </span>
+            </div>
+
+            <input
+                ref="fileInput"
+                type="file"
+                accept="image/*"
+                class="hidden"
+                @change="onPhotoChange"
+            />
+
+            <!-- Custom button -->
+            <Button
+                type="button"
+                variant="outline"
+                @click="fileInput.click()"
+            >
+                Choose Photo
+            </Button>
+            </div>
     
             <Button
                 class="w-full py-4 text-lg font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition"
@@ -64,32 +95,83 @@
 </template>
 
 <script setup>
-import {ref} from 'vue'
+import {ref, computed} from 'vue'
 import {useRouter} from 'vue-router'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import {useAuthStore} from '@/stores/auth'
+import {useAPIStore} from '@/stores/api'
 import {toast} from 'vue-sonner'
 
 
 const router = useRouter()
 const authStore = useAuthStore()
+const apiStore = useAPIStore()
+const fileInput = ref(null)
 
 const formData = ref({
     nickname: '',
     name: '',
     email: '',
-    password: ''
+    password: '',
+    photo: null
 })
 
+const preview = computed(() => {
+    return formData.value.photo
+        ? URL.createObjectURL(formData.value.photo)
+        : null
+})
 
-const registerAccount = () => {
-    toast.promise(authStore.register(formData.value),{
+const onPhotoChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+        formData.value.photo = file
+    }
+}
+
+const registerAccount = async () => {
+  try {
+    const payload = {
+      nickname: formData.value.nickname,
+      name: formData.value.name,
+      email: formData.value.email,
+      password: formData.value.password
+    }
+
+    await toast.promise(
+      authStore.register(payload),
+      {
         loading: 'Creating account...',
         success: 'Account created successfully!',
         error: 'Failed to create account.'
+      }
+    )
+
+    await authStore.login({
+      email: payload.email,
+      password: payload.password
     })
-    router.push({name: 'login'})
+
+    if (formData.value.photo) {
+      const uploadRes = await apiStore.uploadProfilePhoto(formData.value.photo)
+      if (uploadRes.data?.filename) {
+        await apiStore.patchUserPhoto(
+          authStore.currentUser.id,
+          { photo_avatar_filename: uploadRes.data.filename }
+        )
+        await authStore.getUser()
+      }
+    }
+
+    router.push({ name: 'home' })
+
+  } catch (err) {
+    console.error(err)
+    toast.error('Failed to create account.')
+  }
 }
+
+
 </script>
