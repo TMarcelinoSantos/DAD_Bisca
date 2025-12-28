@@ -16,7 +16,12 @@
             <RouterLink to="/login" class="hover:text-amber-200">Login</RouterLink>
           </NavigationMenuLink>
         </NavigationMenuItem>
-        <NavigationMenuItem v-else>
+        <NavigationMenuItem v-else class="flex items-center gap-4">
+          <span
+            class="inline-flex items-center gap-1 rounded-full border border-amber-200/30 bg-amber-100/10 px-3 py-1 text-sm text-amber-50"
+          >
+            {{ authStore.currentUser?.coins_balance ?? 0 }} 🪙
+          </span>
           <NavigationMenuTrigger class="text-amber-100 bg-emerald-950 hover:text-white hover:bg-white/10">
             <img
               :src="authStore.currentUser?.avatar || '/default-avatar.png'"
