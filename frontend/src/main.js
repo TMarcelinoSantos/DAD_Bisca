@@ -7,13 +7,16 @@ import AboutPage from '@/pages/about/AboutPage.vue'
 import GameBoard from './components/game/GameBoard.vue'
 import router from './router'
 
-const API_BASE_URL = 'http://localhost:8000/api'
+// const API_BASE_URL = 'http://localhost:8000/api'
+const API_BASE_URL = import.meta.env.VITE_API_DOMAIN
+
 const SERVER_BASE_URL = 'http://localhost:8000'
 //const app = createApp(AboutPage)
 const app = createApp(App)
 //const app = createApp(GameBoard)
 
-const socket = io('http://localhost:3000')
+// const socket = io('http://localhost:3000')
+const socket = io(import.meta.env.VITE_WS_CONNECTION)
 app.provide('socket', socket)
 app.provide('apiBaseURL', API_BASE_URL)
 app.provide('serverBaseURL', SERVER_BASE_URL)
