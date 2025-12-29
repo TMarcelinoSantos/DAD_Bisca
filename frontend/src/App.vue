@@ -11,13 +11,15 @@
     </div>
     <NavigationMenu>
       <NavigationMenuList class="justify-around gap-20 text-amber-100">
+        <!-- LOGIN BUTTON -->
         <NavigationMenuItem v-if="!authStore.isLoggedIn">
-          <NavigationMenuLink class="text-amber-100 hover:text-white">
+          <NavigationMenuLink class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10">
             <RouterLink to="/login" class="hover:text-amber-200">Login</RouterLink>
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem v-else>
-          <NavigationMenuTrigger class="text-amber-100 bg-emerald-950 hover:text-white hover:bg-white/10">
+          <!-- USER MENU -->
+          <NavigationMenuTrigger class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10">
             <img
               :src="authStore.currentUser?.avatar || '/default-avatar.png'"
               alt="User Avatar"
@@ -26,12 +28,15 @@
             {{ authStore.currentUser?.nickname }}</NavigationMenuTrigger>
           <NavigationMenuContent class="bg-emerald-950/95 text-amber-100 border border-amber-400/30 shadow-2xl">
             <li>
+              <!-- PROFILE -->
               <NavigationMenuLink as-child>
                 <RouterLink to="/profile" class="hover:text-black">Profile</RouterLink>
               </NavigationMenuLink>
+              <!-- STORE -->
               <NavigationMenuLink as-child>
                 <RouterLink to="/store" class="hover:text-black">Store</RouterLink>
               </NavigationMenuLink>
+              <!-- LOGOUT -->
               <NavigationMenuLink as-child>
                 <a @click.prevent="logout" class="cursor-pointer hover:text-black">Logout</a>
               </NavigationMenuLink>
