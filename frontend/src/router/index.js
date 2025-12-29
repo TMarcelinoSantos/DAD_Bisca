@@ -6,6 +6,7 @@ import RegisterPage from '@/pages/register/RegisterPage.vue'
 import ProfilePage from '@/pages/profile/ProfilePage.vue'
 import SinglePlayerGamePage from '../pages/game/SinglePlayerGamePage.vue'
 import SinglePlayerMatchesPage from '../pages/game/SinglePlayerMatchesPage.vue'
+import AppManagement from '@/pages/admin/AppManagement.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
@@ -56,6 +57,12 @@ const router = createRouter({
       path: '/about',
       name: 'about',
       component: AboutPage,
+    },
+    {
+      path: '/appManagement',
+      name: 'AppManagement',
+      component: AppManagement,
+      meta: { requiresAuth: true },
     },
   ],
 })

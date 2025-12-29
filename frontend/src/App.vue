@@ -17,32 +17,38 @@
             <RouterLink to="/login" class="hover:text-amber-200">Login</RouterLink>
           </NavigationMenuLink>
         </NavigationMenuItem>
-        <NavigationMenuItem v-else>
-          <!-- USER MENU -->
-          <NavigationMenuTrigger class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10">
-            <img
-              :src="authStore.currentUser?.avatar || '/default-avatar.png'"
-              alt="User Avatar"
-              class="inline-block h-6 w-6 rounded-full mr-2"
-            />
-            {{ authStore.currentUser?.nickname }}</NavigationMenuTrigger>
-          <NavigationMenuContent class="bg-emerald-950/95 text-amber-100 border border-amber-400/30 shadow-2xl">
-            <li>
-              <!-- PROFILE -->
-              <NavigationMenuLink as-child>
-                <RouterLink to="/profile" class="hover:text-black">Profile</RouterLink>
-              </NavigationMenuLink>
-              <!-- STORE -->
-              <NavigationMenuLink as-child>
-                <RouterLink to="/store" class="hover:text-black">Store</RouterLink>
-              </NavigationMenuLink>
-              <!-- LOGOUT -->
-              <NavigationMenuLink as-child>
-                <a @click.prevent="logout" class="cursor-pointer hover:text-black">Logout</a>
-              </NavigationMenuLink>
-            </li>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
+        <template v-else>
+          <NavigationMenuItem>
+            <NavigationMenuLink class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10">
+              <RouterLink to="/appManagement" class="hover:text-amber-200">App Management</RouterLink>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10">
+              <img
+                :src="authStore.currentUser?.avatar || '/default-avatar.png'"
+                alt="User Avatar"
+                class="inline-block h-6 w-6 rounded-full mr-2"
+              />
+              {{ authStore.currentUser?.nickname }}</NavigationMenuTrigger>
+            <NavigationMenuContent class="bg-emerald-950/95 text-amber-100 border border-amber-400/30 shadow-2xl">
+              <li>
+                <!-- PROFILE -->
+                <NavigationMenuLink as-child>
+                  <RouterLink to="/profile" class="hover:text-black">Profile</RouterLink>
+                </NavigationMenuLink>
+                <!-- STORE -->
+                <NavigationMenuLink as-child>
+                  <RouterLink to="/store" class="hover:text-black">Store</RouterLink>
+                </NavigationMenuLink>
+                <!-- LOGOUT -->
+                <NavigationMenuLink as-child>
+                  <a @click.prevent="logout" class="cursor-pointer hover:text-black">Logout</a>
+                </NavigationMenuLink>
+              </li>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+        </template>
       </NavigationMenuList>
     </NavigationMenu>
   </nav>
