@@ -16,7 +16,7 @@
           </label>
           <Input
             id="email"
-            v-model="formData.email"
+            v-model:model-value="formData.email"
             type="email"
             autocomplete="email"
             required
@@ -31,7 +31,7 @@
           </label>
           <Input
             id="password"
-            v-model="formData.password"
+            v-model:model-value="formData.password"
             type="password"
             autocomplete="current-password"
             required
