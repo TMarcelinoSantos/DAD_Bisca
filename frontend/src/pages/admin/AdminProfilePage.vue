@@ -1,8 +1,15 @@
 <template>
-    <div class="min-h-screen bg-[radial-gradient(circle_at_top,#14532d,#052e16)]">
+    <div class="min-h-screen bg-transparent relative overflow-hidden">
+        <div class="fixed inset-0 -z-10 pointer-events-none">
+            <Balatro
+              :is-rotate="false"
+              :mouse-interaction="false"
+              :pixel-filter="700"
+              :color1 = "'#5CA173'"
+              :color2 = "'#0D5E1C'"
+            />
+          </div>
         <div class="max-w-4xl mx-auto p-6">
-        <h1 class="text-3xl font-bold mb-8">{{ headingTitle }}</h1>
-
          <div v-if="selectedUser" class="space-y-6">
              <Card class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
                  <CardHeader>
@@ -46,11 +53,11 @@
                         </p>
                     </div>
                  </CardContent>
+                    <div v-if="canDelete" class="mt-6 items-center justify-center flex">
+                        <Button class="hover:bg-red-700" @click="showDeleteModal = true"> Delete Account </Button>
+                    </div>  
              </Card>
          </div>
-        <div v-if="canDelete" class="mt-6 items-center justify-center flex">
-            <Button @click="showDeleteModal = true"> Delete Account </Button>
-        </div>  
         
         <transition name="fade">
         <div v-if="showDeleteModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -85,6 +92,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import Balatro from "@/components/ui/Balatro.vue"
 
 const authStore = useAuthStore()
 const apiStore = useAPIStore()
