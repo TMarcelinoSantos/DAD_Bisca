@@ -10,6 +10,7 @@ use App\Http\Controllers\RoundController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\MatchController;
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\HistoryController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -32,6 +33,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/users/{user}/photo-url', [UserController::class, 'patchPhotoURL']);
 
     Route::apiResource('users', UserController::class)->except(['store']);
+    Route::apiResource('matches', MatchController::class);
+    Route::apiResource('games', GameController::class);
+    Route::apiResource('matches.games', GameController::class)->shallow();
+
+    Route::get('history', [HistoryController::class, 'index']);
 
     Route::post('/user/theme', [UserController::class, 'updateTheme']);
     Route::post('/user/avatar', [UserController::class, 'updateAvatar']);
@@ -53,10 +59,6 @@ Route::apiResources([
     'single_match' => SingleMatchesController::class,
     'rounds' => RoundController::class
 ]);
-
-Route::apiResource('matches', MatchController::class);
-Route::apiResource('games', GameController::class);
-Route::apiResource('matches.games', GameController::class)->shallow();
 
 
 //Route::post('/single_match', [SingleMatchesController::class, 'store']);
