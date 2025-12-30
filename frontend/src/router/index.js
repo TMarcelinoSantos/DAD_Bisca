@@ -7,6 +7,8 @@ import ProfilePage from '@/pages/profile/ProfilePage.vue'
 import SinglePlayerGamePage from '../pages/game/SinglePlayerGamePage.vue'
 import SinglePlayerMatchesPage from '../pages/game/SinglePlayerMatchesPage.vue'
 import { useAuthStore } from '@/stores/auth'
+import MultiPlayerGamePage from '@/pages/game/MultiPlayerGamePage.vue'
+import MultiPlayerMatchPage from '@/pages/game/MultiPlayerMatchesPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,6 +26,11 @@ const router = createRouter({
           name: 'singleplayer',
           component: SinglePlayerGamePage,
         },
+        {
+          path: 'multiplayergame',
+          name: 'multiplayergame',
+          component: MultiPlayerGamePage,
+        },
       ],
     },
     {
@@ -33,6 +40,11 @@ const router = createRouter({
           path: 'singlematches',
           name: 'singlematches',
           component: SinglePlayerMatchesPage,
+        },
+        {
+          path: 'multiplayermatches',
+          name: 'multiplayermatches',
+          component: MultiPlayerMatchPage,
         },
       ],
     },
