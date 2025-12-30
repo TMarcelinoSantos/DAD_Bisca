@@ -1,5 +1,14 @@
 <template>
-  <div class="min-h-screen bg-[radial-gradient(circle_at_top,#14532d,#052e16)] py-10 px-4">
+    <div class="fixed inset-0 -z-10 pointer-events-none">
+    <Balatro
+      :is-rotate="false"
+      :mouse-interaction="false"
+      :pixel-filter="700"
+      :color1 = "'#5CA173'"
+      :color2 = "'#0D5E1C'"
+    />
+  </div>
+  <div class="min-h-screen bg-transparent py-10 px-4">
     <div class="max-w-5xl mx-auto space-y-6 bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)] p-6">
       <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -77,9 +86,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Button } from '@/components/ui/button'
+import Balatro from "@/component/Balatro/Balatro.vue";
 import {
   Table,
   TableBody,
