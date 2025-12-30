@@ -97,6 +97,10 @@ export const useAPIStore = defineStore('api', () => {
     return axios.delete(`${API_BASE_URL}/users/${userId}`)
   }
 
+  const patchUserBlocked = (id, blocked) => {
+    return axios.patch(`${API_BASE_URL}/users/${id}/block`, { blocked })
+  }
+
   const verifyPassword = async (userId, password) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/users/verify-password`, {

@@ -52,10 +52,37 @@
                             {{ selectedUser.coins ?? 0 }}
                         </p>
                     </div>
+                    <div class="space-y-1">
+                        <Label for="coin">Type</Label>
+                        <div class="flex items-center gap-3">
+                            <p class="flex-1 min-w-0 bg-white/60 border border-yellow-800/20 rounded-lg px-3 py-2 text-black font-semibold">
+                                 {{
+                                 selectedUser.type === 'A'
+                                     ? 'Administrator'
+                                     : selectedUser.type === 'P'
+                                     ? 'Player'
+                                     : '—'
+                                 }}
+                            </p>
+                            <Button v-if="selectedUser.type === 'P'" class="hover:bg-emerald-700"> Promote to Administrator </Button>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <Label for="blocked">State</Label>
+                        <div class="flex items-center gap-3">
+                            <p class="flex-1 min-w-0 bg-white/60 border border-yellow-800/20 rounded-lg px-3 py-2 text-black font-semibold">
+                                 {{ selectedUser.blocked ? 'Blocked' : 'Unblocked' }}
+                            </p>
+                            <!--BLOCK/UNBLOCK BUTTON-->
+                            <Button v-if="!selectedUser.blocked" class="hover:bg-red-700" @click="showDeleteModal = true"> Block User </Button>
+                            <Button v-else class="hover:bg-emerald-700" @click="showDeleteModal = true"> Unblock User </Button>
+                        </div>
+                    </div>
                  </CardContent>
-                    <div v-if="canDelete" class="mt-6 items-center justify-center flex">
+                    <div class="mt-6 items-center justify-center flex">
+                        <!--DELETE BUTTON-->
                         <Button class="hover:bg-red-700" @click="showDeleteModal = true"> Delete Account </Button>
-                    </div>  
+                    </div> 
              </Card>
          </div>
         
@@ -63,14 +90,7 @@
         <div v-if="showDeleteModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div class="bg-white rounded-2xl p-6 w-96 max-w-full shadow-lg">
             <h2 class="text-xl font-bold mb-4">Confirm Account Deletion</h2>
-            <p class="mb-4">Please, insert your password to confirm the account deletion:</p>
-            <input 
-              type="password" 
-              v-model="deletePassword" 
-              class="w-full p-2 border rounded mb-4" 
-              placeholder="Password" 
-            />
-            <div class="flex justify-end gap-2">
+            <div class="flex justify-center gap-10">
               <Button @click="confirmDelete" variant="destructive">Confirm</Button>
               <Button @click="closeDeleteModal" variant="ghost">Cancel</Button>
             </div>
@@ -85,7 +105,6 @@
 <script setup>
 import { ref, inject, watch, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { useAPIStore } from '@/stores/api'
 import { toast } from 'vue-sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -94,52 +113,28 @@ import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Balatro from "@/components/ui/Balatro.vue"
 
-const authStore = useAuthStore()
 const apiStore = useAPIStore()
 const router = useRouter()
 const route = useRoute()
 
 const showDeleteModal = ref(false)
-const deletePassword = ref('')
 const selectedUser = ref(null)
-const headingTitle = computed(() => {
-    const name = selectedUser.value?.name
-    return name ? `${name}'s Profile` : 'User Profile'
-})
 
 const serverBaseURL = inject("serverBaseURL")
 
-const canDelete = computed(() => {
-    return authStore.currentUser?.type !== 'A'
-})
-
 const closeDeleteModal = () => {
-    deletePassword.value = ''
     showDeleteModal.value = false
 }
 
 const confirmDelete = async () => {
-    if (!deletePassword.value) {
-        toast.error("Por favor, insira a password")
-        return
-    }
-
-    const passwordOk = await apiStore.verifyPassword(authStore.currentUser.id, deletePassword.value)
-    if (!passwordOk) {
-        toast.error("Password incorreta")
-        closeDeleteModal()
-        return
-    }
-
     try {
-        await apiStore.deleteUser(authStore.currentUser.id)
+        await apiStore.deleteUser(selectedUser.id)
         toast.success("Profile deleted successfully")
         closeDeleteModal()
-        authStore.currentUser = undefined
-        await router.push({ name: 'home' })
+        await router.push({ name: 'appManagement' })
     } catch (error) {
         console.error('Failed to delete profile:', error)
-        toast.error("Failed to delete profile. Please try again.")
+        toast.error("Failed to delete profile.")
         closeDeleteModal()
     }
 }

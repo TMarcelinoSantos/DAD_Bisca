@@ -27,6 +27,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('userphoto', [FileController::class, 'uploadUserPhoto']);
     });
 
+    Route::patch('/users/{user}/block', [UserController::class, 'updateBlocked']);
+
     Route::patch('/users/{user}/photo-url', [UserController::class, 'patchPhotoURL']);
 
     Route::apiResource('users', UserController::class)->except(['store']);
