@@ -1,142 +1,113 @@
 <template>
     <div class="min-h-screen bg-[radial-gradient(circle_at_top,#14532d,#052e16)]">
-        <div class="max-w-4xl mx-auto p-6">
-            <h1 class="text-3xl font-bold mb-8">Store</h1>
+      <div class="max-w-4xl mx-auto p-6">
+        <h1 class="text-3xl font-bold mb-8">Store</h1>
 
-            <Card class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
-                <CardHeader class= "flex flex-col items-center gap-2 text-center">
-                    <CardTitle>Coins</CardTitle>
-                    <CardDescription>Choose a package</CardDescription>
-                </CardHeader>
+          <Card class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
+            <CardHeader class= "flex flex-col items-center gap-2 text-center">
+              <CardTitle>Coins</CardTitle>
+              <CardDescription>Choose a package</CardDescription>
+            </CardHeader>
 
-                <CardContent>
-                    <div class="w-10/12 mx-auto">
-                    <Carousel class="w-full max-w-xxs">
-                        <CarouselContent>
-                        <CarouselItem
-                            v-for="pack in coinPackages"
-                            :key="pack.id"
-                            class="basis-1/2 sm:basis-1/2 md:basis-1/3"
+            <CardContent>
+              <div class="w-10/12 mx-auto">
+                <Carousel class="w-full max-w-xxs">
+                  <CarouselContent>
+                    <CarouselItem
+                      v-for="pack in coinPackages"
+                      :key="pack.id"
+                      class="basis-1/2 sm:basis-1/2 md:basis-1/3"
+                    >
+                      <div class="px-6 py-4 flex flex-col items-center">
+                        <Card class="rounded-xl overflow-hidden w-28 h-28 flex items-center justify-center cursor-pointer shadow-lg
+                            bg-gradient-to-br from-yellow-200 to-yellow-400"
+                          @click="goToPayment(pack.price, pack.coins)"
                         >
-                            <div class="px-6 py-4 flex flex-col items-center">
-                            <Card
-                                class="rounded-xl overflow-hidden w-28 h-28 flex items-center justify-center cursor-pointer shadow-lg
-                                bg-gradient-to-br from-yellow-200 to-yellow-400"
-                                @click="confirmPurchase(pack, 'coins')"
-                            >
-                            <Coins class="w-12 h-12 text-yellow-800" />
-                                
-                            </Card>
+                          <Coins class="w-12 h-12 text-yellow-800" />     
+                        </Card>
 
-                            <div class="mt-3 text-center">
-                                <div class="text-sm font-medium text-gray-800">
-                                {{ pack.name }}
-                                </div>
-                                <div class="mt-1 text-green-700 font-semibold">
-                                {{ pack.price }}€
-                                </div>
-                            </div>
-                            </div>
-                        </CarouselItem>
-                        </CarouselContent>
-
-                        <CarouselPrevious />
-                        <CarouselNext />
-                    </Carousel>
-                    </div>
+                        <div class="mt-3 text-center">
+                          <div class="text-sm font-medium text-gray-800">
+                            {{ pack.name }}
+                          </div>
+                          <div class="mt-1 text-green-700 font-semibold">
+                            {{ pack.price }}€
+                          </div>
+                        </div>
+                      </div>
+                    </CarouselItem>
+                  </CarouselContent>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </Carousel>
+              </div>
                 
-                    <div class="mt-6 flex flex-col items-center gap-4">
-                        <p class="text-lg font-semibold">Buy Coins</p>
+              <div class="mt-6 flex flex-col items-center gap-4">
+                <p class="text-lg font-semibold">Buy Coins</p>
 
-                        <!-- Increment -->
-                        <div class="flex items-center gap-4">
-                            <button
-                            class="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 text-xl font-bold"
-                            @click="decrementEuros"
-                            >
-                            −
-                            </button>
+                <div class="flex items-center gap-4">
+                  <button class="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 text-xl font-bold"
+                    @click="decrementEuros"> - </button>
 
-                            <div class="text-xl font-bold w-20 text-center">
-                            {{ euros }} €
-                            </div>
+                  <div class="text-xl font-bold w-20 text-center"> {{ euros }} € </div>
 
-                            <button
-                            class="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 text-xl font-bold"
-                            @click="incrementEuros"
-                            >
-                            +
-                            </button>
-                        </div>
+                  <button class="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 text-xl font-bold"
+                    @click="incrementEuros"> + </button>
+                </div>
 
-                        <!-- Result -->
-                        <div class="text-yellow-700 font-semibold">
-                            You will receive <span class="font-bold">{{ coinsFromEuros }}</span> coins
-                        </div>
+                <div class="text-yellow-700 font-semibold">
+                  You will receive <span class="font-bold">{{ coinsFromEuros }}</span> coins
+                </div>
 
-                        <!-- Buy -->
-                        <button
-                            class="mt-2 px-6 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600
-                                text-white font-semibold shadow-lg"
-                            @click="confirmPurchase(
-                            {
-                                id: 'custom_coins',
-                                name: `${coinsFromEuros} Coins`,
-                                coins: coinsFromEuros,
-                                price: euros
-                            },
-                            'coins'
-                            )"
+                <button class="mt-2 px-6 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600
+                    text-white font-semibold shadow-lg"
+                  @click="goToPayment(euros, coinsFromEuros)">
+                  Buy Coins
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <br></br>
+
+          <Card class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
+            <CardHeader class="flex flex-col items-center gap-2 text-center">
+              <CardTitle>Card Theme Options</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <!--Card Theme options-->
+              <div class="w-10/12 mx-auto mt-8">
+                <Carousel class="w-full max-w-xxs">
+                  <CarouselContent>
+                    <CarouselItem
+                      v-for="option in cardBacks"
+                      :key="option.id"
+                      class="basis-1/2 sm:basis-1/2 md:basis-1/3"
+                    >
+                      <!-- use px so items aren't flush to the carousel edges -->
+                      <div class="px-6 py-2 flex flex-col items-center">
+                        <Card class="rounded-lg overflow-hidden w-28 h-40 flex items-center justify-center cursor-pointer shadow-lg z-10"
+                          @click="confirmPurchase({ id: option.id, name: option.name, price: option.price, img: option.src}, 'card' )"
                         >
-                            Buy Coins
-                        </button>
-                    </div>
-                </CardContent>
-            </Card>
+                          <!-- card back image sized as a deck card -->
+                          <img :src="option.src" :alt="option.name" class="w-full h-full object-contain" />
+                        </Card>
 
-            <br></br>
-
-            <Card class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
-                <CardHeader class="flex flex-col items-center gap-2 text-center">
-                    <CardTitle>Card Theme Options</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <!--Card Theme options-->
-                    <div class="w-10/12 mx-auto mt-8">
-                    
-                        <Carousel class="w-full max-w-xxs">
-                        <CarouselContent>
-                            <CarouselItem
-                            v-for="option in cardBacks"
-                            :key="option.id"
-                            class="basis-1/2 sm:basis-1/2 md:basis-1/3"
-                            >
-                            <!-- use px so items aren't flush to the carousel edges -->
-                            <div class="px-6 py-2 flex flex-col items-center">
-                                <Card
-                                class="rounded-lg overflow-hidden w-28 h-40 flex items-center justify-center cursor-pointer shadow-lg z-10"
-                                @click="confirmPurchase({ id: option.id, name: option.name, price: option.price, img: option.src}, 'card' )"
-                                >
-                                <!-- card back image sized as a deck card -->
-                                <img :src="option.src" :alt="option.name" class="w-full h-full object-contain" />
-                                </Card>
-
-                                <div class="mt-3 text-center">
-                                <div class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ option.name }}</div>
-                                <div class="mt-1 text-yellow-500 font-semibold">{{ option.price }} <span class="text-gray-600 text-xs">coins</span></div>
-                                </div>
-                            </div>
-                            </CarouselItem>
-                        </CarouselContent>
-                        <CarouselPrevious />
-                        <CarouselNext />
-                        </Carousel>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+                        <div class="mt-3 text-center">
+                          <div class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ option.name }}</div>
+                          <div class="mt-1 text-yellow-500 font-semibold">{{ option.price }} <span class="text-gray-600 text-xs">coins</span></div>
+                        </div>
+                      </div>
+                    </CarouselItem>
+                  </CarouselContent>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </Carousel>
+              </div>
+            </CardContent>
+          </Card>
+      </div>
     </div>
-
 
     <!-- Confirmation popup -->
     <transition name="fade">
@@ -248,6 +219,17 @@ function decrementEuros() {
     euros.value--
   }
 }
+
+function goToPayment(price: number, coins: number) {
+  router.push({
+    name: 'payment',
+    query: {
+      value: price,
+      coins: coins,
+    }
+  })
+}
+
 
 
 function confirmPurchase(item: { id: number; name: string; price: number; img: string }, type: 'coins' | 'card') {

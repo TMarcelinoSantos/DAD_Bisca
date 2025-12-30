@@ -5,6 +5,7 @@ import LoginPage from '@/pages/login/LoginPage.vue'
 import RegisterPage from '@/pages/register/RegisterPage.vue'
 import ProfilePage from '@/pages/profile/ProfilePage.vue'
 import StorePage from '@/pages/store/Store.vue'
+import PaymentPage from '@/pages/store/Payment.vue'
 import SinglePlayerGamePage from '../pages/game/SinglePlayerGamePage.vue'
 import SinglePlayerMatchesPage from '../pages/game/SinglePlayerMatchesPage.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -58,6 +59,11 @@ const router = createRouter({
       name: 'store',
       component: StorePage,
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/payment',
+      name: 'payment',
+      component: PaymentPage,
     },
     {
       path: '/about',
