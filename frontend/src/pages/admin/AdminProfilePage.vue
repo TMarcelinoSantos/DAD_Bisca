@@ -1,46 +1,53 @@
 <template>
     <div class="min-h-screen bg-[radial-gradient(circle_at_top,#14532d,#052e16)]">
         <div class="max-w-4xl mx-auto p-6">
-        <h1 class="text-3xl font-bold mb-8">{{selectedUser.name}}'s Profile</h1>
+        <h1 class="text-3xl font-bold mb-8">{{ headingTitle }}</h1>
 
-        <div v-if="selectedUser" class="space-y-6">
-            <Card class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
-                <CardHeader>
-                    <CardTitle>Account Information</CardTitle>
-                    <CardDescription>Update your personal details</CardDescription>
-                </CardHeader>
-                <CardContent class="space-y-4">
-                    <div class="flex flex-col items-center gap-2">
-                        <span class="text-sm text-muted-foreground">Current</span>
-                        <Avatar class="w-32 h-32 ring-2 ring-primary">
-                        <AvatarImage
-                            v-if="selectedUser.photo_avatar_filename"
-                            :src="`${serverBaseURL}/storage/photos/${selectedUser.photo_avatar_filename}`"
-                        />
-                        <AvatarFallback class="text-4xl">
-                            {{ selectedUser.name?.charAt(0).toUpperCase() }}
-                        </AvatarFallback>
-                        </Avatar>
-                    </div>
-                    <div class="space-y-2">
+         <div v-if="selectedUser" class="space-y-6">
+             <Card class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
+                 <CardHeader>
+                     <CardTitle>Account Information</CardTitle>
+                 </CardHeader>
+                 <CardContent class="space-y-4">
+                     <div class="flex flex-col items-center gap-2">
+                         <span class="text-sm font-semibold text-black">Profile Picture</span>
+                         <Avatar class="w-32 h-32 ring-2 ring-primary">
+                         <AvatarImage
+                             v-if="selectedUser.photo_avatar_filename"
+                             :src="`${serverBaseURL}/storage/photos/${selectedUser.photo_avatar_filename}`"
+                         />
+                         <AvatarFallback class="text-4xl">
+                             {{ selectedUser.name?.charAt(0).toUpperCase() }}
+                         </AvatarFallback>
+                         </Avatar>
+                     </div>
+                    <div class="space-y-1">
                         <Label for="name">Name</Label>
-                        <Input class="bg-white/70" id="name" v-model="selectedUser.name" placeholder="Enter your name" />
+                        <p class="bg-white/60 border border-yellow-800/20 rounded-lg px-3 py-2 text-black font-semibold">
+                            {{ selectedUser.name || '—' }}
+                        </p>
                     </div>
-                    <div class="space-y-2">
+                    <div class="space-y-1">
                         <Label for="nickname">Nickname</Label>
-                        <Input class="bg-white/70" id="nickname" v-model="selectedUser.nickname" placeholder="Enter your nickname" />
+                        <p class="bg-white/60 border border-yellow-800/20 rounded-lg px-3 py-2 text-black font-semibold">
+                            {{ selectedUser.nickname || '—' }}
+                        </p>
                     </div>
-                    <div class="space-y-2">
+                    <div class="space-y-1">
                         <Label for="email">Email</Label>
-                        <Input class="bg-white/70" id="email" v-model="selectedUser.email" type="email" placeholder="Enter your email" />
+                        <p class="bg-white/60 border border-yellow-800/20 rounded-lg px-3 py-2 text-black font-semibold break-all">
+                            {{ selectedUser.email || '—' }}
+                        </p>
                     </div>
-                    <div class="space-y-2">
+                    <div class="space-y-1">
                         <Label for="coin">Coins</Label>
-                        <Input class="bg-white/70" id="coin" v-model="selectedUser.coins" type="number" placeholder="Enter your coin amount" />
+                        <p class="bg-white/60 border border-yellow-800/20 rounded-lg px-3 py-2 text-black font-semibold">
+                            {{ selectedUser.coins ?? 0 }}
+                        </p>
                     </div>
-                </CardContent>
-            </Card>
-        </div>
+                 </CardContent>
+             </Card>
+         </div>
         <div v-if="canDelete" class="mt-6 items-center justify-center flex">
             <Button @click="showDeleteModal = true"> Delete Account </Button>
         </div>  
@@ -74,9 +81,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAPIStore } from '@/stores/api'
 import { toast } from 'vue-sonner'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
@@ -88,6 +94,10 @@ const route = useRoute()
 const showDeleteModal = ref(false)
 const deletePassword = ref('')
 const selectedUser = ref(null)
+const headingTitle = computed(() => {
+    const name = selectedUser.value?.name
+    return name ? `${name}'s Profile` : 'User Profile'
+})
 
 const serverBaseURL = inject("serverBaseURL")
 
