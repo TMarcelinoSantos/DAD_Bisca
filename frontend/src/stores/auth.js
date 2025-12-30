@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useAPIStore } from './api.js'
+import {useSocketStore} from './socket.js'
 
 export const useAuthStore = defineStore('auth', () => {
   const apiStore = useAPIStore()
+  const socketStore = useSocketStore()
 
   const currentUser = ref(undefined)
 
@@ -14,10 +16,12 @@ export const useAuthStore = defineStore('auth', () => {
   const login = async (credentials) => {
     await apiStore.postLogin(credentials)
     await getUser()
+    socketStore.emitJoin(currentUser.value)
   }
 
   const logout = async () => {
     await apiStore.postLogout()
+    socketStore.emitLeave()
     currentUser.value = undefined
   }
 
