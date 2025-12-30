@@ -61,7 +61,7 @@ const router = createRouter({
     },
     {
       path: '/appManagement',
-      name: 'AppManagement',
+      name: 'appManagement',
       component: AppManagement,
       meta: { requiresAuth: true },
     },
