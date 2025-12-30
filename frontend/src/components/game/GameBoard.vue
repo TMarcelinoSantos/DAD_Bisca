@@ -3,8 +3,10 @@ import { ref } from 'vue'
 import BiscaGame from './BiscaGame.vue';
 import semFace from '@/cards/semFace.png'
 import { useGameStore } from '@/stores/game'
+import { useSocketStore } from '@/stores/socket';
 
 const gameStore = useGameStore()
+const socketStore = useSocketStore()
 
 const props = defineProps({
   opponentCards: {
@@ -24,7 +26,24 @@ const props = defineProps({
     type: Object,
     default: () => null
   },
+  multiPlayer: {
+    type: Boolean,
+    default: false
+  },
+  roomId: {
+    type: String,
+    default: null
+  },
 })
+
+const onCardClick = (card) => {
+  if (isCardPlayable(card.id)) {
+    gameStore.playCard(card)
+    if (props.multiPlayer) {
+      socketStore.emitPlayCard(props.roomId, card)
+    }
+  }
+}
 
 const isCardPlayable = (id) => gameStore.getValidPlayerCards().includes(id)
 </script>

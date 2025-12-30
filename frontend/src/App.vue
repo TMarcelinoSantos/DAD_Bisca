@@ -67,7 +67,11 @@ import { toast } from 'vue-sonner'
 import 'vue-sonner/style.css'
 import { RouterLink, RouterView } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { onMounted } from 'vue';
+import { useSocketStore } from './stores/socket';
+
 const authStore = useAuthStore()
+const socketStore = useSocketStore()
 
 const logout = () => {
   toast.promise(authStore.logout(), {
@@ -78,6 +82,11 @@ const logout = () => {
     error: (data) => `[API] Error saving game - ${data?.response?.data?.message}`,
   })
 }
+
+onMounted(() => {
+  socketStore.handleConnection()
+  socketStore.handleGameEvents()
+})
 
 </script>
 

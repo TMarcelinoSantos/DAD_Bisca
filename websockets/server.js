@@ -1,6 +1,6 @@
 import { Server } from "socket.io"
 import { handleConnectionEvents } from "./events/connection.js"
-//import { handleGameEvents } from "./events/game.js"
+import { registerGameEvents } from "./events/game.js"
 
 export const server = {
   io: null,
@@ -16,6 +16,6 @@ export const serverStart = (port) => {
     console.log("New connection:", socket.id)
 
     handleConnectionEvents(server.io, socket)
-    //handleGameEvents(server.io, socket)
+    registerGameEvents(server.io, socket)
   })
 }
