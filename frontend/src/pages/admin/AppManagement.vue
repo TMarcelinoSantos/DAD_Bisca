@@ -89,7 +89,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Button } from '@/components/ui/button'
-import Balatro from "@/component/Balatro/Balatro.vue";
+import Balatro from "@/components/ui/Balatro.vue";
 import {
   Table,
   TableBody,
