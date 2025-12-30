@@ -8,6 +8,8 @@ use App\Http\Controllers\SingleGameController;
 use App\Http\Controllers\SingleMatchesController;
 use App\Http\Controllers\RoundController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\MatchController;
+use App\Http\Controllers\GameController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -51,5 +53,10 @@ Route::apiResources([
     'single_match' => SingleMatchesController::class,
     'rounds' => RoundController::class
 ]);
+
+Route::apiResource('matches', MatchController::class);
+Route::apiResource('games', GameController::class);
+Route::apiResource('matches.games', GameController::class)->shallow();
+
 
 //Route::post('/single_match', [SingleMatchesController::class, 'store']);
