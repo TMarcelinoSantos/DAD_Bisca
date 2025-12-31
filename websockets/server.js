@@ -12,6 +12,9 @@ export const serverStart = (port) => {
       origin: "*",
     },
   })
+
+    setInterval(() => cleanupFinishedGames(), 1000 * 60 * 5)
+
   server.io.on("connection", (socket) => {
     console.log("New connection:", socket.id)
 

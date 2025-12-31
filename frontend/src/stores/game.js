@@ -32,6 +32,82 @@ export const useGameStore = defineStore('game', () => {
     const lastRoundWinner = ref(null)
     const lastGameWinner = ref(null)
 
+    // MULTIPLAYER
+    const multiplayerGames = ref([])          // list from lobby (joinable games, etc.)
+    const activeMultiplayerGame = ref(null)   // game object from websockets server
+
+    const isMultiplayerGame = computed(() => !!activeMultiplayerGame.value)
+
+    const setGames = (games) => {
+        multiplayerGames.value = Array.isArray(games) ? games : []
+    }
+
+    const setActiveMultiplayerGame = (game) => {
+        activeMultiplayerGame.value = game ?? null
+    }
+
+    const syncFromServerGame = (game) => {
+        activeMultiplayerGame.value = game ?? null
+        if (!game?.board) return
+
+        const board = game.board
+        const allCards = getAllCards()
+        const cardMap = new Map(allCards.map(c => [c.id, c]))
+
+        const mapIdsToCards = (ids = []) =>
+            ids
+                .map(id => cardMap.get(id))
+                .filter(Boolean)
+                .map(c => ({ ...c }))
+
+        deck.value = mapIdsToCards(board.deck)
+        playerHand.value = mapIdsToCards(board.playerHand)
+        opponentHand.value = mapIdsToCards(board.opponentHand)
+
+        trumpCard.value = board.trumpCard
+            ? { ...(cardMap.get(board.trumpCard) || {}), hidden: !!board.trumpHidden }
+            : null
+
+        playedCards.value = (board.playedCards || []).map(pc => ({
+            ...(cardMap.get(pc.id) || {}),
+            id: pc.id,
+            player: pc.player,
+        }))
+
+        playerCardWon.value = mapIdsToCards(board.playerCardWon)
+        opponentCardWon.value = mapIdsToCards(board.opponentCardWon)
+
+        turn.value = board.turn || 'player'
+        playerTotalPoints.value = board.playerTotalPoints || 0
+        opponentTotalPoints.value = board.opponentTotalPoints || 0
+    }
+
+    const resetMultiplayer = () => {
+        multiplayerGames.value = []
+        activeMultiplayerGame.value = null
+    }
+
+    const getBoardSnapshot = () => {
+        return {
+            deck: deck.value.map(c => c.id),
+            playerHand: playerHand.value.map(c => c.id),
+            opponentHand: opponentHand.value.map(c => c.id),
+            trumpCard: trumpCard.value?.id ?? null,
+            trumpHidden: !!trumpCard.value?.hidden,
+            playedCards: playedCards.value.map(c => ({
+                id: c.id,
+                player: c.player,
+            })),
+            playerCardWon: playerCardWon.value.map(c => c.id),
+            opponentCardWon: opponentCardWon.value.map(c => c.id),
+            turn: turn.value,
+            playerTotalPoints: playerTotalPoints.value,
+            opponentTotalPoints: opponentTotalPoints.value,
+        }
+    }
+
+    // MULTIPLAYER END
+
     const shuffle = (array) => {
         const a = array.slice()
         for (let i = a.length - 1; i > 0; i--) {
@@ -54,6 +130,14 @@ export const useGameStore = defineStore('game', () => {
             .map(i => ({ id: i.id, src: i.src }))
 
         return imgs
+    }
+
+    let allCardsCache = null
+    const getAllCards = () => {
+        if (!allCardsCache) {
+            allCardsCache = loadImagesAsDeck()
+        }
+        return allCardsCache
     }
 
     const startGame = async () => {
@@ -583,5 +667,15 @@ export const useGameStore = defineStore('game', () => {
         saveMatch,
         startMatch,
         isAuthenticated,
+
+        // MULTIPLAYER
+        multiplayerGames,
+        activeMultiplayerGame,
+        isMultiplayerGame,
+        setGames,
+        setActiveMultiplayerGame,
+        syncFromServerGame,
+        resetMultiplayer,
+        getBoardSnapshot,
     }
 })

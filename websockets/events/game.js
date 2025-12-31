@@ -5,6 +5,7 @@ import {
     leaveGame,
     playerMove,
     getJoinableGames,
+    updateGameBoard,
 } from '../state/game.js'
 
 export const registerGameEvents = (io, socket) => {
@@ -45,6 +46,17 @@ export const registerGameEvents = (io, socket) => {
     socket.on('game:move', ({ gameID, move }, cb) => {
         try {
             const game = playerMove(gameID, { ...move, by: player.username })
+            const room = roomName(gameID)
+            io.to(room).emit('game:updated', game)
+            cb && cb({ ok: true })
+        } catch (err) {
+            cb && cb({ ok: false, error: err.message })
+        }
+    })
+
+    socket.on('game:sync', ({ gameID, board }, cb) => {
+        try {
+            const game = updateGameBoard(gameID, board)
             const room = roomName(gameID)
             io.to(room).emit('game:updated', game)
             cb && cb({ ok: true })

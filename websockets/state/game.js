@@ -1,6 +1,8 @@
 const games = new Map()
 let currentGameID = 0
 
+const nextGameID = () => ++currentGameID
+
 export const joinGame = (gameID, player) => {
     const game = games.get(gameID)
     if (!game) throw new Error('Game not found')
@@ -42,13 +44,41 @@ export const getJoinableGames = () => {
 
 export const createGame = (player1) => {
     const gameID = ++currentGameID
-    games.set(gameID, {
+    const game = {
         id: gameID,
         player1: player1,
         player2: null,
         state: 'waiting',
+        createdAt: Date.now(),
         moves: [],
-    })
+        board: {
+            deck: [],
+            playerHand: [],
+            opponentHand: [],
+            trumpCard: null,
+            trumpHidden: false,
+            playedCards: [],
+            turn: 'player',
+            playerCardWon: [],
+            opponentCardWon: [],
+            playerTotalPoints: 0,
+            opponentTotalPoints: 0,
+        },
+    }
+    games.set(gameID, game)
+    return game
+}
+
+export const updateGameBoard = (gameID, partialBoard) => {
+    const game = games.get(gameID)
+    if (!game) throw new Error('Game not found')
+
+    game.board = {
+        ...(game.board || {}),
+        ...partialBoard,
+    }
+
+    return game
 }
 
 export const playerMove = (gameID, move) => {
@@ -89,9 +119,10 @@ export const leaveGame = (gameID, player) => {
 export const cleanupFinishedGames = (maxAgeMs = 1000 * 60 * 60) => {
     const now = Date.now()
     for (const [id, game] of games.entries()) {
+        const createdAt = game.createdAt ?? now
         if (
             (game.state === 'finished' || (!game.player1 && !game.player2)) &&
-            now - game.createdAt > maxAgeMs
+            now - createdAt > maxAgeMs
         ) {
             games.delete(id)
         }
