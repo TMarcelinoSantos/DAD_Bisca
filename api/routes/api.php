@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::patch('/users/{user}/block', [UserController::class, 'updateBlocked']);
+    Route::patch('/users/{user}/updateType', [UserController::class, 'updateType']);
 
     Route::patch('/users/{user}/photo-url', [UserController::class, 'patchPhotoURL']);
 

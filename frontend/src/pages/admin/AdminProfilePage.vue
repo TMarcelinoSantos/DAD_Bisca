@@ -64,7 +64,7 @@
                                      : '—'
                                  }}
                             </p>
-                            <Button v-if="selectedUser.type === 'P'" class="hover:bg-emerald-700"> Promote to Administrator </Button>
+                            <Button v-if="selectedUser.type === 'P'" class="hover:bg-blue-700" @click="promoteToAdmin"> Promote to Administrator </Button>
                         </div>
                     </div>
                     <div v-if="selectedUser.type === 'P'" class="space-y-1">
@@ -143,6 +143,16 @@ const unblockUser = async () => {
         await loadUser(selectedUser.value.id)
     } catch (error) {
         toast.error("Failed to unblock user.")
+    }
+}
+
+const promoteToAdmin = async () => {
+    try {
+        await apiStore.patchUserType(selectedUser.value.id, 'A')
+        toast.success("User promoted to administrator successfully")
+        await loadUser(selectedUser.value.id)
+    } catch (error) {
+        toast.error("Failed to promote user.")
     }
 }
 

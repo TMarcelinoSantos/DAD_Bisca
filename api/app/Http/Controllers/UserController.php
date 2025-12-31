@@ -179,4 +179,16 @@ class UserController extends Controller
 
         return new UserResource($user);
     }
+
+    public function updateType(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'type' => ['required', 'string', 'in:A,P'],
+        ]);
+
+        $user->type = $data['type'];
+        $user->save();
+
+        return new UserResource($user);
+    }
 }

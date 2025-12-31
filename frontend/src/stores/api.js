@@ -97,6 +97,10 @@ export const useAPIStore = defineStore('api', () => {
     return axios.patch(`${API_BASE_URL}/users/${id}/block`, { blocked })
   }
 
+  const patchUserType = (id, type) => {
+    return axios.patch(`${API_BASE_URL}/users/${id}/updateType`, { type })
+  }
+
   const blockUser = (userId) => {
     return patchUserBlocked(userId, true)
   }
@@ -157,6 +161,7 @@ export const useAPIStore = defineStore('api', () => {
     getAuthUser,
     putUser,
     patchUserPhoto,
+    patchUserType,
     blockUser,
     unblockUser,
     deleteUser,
