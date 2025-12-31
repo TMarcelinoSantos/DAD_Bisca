@@ -93,12 +93,20 @@ export const useAPIStore = defineStore('api', () => {
     return axios.patch(`${API_BASE_URL}/users/${id}/photo-url`, filename)
   }
 
-  const deleteUser = (userId) => {
-    return axios.delete(`${API_BASE_URL}/users/${userId}`)
-  }
-
   const patchUserBlocked = (id, blocked) => {
     return axios.patch(`${API_BASE_URL}/users/${id}/block`, { blocked })
+  }
+
+  const blockUser = (userId) => {
+    return patchUserBlocked(userId, true)
+  }
+
+  const unblockUser = (userId) => {
+    return patchUserBlocked(userId, false)
+  }
+
+  const deleteUser = (userId) => {
+    return axios.delete(`${API_BASE_URL}/users/${userId}`)
   }
 
   const verifyPassword = async (userId, password) => {
@@ -149,6 +157,8 @@ export const useAPIStore = defineStore('api', () => {
     getAuthUser,
     putUser,
     patchUserPhoto,
+    blockUser,
+    unblockUser,
     deleteUser,
     verifyPassword,
     postRound,

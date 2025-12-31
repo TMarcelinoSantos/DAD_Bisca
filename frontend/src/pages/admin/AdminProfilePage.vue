@@ -67,15 +67,15 @@
                             <Button v-if="selectedUser.type === 'P'" class="hover:bg-emerald-700"> Promote to Administrator </Button>
                         </div>
                     </div>
-                    <div class="space-y-1">
+                    <div v-if="selectedUser.type === 'P'" class="space-y-1">
                         <Label for="blocked">State</Label>
                         <div class="flex items-center gap-3">
                             <p class="flex-1 min-w-0 bg-white/60 border border-yellow-800/20 rounded-lg px-3 py-2 text-black font-semibold">
                                  {{ selectedUser.blocked ? 'Blocked' : 'Unblocked' }}
                             </p>
                             <!--BLOCK/UNBLOCK BUTTON-->
-                            <Button v-if="!selectedUser.blocked" class="hover:bg-red-700" @click="showDeleteModal = true"> Block User </Button>
-                            <Button v-else class="hover:bg-emerald-700" @click="showDeleteModal = true"> Unblock User </Button>
+                            <Button v-if="!selectedUser.blocked" class="hover:bg-red-700" @click="blockUser"> Block User </Button>
+                            <Button v-else class="hover:bg-emerald-700" @click="unblockUser"> Unblock User </Button>
                         </div>
                     </div>
                  </CardContent>
@@ -126,15 +126,35 @@ const closeDeleteModal = () => {
     showDeleteModal.value = false
 }
 
+const blockUser = async () => {
+    try {
+        await apiStore.blockUser(selectedUser.value.id)
+        toast.success("User blocked successfully")
+        await loadUser(selectedUser.value.id)
+    } catch (error) {
+        toast.error("Failed to block user.")
+    }
+}
+
+const unblockUser = async () => {
+    try {
+        await apiStore.unblockUser(selectedUser.value.id)
+        toast.success("User unblocked successfully")
+        await loadUser(selectedUser.value.id)
+    } catch (error) {
+        toast.error("Failed to unblock user.")
+    }
+}
+
 const confirmDelete = async () => {
     try {
-        await apiStore.deleteUser(selectedUser.id)
+        await apiStore.deleteUser(selectedUser.value.id)
         toast.success("Profile deleted successfully")
-        closeDeleteModal()
         await router.push({ name: 'appManagement' })
     } catch (error) {
         console.error('Failed to delete profile:', error)
         toast.error("Failed to delete profile.")
+    } finally {
         closeDeleteModal()
     }
 }
