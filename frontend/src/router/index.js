@@ -63,13 +63,13 @@ const router = createRouter({
       path: '/appManagement',
       name: 'appManagement',
       component: AppManagement,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresAdmin: true },
     },
     {
       path: '/adminProfile',
       name: 'adminProfile',
       component: AdminProfilePage,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresAdmin: true },
     }
   ],
 })
@@ -77,12 +77,19 @@ const router = createRouter({
 // navigation guard: redirect to login if route requires auth and user not authenticated
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
+
   if (to.matched.some(record => record.meta?.requiresAuth)) {
-    if (auth.isLoggedIn) {
-      return next()
+    if (!auth.isLoggedIn) {
+      return next({ name: 'login' })
     }
-    return next({ name: 'login' })
   }
+
+  if (to.matched.some(record => record.meta?.requiresAdmin)) {
+    if (!auth.isAdmin) {
+      return next({ name: 'home' })
+    }
+  }
+
   next()
 })
 

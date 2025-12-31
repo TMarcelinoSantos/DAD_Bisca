@@ -18,7 +18,7 @@
           </NavigationMenuLink>
         </NavigationMenuItem>
         <template v-else>
-          <NavigationMenuItem>
+          <NavigationMenuItem v-if ="authStore.isAdmin">
             <NavigationMenuLink class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10">
               <RouterLink to="/appManagement" class="hover:text-amber-200">App Management</RouterLink>
             </NavigationMenuLink>
@@ -30,7 +30,7 @@
                 alt="User Avatar"
                 class="inline-block h-6 w-6 rounded-full mr-2"
               />
-              {{ authStore.currentUser?.nickname }}</NavigationMenuTrigger>
+              {{ authStore.currentUser?.nickname || authStore.currentUser?.name}}</NavigationMenuTrigger>
             <NavigationMenuContent class="bg-emerald-950/95 text-amber-100 border border-amber-400/30 shadow-2xl">
               <li>
                 <!-- PROFILE -->
