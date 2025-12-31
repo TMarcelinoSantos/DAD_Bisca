@@ -110,6 +110,11 @@ export const useAPIStore = defineStore('api', () => {
     return axios.post(`${API_BASE_URL}/coins/purchase`, {value, coins})
   }
 
+  const getMyCoinTransactions =() =>{
+    return axios.get(`${API_BASE_URL}/coins/transactions/me`)
+  }
+
+
   // Files
   const uploadProfilePhoto = async (file) => {
     const formData = new FormData()
@@ -150,6 +155,7 @@ export const useAPIStore = defineStore('api', () => {
     getRound,
     updateRound,
     purchaseCoins,
+    getMyCoinTransactions,
     uploadProfilePhoto,
   }
 })

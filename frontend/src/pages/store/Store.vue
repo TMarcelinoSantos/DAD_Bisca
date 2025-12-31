@@ -230,8 +230,6 @@ function goToPayment(price: number, coins: number) {
   })
 }
 
-
-
 function confirmPurchase(item: { id: number; name: string; price: number; img: string }, type: 'coins' | 'card') {
   selected.value = { ...item, type };
   showConfirm.value = true;
@@ -243,10 +241,8 @@ function cancelPurchase() {
 }
 
 const buyConfirmed = async () => {
-  //implement your purchase logic here (deduct coins, call API, etc.)
   console.log('Purchase confirmed for', selected.value)
   const item = selected.value
-
   
   if (authStore.currentUser.coins_balance < item.price) {
     errorMessage.value = "Not enough Coins!!"
@@ -263,7 +259,6 @@ const buyConfirmed = async () => {
 
     await authStore.getUser()
 
-    // close modal
     showConfirm.value = false
     selected.value = null
     router.push({ name: 'customizations' })

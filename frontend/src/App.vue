@@ -43,6 +43,9 @@
                 <RouterLink to="/store">Store</RouterLink>
               </NavigationMenuLink>
               <NavigationMenuLink as-child>
+                <RouterLink to="/coinshistory">Coin History</RouterLink>
+              </NavigationMenuLink>
+              <NavigationMenuLink as-child>
                 <a @click.prevent="logout" class="cursor-pointer">Logout</a>
               </NavigationMenuLink>
             </li>

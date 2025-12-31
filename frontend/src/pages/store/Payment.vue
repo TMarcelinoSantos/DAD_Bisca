@@ -1,7 +1,7 @@
 <template>
     <Card class="mb-6">
         <CardHeader class="text-center">
-            <CardTitle>Order Summary</CardTitle>
+            <CardTitle class="text-lg font-semibold">Order</CardTitle>
         </CardHeader>
 
         <CardContent class="text-center space-y-2">
