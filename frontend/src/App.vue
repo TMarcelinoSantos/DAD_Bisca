@@ -38,7 +38,7 @@
                   <RouterLink to="/profile" class="hover:text-black">Profile</RouterLink>
                 </NavigationMenuLink>
                 <!-- STORE -->
-                <NavigationMenuLink as-child>
+                <NavigationMenuLink v-if="!authStore.isAdmin" as-child>
                   <RouterLink to="/store" class="hover:text-black">Store</RouterLink>
                 </NavigationMenuLink>
                 <!-- LOGOUT -->
