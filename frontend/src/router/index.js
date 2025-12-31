@@ -4,6 +4,9 @@ import AboutPage from '@/pages/about/AboutPage.vue'
 import LoginPage from '@/pages/login/LoginPage.vue'
 import RegisterPage from '@/pages/register/RegisterPage.vue'
 import ProfilePage from '@/pages/profile/ProfilePage.vue'
+import StorePage from '@/pages/store/Store.vue'
+import PaymentPage from '@/pages/store/Payment.vue'
+import CoinsHistoryPage from '@/pages/store/HistoryCoins.vue'
 import SinglePlayerGamePage from '../pages/game/SinglePlayerGamePage.vue'
 import SinglePlayerMatchesPage from '../pages/game/SinglePlayerMatchesPage.vue'
 import AppManagement from '@/pages/admin/AppManagement.vue'
@@ -53,6 +56,23 @@ const router = createRouter({
       name: 'profile',
       component: ProfilePage,
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/store',
+      name: 'store',
+      component: StorePage,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/payment',
+      name: 'payment',
+      component: PaymentPage,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/coinshistory',
+      name: 'coinshistory',
+      component: CoinsHistoryPage,
     },
     {
       path: '/about',

@@ -68,7 +68,7 @@
                     </div>
                     <div class="space-y-2">
                         <Label for="password">Password</Label>
-                        <Input class="bg-white/70" id="password" v-model="formData.password" placeholder="Change your password" />
+                        <Input class="bg-white/70" id="password" v-model="formData.password" type="password" placeholder="Change your password" />
                     </div>
                 </CardContent>
                 <CardFooter class="flex justify-between">
