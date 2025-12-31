@@ -1,5 +1,5 @@
 <template>
-    <div class="fixed inset-0 -z-10 pointer-events-none">
+  <div class="fixed inset-0 -z-10 pointer-events-none">
     <Balatro
       :is-rotate="false"
       :mouse-interaction="false"
@@ -9,11 +9,22 @@
     />
   </div>
   <div class="min-h-screen bg-transparent py-10 px-4">
-    <div class="max-w-5xl mx-auto space-y-6 bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)] p-6">
+    <div
+      class="max-w-5xl mx-auto space-y-6 bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)] p-6"
+    >
       <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 class="text-3xl font-bold text-yellow-900">App Management</h1>
           <p class="text-sm text-yellow-800/80">Registered users overview</p>
+        </div>
+        <!-- SEARCH -->
+        <div class="w-full sm:w-64">
+          <Input
+            v-model="searchTerm"
+            type="text"
+            placeholder="Search by nickname or name..."
+            class="bg-white/80 border-yellow-700/60"
+          />
         </div>
       </header>
 
@@ -36,7 +47,7 @@
               <span class="text-sm font-medium">{{ playerUsers.length }} users</span>
             </div>
             <div v-if="playerUsers.length === 0" class="p-6 text-center text-yellow-900 font-semibold">
-              No player users found.
+              No players found.
             </div>
             <div v-else>
               <div class="overflow-x-auto">
@@ -99,7 +110,7 @@
               <span class="text-sm font-medium">{{ adminUsers.length }} users</span>
             </div>
             <div v-if="adminUsers.length === 0" class="p-6 text-center text-yellow-900 font-semibold">
-              No admin users found.
+              No administrators found.
             </div>
             <div v-else>
               <div class="overflow-x-auto">
@@ -165,7 +176,8 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
-import Balatro from "@/components/ui/Balatro.vue";
+import Balatro from '@/components/ui/Balatro.vue'
+import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -177,13 +189,14 @@ import {
 import { useAPIStore } from '@/stores/api'
 
 const apiStore = useAPIStore()
-const users = ref([])
+const users = ref<any[]>([])
 const isLoading = ref(false)
 const error = ref('')
 const currentPagePlayers = ref(1)
 const currentPageAdmins = ref(1)
 const itemsPerPage = ref(10)
 const router = useRouter()
+const searchTerm = ref('')
 
 const fetchUsers = async () => {
   isLoading.value = true
@@ -191,7 +204,7 @@ const fetchUsers = async () => {
   try {
     const response = await apiStore.getUsers()
     users.value = response.data?.data ?? response.data ?? []
-  } catch (err) {
+  } catch (err: any) {
     error.value = err?.response?.data?.message ?? 'Failed to load users.'
   } finally {
     isLoading.value = false
@@ -200,11 +213,22 @@ const fetchUsers = async () => {
 
 onMounted(fetchUsers)
 
+// FILTER BY SEARCH
+const filteredUsers = computed(() => {
+  const term = searchTerm.value.trim().toLowerCase()
+  if (!term) return users.value
+  return users.value.filter((user) => {
+    const nickname = (user.nickname ?? '').toLowerCase()
+    const name = (user.name ?? '').toLowerCase()
+    return nickname.includes(term) || name.includes(term)
+  })
+})
+
 const playerUsers = computed(() =>
-  users.value.filter(user => (user.type ?? '').toUpperCase() === 'P')
+  filteredUsers.value.filter((user) => (user.type ?? '').toUpperCase() === 'P'),
 )
 const adminUsers = computed(() =>
-  users.value.filter(user => (user.type ?? '').toUpperCase() === 'A')
+  filteredUsers.value.filter((user) => (user.type ?? '').toUpperCase() === 'A'),
 )
 
 watch(playerUsers, () => {
