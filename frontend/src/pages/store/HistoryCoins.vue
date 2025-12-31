@@ -1,4 +1,13 @@
 <template>
+  <div class="fixed inset-0 -z-10 pointer-events-none">
+    <Balatro
+      :is-rotate="false"
+      :mouse-interaction="false"
+      :pixel-filter="700"
+      :color1 = "'#5CA173'"
+      :color2 = "'#0D5E1C'"
+    />
+  </div>
     <div class="min-h-screen py-10 px-4">
         <div class="max-w-5xl mx-auto space-y-6
         bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)]
@@ -89,6 +98,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Button } from '@/components/ui/button'
+import Balatro from '@/components/ui/Balatro.vue'
 import {
   Table,
   TableBody,
