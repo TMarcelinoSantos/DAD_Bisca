@@ -10,6 +10,7 @@ use App\Http\Controllers\RoundController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\CoinsController;
 use App\Http\Controllers\CoinTransactionController;
+use App\Http\Controllers\CoinPurchaseController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -38,9 +39,10 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('/user/coins', [UserController::class, 'updateUserCoins']);
     Route::post('/user/coins/reward', [UserController::class, 'updateRewardCoins']);
-    
-    Route::post('/coins/purchase', [CoinsController::class, 'store']);
+
+    //Route::post('/coins/purchase', [CoinsController::class, 'store']);
     Route::get('/coins/transactions/me', [CoinTransactionController::class, 'myTransactions']);
+    Route::post('/coin-purchases', [CoinPurchaseController::class, 'store']);
 });
 
 Route::get('/metadata', function (Request $request) {

@@ -136,7 +136,12 @@ async function submitPayment() {
         )
 
         if (response.status === 201) {
-            await apiStore.purchaseCoins(value, coins)
+            await apiStore.purchaseCoins({
+                euros: value,
+                coins: coins,
+                payment_type: paymentType.value,
+                payment_reference: reference.value,
+            })
 
             await authStore.getUser()
             successMessage.value = `Payment successful! ${coins} coins added.`

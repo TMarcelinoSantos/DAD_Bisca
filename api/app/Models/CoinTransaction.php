@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CoinTransactionType;
+use App\Models\CoinPurchase;
+use App\Models\User;
 
 class CoinTransaction extends Model
 {
@@ -38,4 +40,10 @@ class CoinTransaction extends Model
     {
         return $this->belongsTo(CoinTransactionType::class,'coin_transaction_type_id');
     }
+
+    public function purchase()
+    {
+        return $this->hasOne(CoinPurchase::class);
+    }
+
 }
