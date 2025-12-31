@@ -60,9 +60,17 @@ export const useGameStore = defineStore('game', () => {
                 .filter(Boolean)
                 .map(c => ({ ...c }))
 
+        // Determine which seat is "me". Prefer the _seat flag
+        // passed from the socket store (based on socket.id),
+        // fallback to treating this client as player1.
+        const mySeat = game._seat === 'player2' ? 'player2' : 'player1'
+
+        const myHandIds = mySeat === 'player1' ? board.playerHand : board.opponentHand
+        const oppHandIds = mySeat === 'player1' ? board.opponentHand : board.playerHand
+
         deck.value = mapIdsToCards(board.deck)
-        playerHand.value = mapIdsToCards(board.playerHand)
-        opponentHand.value = mapIdsToCards(board.opponentHand)
+        playerHand.value = mapIdsToCards(myHandIds)
+        opponentHand.value = mapIdsToCards(oppHandIds)
 
         trumpCard.value = board.trumpCard
             ? { ...(cardMap.get(board.trumpCard) || {}), hidden: !!board.trumpHidden }
@@ -178,11 +186,30 @@ export const useGameStore = defineStore('game', () => {
 
         trumpCard.value = deck.value.pop()
         beganAt.value = new Date()
-        turn.value = lastGameWinner.value? lastGameWinner.value: 'player'
+        turn.value = lastGameWinner.value ? lastGameWinner.value : 'player'
 
-        if(turn.value === 'opponent'){
+        if (turn.value === 'opponent') {
             nextTurn()
         }
+    }
+
+    // Multiplayer board initializer: same dealing logic, but no AI turn
+    const setBoardMultiplayer = () => {
+        const imgs = loadImagesAsDeck()
+        const shuffled = shuffle(imgs)
+
+        deck.value = shuffled.slice()
+        playerHand.value = []
+        opponentHand.value = []
+
+        for (let i = 0; i < parseInt(hand.value); i++) {
+            playerHand.value.push(deck.value.pop())
+            opponentHand.value.push(deck.value.pop())
+        }
+
+        trumpCard.value = deck.value.pop()
+        beganAt.value = new Date()
+        turn.value = 'player'
     }
 
     const getBiscaPoints = (cards) => {
@@ -646,6 +673,7 @@ export const useGameStore = defineStore('game', () => {
         deck,
         trumpCard,
         setBoard,
+        setBoardMultiplayer,
         playCard,
         playedCards,
         playerCardWon,

@@ -37,12 +37,16 @@ const props = defineProps({
 })
 
 const onCardClick = (card) => {
-  if (isCardPlayable(card.id)) {
-    gameStore.playCard(card)
-    if (props.multiPlayer) {
-      socketStore.emitPlayCard(props.roomId, card)
+    if (!isCardPlayable(card.id)) return
+
+    if (props.multiPlayer && props.roomId) {
+        // In multiplayer, let the server apply game rules and
+        // broadcast the updated board via game:updated.
+        socketStore.emitPlayCard(props.roomId, card)
+    } else {
+        // Single player: use local game logic with AI
+        gameStore.playCard(card)
     }
-  }
 }
 
 const isCardPlayable = (id) => gameStore.getValidPlayerCards().includes(id)
@@ -107,7 +111,7 @@ const isCardPlayable = (id) => gameStore.getValidPlayerCards().includes(id)
                 :key="i"
                 :src="card.src"
                 class="card card-img cursor-pointer"
-                @click="isCardPlayable(card.id) && gameStore.playCard(card)"
+            @click="onCardClick(card)"
                 :class="{
                 'opacity-100 cursor-pointer': isCardPlayable(card.id),
                 'opacity-40 cursor-not-allowed': !isCardPlayable(card.id)

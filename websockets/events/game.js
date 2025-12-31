@@ -11,7 +11,18 @@ import {
 export const registerGameEvents = (io, socket) => {
     // Use authenticated user from connection state, fallback to socket info
     const currentUser = getUser(socket.id)
-    const player = currentUser || socket.user || { id: socket.id, username: socket.id }
+
+    const player = currentUser
+        ? {
+              ...currentUser,
+              id: currentUser.id ?? currentUser.user_id ?? socket.id,
+              username:
+                  currentUser.username ??
+                  currentUser.name ??
+                  currentUser.nickname ??
+                  `user-${currentUser.id ?? socket.id}`,
+          }
+        : socket.user || { id: socket.id, username: socket.id }
 
     const roomName = (gameID) => `game:${gameID}`
 
@@ -45,7 +56,7 @@ export const registerGameEvents = (io, socket) => {
 
     socket.on('game:move', ({ gameID, move }, cb) => {
         try {
-            const game = playerMove(gameID, { ...move, by: player.username })
+            const game = playerMove(gameID, player, move)
             const room = roomName(gameID)
             io.to(room).emit('game:updated', game)
             cb && cb({ ok: true })

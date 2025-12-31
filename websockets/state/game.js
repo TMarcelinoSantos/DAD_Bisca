@@ -43,7 +43,7 @@ export const getJoinableGames = () => {
 }
 
 export const createGame = (player1) => {
-    const gameID = ++currentGameID
+    const gameID = nextGameID()
     const game = {
         id: gameID,
         player1: player1,
@@ -52,13 +52,13 @@ export const createGame = (player1) => {
         createdAt: Date.now(),
         moves: [],
         board: {
-            deck: [],
-            playerHand: [],
-            opponentHand: [],
-            trumpCard: null,
+            deck: [],              // array of card ids
+            playerHand: [],        // ids for first seat
+            opponentHand: [],      // ids for second seat
+            trumpCard: null,       // trump card id
             trumpHidden: false,
-            playedCards: [],
-            turn: 'player',
+            playedCards: [],       // [{ id, player: 'player'|'opponent' }]
+            turn: 'player',        // whose turn from host perspective
             playerCardWon: [],
             opponentCardWon: [],
             playerTotalPoints: 0,
@@ -80,15 +80,151 @@ export const updateGameBoard = (gameID, partialBoard) => {
 
     return game
 }
+// --- Bisca rules helpers (server-side multiplayer logic) ---
 
-export const playerMove = (gameID, move) => {
+const getCardId = (c) => (typeof c === 'string' ? c : c?.id)
+
+const getBiscaPoints = (cards) => {
+    let total = 0
+    for (const raw of cards) {
+        const id = getCardId(raw)
+        if (!id) continue
+        if (['c1', 'e1', 'o1', 'p1'].includes(id)) total += 11
+        else if (['c7', 'e7', 'o7', 'p7'].includes(id)) total += 10
+        else if (['c11', 'e11', 'o11', 'p11'].includes(id)) total += 3
+        else if (['c12', 'e12', 'o12', 'p12'].includes(id)) total += 2
+        else if (['c13', 'e13', 'o13', 'p13'].includes(id)) total += 4
+    }
+    return total
+}
+
+const isGameComplete = (board) => {
+    return (
+        board.deck.length === 0 &&
+        board.playerHand.length === 0 &&
+        board.opponentHand.length === 0 &&
+        board.playedCards.length === 0
+    )
+}
+
+const getDeckCard = (game) => {
+    const board = game.board
+    if (!board || board.deck.length === 0) return
+
+    let firstHand
+    let secondHand
+
+    if (board.turn === 'player') {
+        firstHand = 'playerHand'
+        secondHand = 'opponentHand'
+    } else {
+        firstHand = 'opponentHand'
+        secondHand = 'playerHand'
+    }
+
+    if (board.deck.length > 1) {
+        const firstCard = board.deck.pop()
+        const secondCard = board.deck.pop()
+        board[firstHand].push(firstCard)
+        board[secondHand].push(secondCard)
+    } else {
+        const lastCard = board.deck.pop()
+        board[firstHand].push(lastCard)
+        if (board.trumpCard) {
+            board[secondHand].push(board.trumpCard)
+            board.trumpHidden = true
+        }
+    }
+}
+
+const resolveTrick = (game) => {
+    const board = game.board
+    if (!board || board.playedCards.length < 2) return
+
+    const [card1, card2] = board.playedCards
+
+    const trumpSuit = getCardId(board.trumpCard)?.[0]
+    const card1Id = getCardId(card1)
+    const card2Id = getCardId(card2)
+    const card1Suit = card1Id?.[0]
+    const card2Suit = card2Id?.[0]
+
+    let winner = null // 'player' | 'opponent'
+
+    if (card1Suit === trumpSuit && card2Suit !== trumpSuit) {
+        winner = card1.player
+    } else if (card2Suit === trumpSuit && card1Suit !== trumpSuit) {
+        winner = card2.player
+    } else if (card1Suit === card2Suit) {
+        const points1 = getBiscaPoints([card1])
+        const points2 = getBiscaPoints([card2])
+        winner = points1 >= points2 ? card1.player : card2.player
+    } else {
+        // different suits and no trump advantage – first played wins
+        winner = card1.player
+    }
+
+    const roundPoints = getBiscaPoints([card1, card2])
+
+    if (winner === 'player') {
+        board.playerCardWon.push(card1Id, card2Id)
+        board.playerTotalPoints += roundPoints
+    } else {
+        board.opponentCardWon.push(card1Id, card2Id)
+        board.opponentTotalPoints += roundPoints
+    }
+
+    board.turn = winner
+    board.playedCards = []
+
+    getDeckCard(game)
+}
+
+export const playerMove = (gameID, player, move) => {
     const game = games.get(gameID)
     if (!game) throw new Error('Game not found')
     if (game.state !== 'playing') throw new Error('Game is not in playing state')
 
-    game.moves.push(move)
+    const board = game.board
+    if (!board) throw new Error('Game board not initialized')
 
-    // TODO: update game.state = 'finished' according to game rules
+    const seat =
+        game.player1 && game.player1.username === player.username
+            ? 'player'
+            : game.player2 && game.player2.username === player.username
+              ? 'opponent'
+              : null
+
+    if (!seat) throw new Error('Player not part of this game')
+
+    if (board.turn !== seat) throw new Error('Not your turn')
+
+    const handKey = seat === 'player' ? 'playerHand' : 'opponentHand'
+    const cardId = getCardId(move.card)
+    const hand = board[handKey]
+
+    if (!hand.includes(cardId)) throw new Error('Card not in hand')
+
+    // remove from hand
+    board[handKey] = hand.filter((id) => id !== cardId)
+
+    // add to table
+    board.playedCards.push({ id: cardId, player: seat })
+
+    if (board.playedCards.length === 1) {
+        // switch turn to the other player
+        board.turn = seat === 'player' ? 'opponent' : 'player'
+    } else if (board.playedCards.length === 2) {
+        // resolve trick and possibly draw from deck
+        resolveTrick(game)
+        if (isGameComplete(board)) {
+            game.state = 'finished'
+        }
+    }
+
+    // keep move history for debugging/auditing
+    game.moves.push({ ...move, by: player.username })
+
     return game
 }
 

@@ -96,6 +96,7 @@ export const useSocketStore = defineStore('socket', () => {
         })
     }
 
+    // Initial board sync (host only): push local deck/hands/trump to server
     const syncGameState = (gameID) => {
         if (!gameID) return
         const board = gameStore.getBoardSnapshot()
@@ -120,10 +121,6 @@ export const useSocketStore = defineStore('socket', () => {
             (res) => {
                 if (!res?.ok) {
                     console.error('[Socket] game:move failed', res?.error)
-                } else {
-                    console.log('[Socket] game:move ok')
-                    // after local store updated via GameBoard, push full board
-                    syncGameState(gameID)
                 }
             },
         )
@@ -133,7 +130,11 @@ export const useSocketStore = defineStore('socket', () => {
         socket.on('game:updated', (game) => {
             console.log('[Socket] game:updated', game)
             currentGame.value = game
-            gameStore.syncFromServerGame(game)
+
+            // Determine this client's seat based on socket id vs player1.id
+            const seat = game.player1 && game.player1.id === socket.id ? 'player1' : 'player2'
+
+            gameStore.syncFromServerGame({ ...game, _seat: seat })
         })
 
         socket.on('game:closed', ({ id }) => {
