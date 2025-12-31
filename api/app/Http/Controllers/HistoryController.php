@@ -58,4 +58,47 @@ class HistoryController extends Controller
             'games'   => $games,
         ]);
     }
+
+    public function userHistory(Request $request, User $user)
+{
+    $authUser = $request->user();
+
+    if (! $authUser) {
+        return response()->json(['message' => 'Unauthenticated.'], 401);
+    }
+
+    // Admin check
+    if ($authUser->type !== 'A') {
+        return response()->json(['message' => 'Forbidden.'], 403);
+    }
+
+    // Matches for the requested user
+    $matches = MatchModel::where(function ($q) use ($user) {
+        $q->where('player1_user_id', $user->id)
+          ->orWhere('player2_user_id', $user->id)
+          ->orWhere('winner_user_id', $user->id)
+          ->orWhere('loser_user_id', $user->id);
+    })
+    ->orderBy('began_at', 'desc')
+    ->get();
+
+    // Standalone games (no match_id) for the requested user
+    $games = Game::whereNull('match_id')
+        ->where(function ($q) use ($user) {
+            $q->where('player1_user_id', $user->id)
+              ->orWhere('player2_user_id', $user->id)
+              ->orWhere('winner_user_id', $user->id)
+              ->orWhere('loser_user_id', $user->id);
+        })
+        ->orderBy('began_at', 'desc')
+        ->get();
+
+    return response()->json([
+        'user'    => [
+            'id' => $user->id,
+        ],
+        'matches' => $matches,
+        'games'   => $games,
+    ]);
+}
 }
