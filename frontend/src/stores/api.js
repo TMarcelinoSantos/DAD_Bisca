@@ -55,6 +55,11 @@ export const useAPIStore = defineStore('api', () => {
     return axios.put(`${API_BASE_URL}/rounds/${roundId}`, data)
   }
 
+  // HISTORY
+  const getHistory = () => {
+    return axios.get(`${API_BASE_URL}/history`)
+  }
+
   // AUTH
   const postLogin = async (credentials) => {
     const response = await axios.post(`${API_BASE_URL}/login`, credentials)
@@ -146,5 +151,6 @@ export const useAPIStore = defineStore('api', () => {
     getRound,
     updateRound,
     uploadProfilePhoto,
+    getHistory,
   }
 })

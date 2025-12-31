@@ -8,6 +8,7 @@ import StorePage from '@/pages/store/Store.vue'
 import PaymentPage from '@/pages/store/Payment.vue'
 import SinglePlayerGamePage from '../pages/game/SinglePlayerGamePage.vue'
 import SinglePlayerMatchesPage from '../pages/game/SinglePlayerMatchesPage.vue'
+import HistoryPage from '@/pages/history/HistoryPage.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
@@ -70,6 +71,11 @@ const router = createRouter({
       name: 'about',
       component: AboutPage,
     },
+    {
+      path: '/history',
+      name: 'history',
+      component: HistoryPage,
+    }
   ],
 })
 

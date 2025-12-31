@@ -1,5 +1,10 @@
 <template>
-    <span class="text-4xl text-aligh-center font-bold mb-10">GAMES</span>
+    <div class="flex justify-between items-center mb-10">
+        <span class="text-4xl text-aligh-center font-bold">GAMES</span>
+        <Button @click="goToHistory" size="lg" variant="outline" class="hover:bg-purple-500 hover:text-slate-200">
+            View History
+        </Button>
+    </div>
     <div class="flex flex-row justify-center items-stretch gap-5 mt-10">
         <Card class="w-full max-w-md">
             <CardHeader>
@@ -125,6 +130,10 @@ const startGame = () => {
 const startMatch = () => {
     gameStore.hand = selectedHand.value
     router.push({ name: 'singlematches' })
+}
+
+const goToHistory = () => {
+    router.push({ name: 'history' })
 }
 
 </script>
