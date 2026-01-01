@@ -18,7 +18,7 @@
               class="bg-white dark:bg-gray-800 border border-yellow-600 rounded-xl p-4 hover:shadow-md hover:cursor-pointer transition"
             >
               <div class="flex justify-between items-start gap-3 mb-2">
-                <div class="space-y-1">
+                <div class="space-y-1 flex-1">
                   <div class="flex items-center gap-2">
                     <span class="font-bold text-yellow-700">{{ match.player1?.name || 'Unknown' }}</span>
                     <span
@@ -45,7 +45,7 @@
                 </span>
               </div>
 
-              <div class="grid grid-cols-2 gap-4 text-sm">
+              <div class="grid grid-cols-2 gap-4 text-sm mb-3">
                 <div>
                   <p class="text-gray-600 dark:text-gray-400">Type: <span class="font-semibold text-yellow-700">{{ match.type }}</span></p>
                   <p class="text-gray-600 dark:text-gray-400">Started: <span class="font-semibold">{{ formatDate(match.began_at) }}</span></p>
@@ -53,6 +53,20 @@
                 <div>
                   <p class="text-gray-600 dark:text-gray-400">Marks: <span class="font-semibold text-yellow-700">{{ match.player1_marks }} - {{ match.player2_marks }}</span></p>
                   <p class="text-gray-600 dark:text-gray-400">Duration: <span class="font-semibold">{{ match.total_time }}s</span></p>
+                </div>
+              </div>
+
+              <!-- Match Achievements -->
+              <div v-if="getMatchCapotes(match.id).length > 0 || getMatchBandeiras(match.id).length > 0" class="border-t border-yellow-200 pt-2 space-y-1">
+                <div v-for="capote in getMatchCapotes(match.id)" :key="`capote-${capote}`" class="text-xs">
+                  <span class="font-semibold px-2 py-0.5 rounded bg-orange-100 text-orange-700">
+                    🔥 Capotes: {{ capote }}
+                  </span>
+                </div>
+                <div v-for="bandeira in getMatchBandeiras(match.id)" :key="`bandeira-${bandeira}`" class="text-xs">
+                  <span class="font-semibold px-2 py-0.5 rounded bg-purple-100 text-purple-700">
+                    👑 Bandeiras: {{ bandeira }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -74,7 +88,7 @@
               class="bg-white dark:bg-gray-800 border border-yellow-600 rounded-xl p-4 hover:shadow-md transition"
             >
               <div class="flex justify-between items-start gap-3 mb-2">
-                <div class="space-y-1">
+                <div class="space-y-1 flex-1">
                   <div class="flex items-center gap-2">
                     <span class="font-bold text-yellow-700">{{ game.player1?.name || 'Unknown' }}</span>
                     <span
@@ -101,7 +115,7 @@
                 </span>
               </div>
 
-              <div class="grid grid-cols-2 gap-4 text-sm">
+              <div class="grid grid-cols-2 gap-4 text-sm mb-3">
                 <div>
                   <p class="text-gray-600 dark:text-gray-400">Type: <span class="font-semibold text-yellow-700">{{ game.type }}</span></p>
                   <p class="text-gray-600 dark:text-gray-400">Started: <span class="font-semibold">{{ formatDate(game.began_at) }}</span></p>
@@ -112,8 +126,21 @@
                 </div>
               </div>
 
-              <div v-if="game.is_draw" class="mt-2 text-sm">
-                <p class="text-blue-600 dark:text-blue-400 font-semibold">Draw</p>
+              <!-- Game Achievements -->
+              <div v-if="game.is_draw || getGameCapote(game) || getGameBandeira(game)" class="border-t border-yellow-200 pt-2 space-y-1">
+                <div v-if="game.is_draw" class="text-sm">
+                  <p class="text-blue-600 dark:text-blue-400 font-semibold">Draw</p>
+                </div>
+                <div v-if="getGameCapote(game)" class="text-xs">
+                  <span class="font-semibold px-2 py-0.5 rounded bg-orange-100 text-orange-700">
+                    🔥 Capote: {{ getGameCapote(game) }}
+                  </span>
+                </div>
+                <div v-if="getGameBandeira(game)" class="text-xs">
+                  <span class="font-semibold px-2 py-0.5 rounded bg-purple-100 text-purple-700">
+                    👑 Bandeira: {{ getGameBandeira(game) }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -191,6 +218,32 @@ const badgeLabel = (badge) => {
     draw: 'Draw',
   }
   return map[badge] || ''
+}
+
+const getGameCapote = (game) => {
+  if (game.player1_points >= 91) return game.player1?.name || 'Unknown'
+  if (game.player2_points >= 91) return game.player2?.name || 'Unknown'
+  return null
+}
+
+const getGameBandeira = (game) => {
+  if (game.player1_points === 120) return game.player1?.name || 'Unknown'
+  if (game.player2_points === 120) return game.player2?.name || 'Unknown'
+  return null
+}
+
+const getMatchCapotes = (matchId) => {
+  const capotes = new Set()
+  // This would need the games data for this match
+  // For now, we'll show in the details page instead
+  return Array.from(capotes)
+}
+
+const getMatchBandeiras = (matchId) => {
+  const bandeiras = new Set()
+  // This would need the games data for this match
+  // For now, we'll show in the details page instead
+  return Array.from(bandeiras)
 }
 
 const fetchHistory = async () => {

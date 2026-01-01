@@ -64,6 +64,34 @@
               <p class="font-semibold text-yellow-700 text-lg">{{ match.stake }}</p>
             </div>
           </div>
+
+          <!-- Capotes and Bandeiras Summary -->
+          <div v-if="matchCapotes.length > 0 || matchBandeiras.length > 0" class="border-t-2 border-yellow-300 pt-4 mt-4">
+            <div v-if="matchCapotes.length > 0" class="mb-3">
+              <p class="text-sm text-gray-600 dark:text-gray-400 font-semibold">Capotes (>91 points)</p>
+              <div class="flex flex-wrap gap-2 mt-1">
+                <span
+                  v-for="(capote, index) in matchCapotes"
+                  :key="`capote-${index}`"
+                  class="text-sm font-semibold px-3 py-1 rounded-full bg-orange-100 text-orange-700"
+                >
+                  {{ capote.playerName }}: {{ capote.count }}
+                </span>
+              </div>
+            </div>
+            <div v-if="matchBandeiras.length > 0">
+              <p class="text-sm text-gray-600 dark:text-gray-400 font-semibold">Bandeiras (120 points)</p>
+              <div class="flex flex-wrap gap-2 mt-1">
+                <span
+                  v-for="(bandeira, index) in matchBandeiras"
+                  :key="`bandeira-${index}`"
+                  class="text-sm font-semibold px-3 py-1 rounded-full bg-purple-100 text-purple-700"
+                >
+                  {{ bandeira.playerName }}: {{ bandeira.count }}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -115,7 +143,7 @@
               </span>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 text-sm">
+            <div class="grid grid-cols-2 gap-4 text-sm mb-3">
               <div>
                 <p class="text-gray-600 dark:text-gray-400">Points</p>
                 <p class="font-semibold text-yellow-700">{{ game.player1_points }} - {{ game.player2_points }}</p>
@@ -134,8 +162,21 @@
               </div>
             </div>
 
-            <div v-if="game.is_draw" class="mt-2 text-sm">
+            <!-- Game Achievements -->
+            <div v-if="game.is_draw" class="mb-2 text-sm">
               <p class="text-blue-600 dark:text-blue-400 font-semibold">Draw</p>
+            </div>
+            <div v-if="getGameCapote(game) || getGameBandeira(game)" class="border-t border-yellow-200 pt-2 space-y-1">
+              <div v-if="getGameCapote(game)" class="text-xs">
+                <span class="font-semibold px-2 py-0.5 rounded bg-orange-100 text-orange-700">
+                  🔥 Capote: {{ getGameCapote(game) }}
+                </span>
+              </div>
+              <div v-if="getGameBandeira(game)" class="text-xs">
+                <span class="font-semibold px-2 py-0.5 rounded bg-purple-100 text-purple-700">
+                  👑 Bandeira: {{ getGameBandeira(game) }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -163,7 +204,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAPIStore } from '@/stores/api'
 import { toast } from 'vue-sonner'
@@ -222,6 +263,48 @@ const badgeLabel = (badge) => {
   }
   return map[badge] || ''
 }
+
+const getGameCapote = (game) => {
+  if (game.player1_points >= 91) return match.value?.player1?.name || 'Unknown'
+  if (game.player2_points >= 91) return match.value?.player2?.name || 'Unknown'
+  return null
+}
+
+const getGameBandeira = (game) => {
+  if (game.player1_points === 120) return match.value?.player1?.name || 'Unknown'
+  if (game.player2_points === 120) return match.value?.player2?.name || 'Unknown'
+  return null
+}
+
+const matchCapotes = computed(() => {
+  const capotes = {}
+  games.value.forEach((game) => {
+    if (game.player1_points >= 91) {
+      const playerName = match.value?.player1?.name || 'Unknown'
+      capotes[playerName] = (capotes[playerName] || 0) + 1
+    }
+    if (game.player2_points >= 91) {
+      const playerName = match.value?.player2?.name || 'Unknown'
+      capotes[playerName] = (capotes[playerName] || 0) + 1
+    }
+  })
+  return Object.entries(capotes).map(([playerName, count]) => ({ playerName, count }))
+})
+
+const matchBandeiras = computed(() => {
+  const bandeiras = {}
+  games.value.forEach((game) => {
+    if (game.player1_points === 120) {
+      const playerName = match.value?.player1?.name || 'Unknown'
+      bandeiras[playerName] = (bandeiras[playerName] || 0) + 1
+    }
+    if (game.player2_points === 120) {
+      const playerName = match.value?.player2?.name || 'Unknown'
+      bandeiras[playerName] = (bandeiras[playerName] || 0) + 1
+    }
+  })
+  return Object.entries(bandeiras).map(([playerName, count]) => ({ playerName, count }))
+})
 
 const fetchMatchDetails = async () => {
   try {
