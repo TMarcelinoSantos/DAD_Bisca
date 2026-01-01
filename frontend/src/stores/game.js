@@ -60,9 +60,7 @@ export const useGameStore = defineStore('game', () => {
                 .filter(Boolean)
                 .map(c => ({ ...c }))
 
-        // Determine which seat is "me". Prefer the _seat flag
-        // passed from the socket store (based on socket.id),
-        // fallback to treating this client as player1.
+        // Determine which seat is "me"
         const mySeat = game._seat === 'player2' ? 'player2' : 'player1'
 
         const myHandIds = mySeat === 'player1' ? board.playerHand : board.opponentHand
@@ -82,12 +80,28 @@ export const useGameStore = defineStore('game', () => {
             player: pc.player,
         }))
 
-        playerCardWon.value = mapIdsToCards(board.playerCardWon)
-        opponentCardWon.value = mapIdsToCards(board.opponentCardWon)
+        // Map won cards and points by seat
+        const myWonIds = mySeat === 'player1' ? board.playerCardWon : board.opponentCardWon
+        const oppWonIds = mySeat === 'player1' ? board.opponentCardWon : board.playerCardWon
 
-        turn.value = board.turn || 'player'
-        playerTotalPoints.value = board.playerTotalPoints || 0
-        opponentTotalPoints.value = board.opponentTotalPoints || 0
+        playerCardWon.value = mapIdsToCards(myWonIds)
+        opponentCardWon.value = mapIdsToCards(oppWonIds)
+
+        const myPoints =
+            mySeat === 'player1' ? board.playerTotalPoints : board.opponentTotalPoints
+        const oppPoints =
+            mySeat === 'player1' ? board.opponentTotalPoints : board.playerTotalPoints
+
+        // Turn must also be mapped to local 'player' / 'opponent'
+        if (mySeat === 'player1') {
+            turn.value = board.turn || 'player'
+        } else {
+            // server's 'player' is remote for seat2
+            turn.value = board.turn === 'player' ? 'opponent' : 'player'
+        }
+
+        playerTotalPoints.value = myPoints || 0
+        opponentTotalPoints.value = oppPoints || 0
     }
 
     const resetMultiplayer = () => {
@@ -473,6 +487,57 @@ export const useGameStore = defineStore('game', () => {
             opponentHand.value.length === 0 &&
             playedCards.value.length === 0
     })
+
+    const finalizeGame = (game) => {
+        const board = game.board
+        if (!board) return
+
+        const playerPoints =
+            board.playerTotalPoints ?? getBiscaPoints(board.playerCardWon || [])
+        const opponentPoints =
+            board.opponentTotalPoints ?? getBiscaPoints(board.opponentCardWon || [])
+
+        let winner = 'tie'
+        if (playerPoints > opponentPoints && playerPoints >= 61) {
+            winner = 'player'
+        } else if (opponentPoints > playerPoints && opponentPoints >= 61) {
+            winner = 'opponent'
+        }
+
+        let playerMarks = 0
+        let opponentMarks = 0
+        if (winner !== 'tie') {
+            const winnerPoints = winner === 'player' ? playerPoints : opponentPoints
+
+            if (winnerPoints >= 61 && winnerPoints <= 90) {
+                // 1 mark
+                if (winner === 'player') playerMarks = 1
+                else opponentMarks = 1
+            } else if (winnerPoints >= 91 && winnerPoints <= 119) {
+                // 2 marks (capote)
+                if (winner === 'player') playerMarks = 2
+                else opponentMarks = 2
+            } else if (winnerPoints >= 120) {
+                // 4 marks (bandeira)
+                if (winner === 'player') playerMarks = 4
+                else opponentMarks = 4
+            }
+        }
+
+        game.result = {
+            winner,               // 'player' | 'opponent' | 'tie'
+            playerPoints,
+            opponentPoints,
+            playerMarks,
+            opponentMarks,
+        }
+
+        game.state = 'finished'
+    }
+
+    // --- Bisca rules helpers (server-side multiplayer logic) ---
+    const getCardId = (c) => (typeof c === 'string' ? c : c?.id)
+
 
     watch(isGameComplete, (value) => {
         if (value) {

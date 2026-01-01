@@ -141,9 +141,17 @@ export const useSocketStore = defineStore('socket', () => {
               seat = 'player2'
           }
 
-          const boardEmpty = !game.board || !game.board.deck || game.board.deck.length === 0
-          if (game.state === 'playing' && boardEmpty && seat === 'player1') {
-              // Host (player1) initializes the board once
+          // Consider the board "uninitialized" only when all piles are empty
+          const board = game.board
+          const boardUninitialized =
+              !board ||
+              (!board.deck?.length &&
+                  !board.playerHand?.length &&
+                  !board.opponentHand?.length &&
+                  !board.playedCards?.length)
+
+          if (game.state === 'playing' && boardUninitialized && seat === 'player1') {
+              // Host (player1) initializes the board once at game start
               gameStore.setBoardMultiplayer()
               syncGameState(game.id)
               return

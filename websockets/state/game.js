@@ -180,6 +180,56 @@ const resolveTrick = (game) => {
     getDeckCard(game)
 }
 
+const finalizeGame = (game) => {
+    const board = game.board
+    if (!board) return
+
+    // total points for each side
+    const playerPoints =
+        board.playerTotalPoints ?? getBiscaPoints(board.playerCardWon || [])
+    const opponentPoints =
+        board.opponentTotalPoints ?? getBiscaPoints(board.opponentCardWon || [])
+
+    // who wins the game (61+ points)
+    let winner = 'tie'
+    if (playerPoints > opponentPoints && playerPoints >= 61) {
+        winner = 'player'
+    } else if (opponentPoints > playerPoints && opponentPoints >= 61) {
+        winner = 'opponent'
+    }
+
+    // marks according to Bisca rules
+    let playerMarks = 0
+    let opponentMarks = 0
+    if (winner !== 'tie') {
+        const winnerPoints = winner === 'player' ? playerPoints : opponentPoints
+
+        if (winnerPoints >= 61 && winnerPoints <= 90) {
+            // 1 mark
+            if (winner === 'player') playerMarks = 1
+            else opponentMarks = 1
+        } else if (winnerPoints >= 91 && winnerPoints <= 119) {
+            // 2 marks (capote)
+            if (winner === 'player') playerMarks = 2
+            else opponentMarks = 2
+        } else if (winnerPoints >= 120) {
+            // 4 marks (bandeira)
+            if (winner === 'player') playerMarks = 4
+            else opponentMarks = 4
+        }
+    }
+
+    game.result = {
+        winner,          // 'player' | 'opponent' | 'tie'
+        playerPoints,
+        opponentPoints,
+        playerMarks,
+        opponentMarks,
+    }
+
+    game.state = 'finished'
+}
+
 export const playerMove = (gameID, player, move) => {
     const game = games.get(gameID)
     if (!game) throw new Error('Game not found')
@@ -218,7 +268,7 @@ export const playerMove = (gameID, player, move) => {
         // resolve trick and possibly draw from deck
         resolveTrick(game)
         if (isGameComplete(board)) {
-            game.state = 'finished'
+            finalizeGame(game)
         }
     }
 

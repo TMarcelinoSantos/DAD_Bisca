@@ -14,22 +14,31 @@
     const isGameOver = ref(false)
     const isLoading = ref(true)
 
-    watch(gameStore.isGameComplete, (complete) => {
-        if (!complete) return
+    // In multiplayer, rely on server state instead of local isGameComplete
+    watch(
+        () => socketStore.currentGame?.state,
+        (state) => {
+            if (state !== 'finished') return
 
-        const playerPoints = gameStore.getBiscaPoints(gameStore.playerCardWon)
-        const opponentPoints = gameStore.getBiscaPoints(gameStore.opponentCardWon)
+            const playerPoints = gameStore.playerTotalPoints
+            const opponentPoints = gameStore.opponentTotalPoints
 
-        if (playerPoints < opponentPoints)
-            toast.error(`Game Completed - You lost ${playerPoints} to ${opponentPoints}`)
-        else if (playerPoints > opponentPoints)
-            toast.success(`Game Completed - You won ${playerPoints} to ${opponentPoints}`)
-        else
-            toast(`Game Completed - It's a tie ${playerPoints} to ${opponentPoints}`)
+            if (playerPoints < opponentPoints)
+                toast.error(
+                    `Game Completed - You lost ${playerPoints} to ${opponentPoints}`,
+                )
+            else if (playerPoints > opponentPoints)
+                toast.success(
+                    `Game Completed - You won ${playerPoints} to ${opponentPoints}`,
+                )
+            else
+                toast(
+                    `Game Completed - It's a tie ${playerPoints} to ${opponentPoints}`,
+                )
 
-        gameStore.saveGame()
-        isGameOver.value = true
-    })
+            isGameOver.value = true
+        },
+    )
 
     const goDashboard = () => {
         router.push({ name: 'home' })
@@ -44,7 +53,6 @@
             return
         }
 
-        // Initialize board once when server-side board is still empty
         const serverBoardEmpty = !game.board || !game.board.deck || game.board.deck.length === 0
 
         if (game.state === 'playing' && serverBoardEmpty) {
@@ -54,7 +62,6 @@
 
         isLoading.value = false
     })
-
 </script>
 <template>
     <div v-if="isLoading" class="flex items-center justify-center h-full py-10 text-white">
