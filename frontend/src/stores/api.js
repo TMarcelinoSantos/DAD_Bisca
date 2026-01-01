@@ -131,12 +131,17 @@ export const useAPIStore = defineStore('api', () => {
   // }
 
   const purchaseCoins = (payload) =>{
-  return axios.post(`${API_BASE_URL}/coin-purchases`, payload)
-}
+    return axios.post(`${API_BASE_URL}/coin-purchases`, payload)
+  }
 
   const getMyCoinTransactions =() =>{
     return axios.get(`${API_BASE_URL}/coins/transactions/me`)
   }
+
+  const getUserCoinTransactions = (userId) => {
+    return axios.get(`${API_BASE_URL}/coins/transactions/${userId}`)
+  }
+
 
 
   // Files
@@ -184,6 +189,7 @@ export const useAPIStore = defineStore('api', () => {
     updateRound,
     purchaseCoins,
     getMyCoinTransactions,
+    getUserCoinTransactions,
     uploadProfilePhoto,
   }
 })

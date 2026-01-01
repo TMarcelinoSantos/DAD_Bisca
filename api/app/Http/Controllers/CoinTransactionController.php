@@ -19,4 +19,14 @@ class CoinTransactionController extends Controller
 
         return CoinTransactionResource::collection($transactions);
     }
+
+    public function userTransactions(Request $request, $userId)
+    {
+        $transactions = CoinTransaction::with('transactionType')
+            ->where('user_id', $userId)
+            ->orderByDesc('transaction_datetime')
+            ->get();
+
+        return CoinTransactionResource::collection($transactions);
+    }
 }

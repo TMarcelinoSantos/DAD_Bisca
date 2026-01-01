@@ -148,7 +148,7 @@
     </transition>
     <transition name="fade">
       <div v-if="showPayment" class="fixed inset-0 z-50 flex items-center justify-center">
-        <div class="max-w-md mx-auto p-6 bg-white rounded-xl shadow-lg">
+        <div class="relative bg-white rounded-xl shadow-lg w-11/12 max-w-sm p-6 z-10">
 
           <h2 class="text-xl font-bold mb-4 text-center">Buy Coins</h2>
 
@@ -163,7 +163,7 @@
           </select>
 
           <!-- Reference -->
-          <label class="block mb-2 font-medium">Reference</label>
+          <label class="block mb-2 font-medium">{{ referenceLabel }}</label>
           <input
               v-model="reference"
               class="w-full border rounded p-2 mb-4"
@@ -172,16 +172,10 @@
 
           <!-- Value -->
           <label class="block mb-2 font-medium">Value (€)</label>
-          <input
-              v-model.number="euros"
-              type="number"
-              min="1"
-              max="99"
-              class="w-full border rounded p-2 mb-4"
-          />
+          <input v-model.number="paymentEuros" type="number" />
 
           <div class="text-center text-yellow-600 font-semibold mb-4">
-              You will receive {{ coinsFromEuros }} coins
+              You will receive {{ coinsFromPayment }} coins
           </div>
 
           <p v-if="errorMessage" class="text-red-600 mb-3 text-center">
@@ -242,6 +236,10 @@ const cardBacks = ref<any>(null)
 const showError = ref(false)
 const errorMessage = ref('')
 
+const paymentEuros = ref(1)
+const coinsFromPayment = computed(() => paymentEuros.value * 10)
+
+
 
 const showPayment = ref(false)
 const paymentType = ref<'MBWAY' | 'PAYPAL' | 'IBAN' | 'MB' | 'VISA'>('MBWAY')
@@ -293,8 +291,9 @@ function decrementEuros() {
   }
 }
 
-function goToPayment(euros: number, coins: number) {
-  selected.value = { euros, coins };
+function goToPayment(eurosValue: number, coins: number) {
+  paymentEuros.value = eurosValue
+  selected.value = { euros: eurosValue, coins }
   showPayment.value = true;
 }
 
@@ -303,7 +302,11 @@ function cancelPayment() {
   showPayment.value = false
 }
 
-
+const referenceLabel = computed(() => {
+  if (paymentType.value === 'MBWAY') return 'Phone Number'
+  if (paymentType.value === 'PAYPAL') return 'Email'
+  return 'Reference'
+})
 
 const validators = {
     MBWAY: /^9\d{8}$/,

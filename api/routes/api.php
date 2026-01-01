@@ -44,7 +44,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/coins/reward', [UserController::class, 'updateRewardCoins']);
 
     //Route::post('/coins/purchase', [CoinsController::class, 'store']);
-    Route::get('/coins/transactions/me', [CoinTransactionController::class, 'myTransactions']);
+    Route::get('/coins/transactions/me', [CoinTransactionController::class, 'myTransactions']);    
+    Route::get('/coins/transactions/{userId}', [CoinTransactionController::class, 'userTransactions']);
     Route::post('/coin-purchases', [CoinPurchaseController::class, 'store']);
 });
 
