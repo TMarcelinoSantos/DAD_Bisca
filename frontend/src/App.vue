@@ -27,6 +27,16 @@
             <RouterLink to="/about">About</RouterLink>
           </NavigationMenuLink>
         </NavigationMenuItem>
+        <NavigationMenuItem v-if="authStore.isLoggedIn">
+          <NavigationMenuLink>
+            <RouterLink to="/history">History</RouterLink>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem v-if="authStore.isLoggedIn">
+          <NavigationMenuLink>
+            <RouterLink to="/leaderboard">Stats</RouterLink>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
         <NavigationMenuItem v-if="!authStore.isLoggedIn">
           <NavigationMenuLink>
             <RouterLink to="/login">Login</RouterLink>
@@ -47,6 +57,11 @@
               </NavigationMenuLink>
             </li>
           </NavigationMenuContent>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink>
+            <RouterLink to="/leaderboards">Leaderboards</RouterLink>
+          </NavigationMenuLink>
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>

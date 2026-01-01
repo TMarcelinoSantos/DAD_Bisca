@@ -81,6 +81,16 @@ const router = createRouter({
       name: 'matchDetails',
       component: () => import('@/pages/history/MatchDetailsPage.vue'),
     },
+    {
+      path: '/leaderboard',
+      name: 'leaderboard',
+      component: () => import('@/pages/leaderboard/PersonalLeaderboardPage.vue'),
+    },
+    {
+      path: '/leaderboards',
+      name: 'globalLeaderboard',
+      component: () => import('@/pages/leaderboard/GlobalLeaderboardPage.vue'),
+    },
   ],
 })
 

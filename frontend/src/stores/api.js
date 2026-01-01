@@ -133,6 +133,16 @@ export const useAPIStore = defineStore('api', () => {
     return uploadPromise
   }
 
+  // STATS
+  const getPersonalStats = () => {
+    return axios.get(`${API_BASE_URL}/users/me/stats`)
+  }
+
+  // LEADERBOARDS
+  const getGlobalLeaderboards = (limit = 10) => {
+    return axios.get(`${API_BASE_URL}/leaderboards?limit=${limit}`)
+  }
+
   return {
     postGame,
     getGames,
@@ -157,5 +167,7 @@ export const useAPIStore = defineStore('api', () => {
     uploadProfilePhoto,
     getHistory,
     getMatchDetails,
+    getPersonalStats,
+    getGlobalLeaderboards,
   }
 })

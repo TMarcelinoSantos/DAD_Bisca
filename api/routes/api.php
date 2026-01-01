@@ -11,6 +11,8 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\MatchController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\StatsController;
+use App\Http\Controllers\LeaderboardController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -41,6 +43,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('users/me/history/{matchId}', [HistoryController::class, 'showMatch']);
     Route::get('history/{user}', [HistoryController::class, 'userHistory']);
 
+    Route::get('users/me/stats', [StatsController::class, 'personalStats']);
+
     Route::post('/user/theme', [UserController::class, 'updateTheme']);
     Route::post('/user/avatar', [UserController::class, 'updateAvatar']);
     
@@ -62,5 +66,7 @@ Route::apiResources([
     'rounds' => RoundController::class
 ]);
 
+// Public routes (no auth required)
+Route::get('/leaderboards', [LeaderboardController::class, 'global']);
 
 //Route::post('/single_match', [SingleMatchesController::class, 'store']);
