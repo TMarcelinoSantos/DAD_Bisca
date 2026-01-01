@@ -14,7 +14,8 @@
             <div
               v-for="match in history.matches"
               :key="`match-${match.id}`"
-              class="bg-white dark:bg-gray-800 border border-yellow-600 rounded-xl p-4 hover:shadow-md transition"
+              @click="viewMatchDetails(match.id)"
+              class="bg-white dark:bg-gray-800 border border-yellow-600 rounded-xl p-4 hover:shadow-md hover:cursor-pointer transition"
             >
               <div class="flex justify-between items-start gap-3 mb-2">
                 <div class="space-y-1">
@@ -207,6 +208,10 @@ const fetchHistory = async () => {
 
 const goBack = () => {
   router.push({ name: 'home' })
+}
+
+const viewMatchDetails = (matchId) => {
+  router.push({ name: 'matchDetails', params: { matchId } })
 }
 
 onMounted(() => {

@@ -75,14 +75,19 @@ const router = createRouter({
       path: '/history',
       name: 'history',
       component: HistoryPage,
-    }
+    },
+    {
+      path: '/history/match/:matchId',
+      name: 'matchDetails',
+      component: () => import('@/pages/history/MatchDetailsPage.vue'),
+    },
   ],
 })
 
 // navigation guard: redirect to login if route requires auth and user not authenticated
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
-  if (to.matched.some(record => record.meta?.requiresAuth)) {
+  if (to.matched.some((record) => record.meta?.requiresAuth)) {
     if (auth.isLoggedIn) {
       return next()
     }
