@@ -57,7 +57,7 @@ export const useAPIStore = defineStore('api', () => {
 
   // HISTORY
   const getHistory = () => {
-    return axios.get(`${API_BASE_URL}/history`)
+    return axios.get(`${API_BASE_URL}/users/me/history`)
   }
 
   // AUTH

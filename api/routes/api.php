@@ -37,7 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('games', GameController::class);
     Route::apiResource('matches.games', GameController::class)->shallow();
 
-    Route::get('history', [HistoryController::class, 'index']);
+    Route::get('users/me/history', [HistoryController::class, 'index']);
     Route::get('history/{user}', [HistoryController::class, 'userHistory']);
 
     Route::post('/user/theme', [UserController::class, 'updateTheme']);
