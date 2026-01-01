@@ -96,11 +96,12 @@ export const useSocketStore = defineStore('socket', () => {
         })
     }
 
-    // Initial board sync (host only): push local deck/hands/trump to server
     const syncGameState = (gameID) => {
-        if (!gameID) return
+        const id = Number(gameID)
+        if (!Number.isFinite(id)) return
+
         const board = gameStore.getBoardSnapshot()
-        socket.emit('game:sync', { gameID, board }, (res) => {
+        socket.emit('game:sync', { gameID: id, board }, (res) => {
             if (!res?.ok) {
                 console.error('[Socket] game:sync failed', res?.error)
             }
@@ -108,11 +109,13 @@ export const useSocketStore = defineStore('socket', () => {
     }
 
     const emitPlayCard = (gameID, card) => {
-        if (!gameID) return
+        const id = Number(gameID)
+        if (!Number.isFinite(id)) return
+
         socket.emit(
             'game:move',
             {
-                gameID,
+                gameID: id,
                 move: {
                     type: 'play-card',
                     card,
@@ -127,24 +130,37 @@ export const useSocketStore = defineStore('socket', () => {
     }
 
     const handleGameEvents = () => {
-        socket.on('game:updated', (game) => {
-            console.log('[Socket] game:updated', game)
-            currentGame.value = game
+      socket.on('game:updated', (game) => {
+          console.log('[Socket] game:updated', game)
+          currentGame.value = game
 
-            // Determine this client's seat based on socket id vs player1.id
-            const seat = game.player1 && game.player1.id === socket.id ? 'player1' : 'player2'
+          // Determine this client's seat based on authenticated user id
+          const currentUser = authStore.currentUser
+          let seat = 'player1'
+          if (currentUser && game.player2 && game.player2.id === currentUser.id) {
+              seat = 'player2'
+          }
 
-            gameStore.syncFromServerGame({ ...game, _seat: seat })
-        })
+          const boardEmpty = !game.board || !game.board.deck || game.board.deck.length === 0
+          if (game.state === 'playing' && boardEmpty && seat === 'player1') {
+              // Host (player1) initializes the board once
+              gameStore.setBoardMultiplayer()
+              syncGameState(game.id)
+              return
+          }
 
-        socket.on('game:closed', ({ id }) => {
-            console.log('[Socket] game:closed', id)
-            if (currentGame.value?.id === id) {
-                currentGame.value = null
-                gameStore.resetMultiplayer()
-            }
-        })
-    }
+          // After board exists on server, just sync from it
+          gameStore.syncFromServerGame({ ...game, _seat: seat })
+      })
+
+      socket.on('game:closed', ({ id }) => {
+          console.log('[Socket] game:closed', id)
+          if (currentGame.value?.id === id) {
+              currentGame.value = null
+              gameStore.resetMultiplayer()
+          }
+      })
+  }
 
     return {
         joined,

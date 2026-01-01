@@ -3,7 +3,7 @@
     import GameBoard from '@/components/game/GameBoard.vue'
     import { useSocketStore } from '@/stores/socket'
     import { useAuthStore } from '@/stores/auth'
-    import { onMounted, ref, watch, computed } from 'vue'
+    import { onMounted, ref, watch } from 'vue'
     import { toast } from 'vue-sonner'
     import { useRouter } from 'vue-router'
 
@@ -14,23 +14,21 @@
     const isGameOver = ref(false)
     const isLoading = ref(true)
 
-    const isGameComplete = computed(() => gameStore.isGameComplete)
+    watch(gameStore.isGameComplete, (complete) => {
+        if (!complete) return
 
-    watch(isGameComplete, (complete) => {
-    if (!complete) return
+        const playerPoints = gameStore.getBiscaPoints(gameStore.playerCardWon)
+        const opponentPoints = gameStore.getBiscaPoints(gameStore.opponentCardWon)
 
-    const playerPoints = gameStore.getBiscaPoints(gameStore.playerCardWon)
-    const opponentPoints = gameStore.getBiscaPoints(gameStore.opponentCardWon)
+        if (playerPoints < opponentPoints)
+            toast.error(`Game Completed - You lost ${playerPoints} to ${opponentPoints}`)
+        else if (playerPoints > opponentPoints)
+            toast.success(`Game Completed - You won ${playerPoints} to ${opponentPoints}`)
+        else
+            toast(`Game Completed - It's a tie ${playerPoints} to ${opponentPoints}`)
 
-    if (playerPoints < opponentPoints)
-        toast.error(`Game Completed - You lost ${playerPoints} to ${opponentPoints}`)
-    else if (playerPoints > opponentPoints)
-        toast.success(`Game Completed - You won ${playerPoints} to ${opponentPoints}`)
-    else
-        toast(`Game Completed - It's a tie ${playerPoints} to ${opponentPoints}`)
-
-    gameStore.saveGame()
-    isGameOver.value = true
+        gameStore.saveGame()
+        isGameOver.value = true
     })
 
     const goDashboard = () => {

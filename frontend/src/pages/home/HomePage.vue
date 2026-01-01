@@ -44,12 +44,20 @@
                 </CardDescription>
             </CardHeader>
             <CardContent class="space-y-6">
+                <p
+                    v-if="!isLoggedIn"
+                    class="text-sm text-red-400 text-center"
+                >
+                    Multiplayer is only available for logged in users. Please
+                    log in to host or join a game.
+                </p>
                 <div class="space-y-4">
                     <div class="flex justify-center gap-3">
                         <Button
                             size="lg"
                             variant="secondary"
                             class="hover:bg-emerald-500 hover:text-slate-200"
+                            :disabled="!isLoggedIn"
                             @click="hostMultiplayerGame"
                         >
                             Host Game
@@ -58,7 +66,7 @@
                             size="lg"
                             variant="outline"
                             class="border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-slate-200"
-                            :disabled="isLoadingRooms"
+                            :disabled="isLoadingRooms || !isLoggedIn"
                             @click="loadRooms"
                         >
                             {{ isLoadingRooms ? 'Loading...' : 'Refresh Rooms' }}
@@ -90,6 +98,7 @@
                                     size="sm"
                                     variant="secondary"
                                     class="hover:bg-emerald-500 hover:text-slate-200"
+                                    :disabled="!isLoggedIn"
                                     @click="joinMultiplayerGame(game.id)"
                                 >
                                     Join
@@ -153,7 +162,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
     Card,
@@ -167,12 +176,15 @@ import { useRouter } from 'vue-router'
 
 import { useGameStore } from '@/stores/game'
 import { useSocketStore } from '@/stores/socket'
+import { useAuthStore } from '@/stores/auth'
 const gameStore = useGameStore()
 const socketStore = useSocketStore()
+const authStore = useAuthStore()
 
 const router = useRouter()
 const selectedHand = ref('')
 const isLoadingRooms = ref(false)
+const isLoggedIn = computed(() => authStore.isLoggedIn)
 
 const startGame = () => {
     gameStore.hand = selectedHand.value
@@ -184,6 +196,11 @@ const startMatch = () => {
 }
 
 const hostMultiplayerGame = () => {
+    if (!isLoggedIn.value) {
+        router.push({ name: 'login' })
+        return
+    }
+
     socketStore.createGame((res) => {
         if (res?.ok) {
             loadRooms()
@@ -199,6 +216,11 @@ const loadRooms = () => {
 }
 
 const joinMultiplayerGame = (gameId) => {
+    if (!isLoggedIn.value) {
+        router.push({ name: 'login' })
+        return
+    }
+
     socketStore.joinGame(gameId, (res) => {
         if (res?.ok) {
             router.push({ name: 'multiplayergame' })

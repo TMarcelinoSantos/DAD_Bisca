@@ -9,25 +9,28 @@ import {
 } from '../state/game.js'
 
 export const registerGameEvents = (io, socket) => {
-    // Use authenticated user from connection state, fallback to socket info
-    const currentUser = getUser(socket.id)
+    const getPlayer = () => {
+        const currentUser = getUser(socket.id)
+        if (!currentUser) return null
 
-    const player = currentUser
-        ? {
-              ...currentUser,
-              id: currentUser.id ?? currentUser.user_id ?? socket.id,
-              username:
-                  currentUser.username ??
-                  currentUser.name ??
-                  currentUser.nickname ??
-                  `user-${currentUser.id ?? socket.id}`,
-          }
-        : socket.user || { id: socket.id, username: socket.id }
+        return {
+            ...currentUser,
+            id: currentUser.id ?? currentUser.user_id ?? socket.id,
+            username:
+                currentUser.username ??
+                currentUser.name ??
+                currentUser.nickname ??
+                `user-${currentUser.id ?? socket.id}`,
+        }
+    }
 
     const roomName = (gameID) => `game:${gameID}`
 
     socket.on('game:create', (cb) => {
         try {
+            const player = getPlayer()
+            if (!player) throw new Error('Authentication required')
+
             const game = createGame(player)
             const room = roomName(game.id)
             socket.join(room)
@@ -44,6 +47,9 @@ export const registerGameEvents = (io, socket) => {
 
     socket.on('game:join', ({ gameID }, cb) => {
         try {
+            const player = getPlayer()
+            if (!player) throw new Error('Authentication required')
+
             const game = joinGame(gameID, player)
             const room = roomName(gameID)
             socket.join(room)
@@ -56,6 +62,9 @@ export const registerGameEvents = (io, socket) => {
 
     socket.on('game:move', ({ gameID, move }, cb) => {
         try {
+            const player = getPlayer()
+            if (!player) throw new Error('Authentication required')
+
             const game = playerMove(gameID, player, move)
             const room = roomName(gameID)
             io.to(room).emit('game:updated', game)
@@ -67,6 +76,9 @@ export const registerGameEvents = (io, socket) => {
 
     socket.on('game:sync', ({ gameID, board }, cb) => {
         try {
+            const player = getPlayer()
+            if (!player) throw new Error('Authentication required')
+
             const game = updateGameBoard(gameID, board)
             const room = roomName(gameID)
             io.to(room).emit('game:updated', game)
@@ -78,6 +90,9 @@ export const registerGameEvents = (io, socket) => {
 
     socket.on('game:leave', ({ gameID }, cb) => {
         try {
+            const player = getPlayer()
+            if (!player) throw new Error('Authentication required')
+
             const game = leaveGame(gameID, player)
             const room = roomName(gameID)
             socket.leave(room)
