@@ -146,6 +146,68 @@
         </div>
       </div>
     </transition>
+    <transition name="fade">
+      <div v-if="showPayment" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="max-w-md mx-auto p-6 bg-white rounded-xl shadow-lg">
+
+          <h2 class="text-xl font-bold mb-4 text-center">Buy Coins</h2>
+
+          <!-- Payment Type -->
+          <label class="block mb-2 font-medium">Payment Method</label>
+          <select v-model="paymentType" class="w-full border rounded p-2 mb-4">
+              <option value="MBWAY">MB Way</option>
+              <option value="PAYPAL">PayPal</option>
+              <option value="IBAN">IBAN</option>
+              <option value="MB">Multibanco</option>
+              <option value="VISA">Visa</option>
+          </select>
+
+          <!-- Reference -->
+          <label class="block mb-2 font-medium">Reference</label>
+          <input
+              v-model="reference"
+              class="w-full border rounded p-2 mb-4"
+              placeholder="Enter reference"
+          />
+
+          <!-- Value -->
+          <label class="block mb-2 font-medium">Value (€)</label>
+          <input
+              v-model.number="euros"
+              type="number"
+              min="1"
+              max="99"
+              class="w-full border rounded p-2 mb-4"
+          />
+
+          <div class="text-center text-yellow-600 font-semibold mb-4">
+              You will receive {{ coinsFromEuros }} coins
+          </div>
+
+          <p v-if="errorMessage" class="text-red-600 mb-3 text-center">
+              {{ errorMessage }}
+          </p>
+
+          <p v-if="successMessage" class="text-green-600 mb-3 text-center">
+              {{ successMessage }}
+          </p>
+
+          <div class="flex gap-3 w-full">
+            <button
+                class="w-full py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                :disabled="loading"
+                @click="submitPayment"
+            >
+                {{ loading ? 'Processing...' : 'Pay' }}
+            </button>
+
+            <button class="flex-1 py-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700" @click="cancelPayment">
+              Cancel
+            </button>
+          </div>
+      </div>
+    </div>
+    </transition>
 
 </template>
 
@@ -166,7 +228,10 @@ import { ref, computed } from 'vue'
 import { useCostumizationsStore } from '@/stores/customizations'
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useAPIStore } from '@/stores/api'
+import axios from 'axios'
 
+const apiStore = useAPIStore()
 const authStore = useAuthStore()
 const router = useRouter();
 const customizationsStore = useCostumizationsStore()
@@ -176,6 +241,14 @@ const selected = ref<any>(null)
 const cardBacks = ref<any>(null)
 const showError = ref(false)
 const errorMessage = ref('')
+
+
+const showPayment = ref(false)
+const paymentType = ref<'MBWAY' | 'PAYPAL' | 'IBAN' | 'MB' | 'VISA'>('MBWAY')
+const reference = ref('')
+
+const loading = ref(false)
+const successMessage = ref('')
 
 const coinPackages = ref([
   {
@@ -220,14 +293,76 @@ function decrementEuros() {
   }
 }
 
-function goToPayment(price: number, coins: number) {
-  router.push({
-    name: 'payment',
-    query: {
-      value: price,
-      coins: coins,
+function goToPayment(euros: number, coins: number) {
+  selected.value = { euros, coins };
+  showPayment.value = true;
+}
+
+function cancelPayment() {
+  selected.value = null
+  showPayment.value = false
+}
+
+
+
+const validators = {
+    MBWAY: /^9\d{8}$/,
+    PAYPAL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    IBAN: /^[A-Z]{2}\d{23}$/,
+    MB: /^\d{5}-\d{9}$/,
+    VISA: /^4\d{15}$/
+}
+
+function validateForm() {
+    errorMessage.value = ''
+
+    if (!validators[paymentType.value].test(reference.value)) {
+        errorMessage.value = 'Invalid reference format'
+        return false
     }
-  })
+
+    return true
+}
+
+async function submitPayment() {
+    if (!validateForm()) return
+
+    loading.value = true
+    errorMessage.value = ''
+    successMessage.value = ''
+
+    try {
+        const response = await axios.post(
+        'https://dad-payments-api.vercel.app/api/debit',
+        {
+            type: paymentType.value,
+            reference: reference.value,
+            value: euros.value,
+        }
+        )
+
+        if (response.status === 201) {
+            await apiStore.purchaseCoins({
+                euros: euros.value,
+                coins: coinsFromEuros.value,
+                payment_type: paymentType.value,
+                payment_reference: reference.value,
+            })
+
+            await authStore.getUser()
+            successMessage.value = `Payment successful! ${coinsFromEuros.value} coins added.`
+            cancelPayment()
+        }
+
+    } catch (error: any) {
+        if (error.response?.status === 422) {
+            errorMessage.value = 'Payment rejected: invalid data or insufficient funds'
+        } else {
+            errorMessage.value = 'Unexpected error. Try again later.'
+        }
+    } finally {
+        loading.value = false
+    }
 }
 
 function confirmPurchase(item: { id: number; name: string; price: number; img: string }, type: 'coins' | 'card') {
