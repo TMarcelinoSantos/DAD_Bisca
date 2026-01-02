@@ -11,6 +11,18 @@
         </div>
       </div>
 
+      <!-- Admin Stats Button -->
+      <div v-if="isAdmin" class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl p-4 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.6)] mb-6">
+        <div class="text-center">
+          <button
+            @click="goToAdminStats"
+            class="px-6 py-3 text-lg font-semibold bg-yellow-700 text-white rounded-xl hover:bg-yellow-800 transition"
+          >
+            👑 View Admin Statistics
+          </button>
+        </div>
+      </div>
+
       <!-- Loading State -->
       <div v-if="loading" class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl p-6 text-center">
         <p class="text-yellow-700 font-semibold">Loading statistics...</p>
@@ -248,13 +260,17 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAPIStore } from '@/stores/api'
+import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const apiStore = useAPIStore()
+const authStore = useAuthStore()
 
 const stats = ref(null)
 const loading = ref(true)
+
+const isAdmin = computed(() => authStore.currentUser?.type === 'A')
 
 const maxGamesPerDay = computed(() => {
   if (!stats.value || !stats.value.activity.games_per_day.length) return 1
@@ -290,6 +306,10 @@ const fetchStatistics = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const goToAdminStats = () => {
+  router.push({ name: 'adminStatistics' })
 }
 
 const goBack = () => {

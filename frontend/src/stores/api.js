@@ -186,6 +186,14 @@ export const useAPIStore = defineStore('api', () => {
     return axios.get(`${API_BASE_URL}/statistics`)
   }
 
+  const getAdminUsersList = () => {
+    return axios.get(`${API_BASE_URL}/admin/statistics/users`)
+  }
+
+  const getAdminUserStatistics = (userId) => {
+    return axios.get(`${API_BASE_URL}/admin/statistics/users/${userId}`)
+  }
+
   return {
     postGame,
     getGames,
@@ -220,5 +228,7 @@ export const useAPIStore = defineStore('api', () => {
     getPersonalStats,
     getGlobalLeaderboards,
     getStatistics,
+    getAdminUsersList,
+    getAdminUserStatistics,
   }
 })

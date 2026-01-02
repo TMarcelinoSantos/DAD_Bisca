@@ -63,6 +63,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/coins/transactions/me', [CoinTransactionController::class, 'myTransactions']);
     Route::get('/coins/transactions/{userId}', [CoinTransactionController::class, 'userTransactions']);
     Route::post('/coin-purchases', [CoinPurchaseController::class, 'store']);
+
+    // Admin statistics routes
+    Route::get('admin/statistics/users', [StatisticsController::class, 'getUsersList']);
+    Route::get('admin/statistics/users/{user}', [StatisticsController::class, 'userStatistics']);
 });
 
 Route::get('/metadata', function (Request $request) {
