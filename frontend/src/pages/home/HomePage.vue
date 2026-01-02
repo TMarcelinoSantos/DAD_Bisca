@@ -120,6 +120,7 @@
                             >
                                 <span>
                                     Room #{{ game.id }} ·
+                                    {{ game.type === '3' ? 'Bisca de 3' : 'Bisca de 9' }} ·
                                     {{ (game.player1 && game.player1.username) || 'Waiting for players' }}
                                 </span>
                                 <Button
