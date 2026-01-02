@@ -62,6 +62,16 @@ const remainingSeconds = computed(() => gameStore.remainingTurnSeconds)
 // Multiplayer countdown derived from server-side turnDeadlineAt
 const multiplayerSeconds = ref(null)
 
+const isMultiplayerGameOver = computed(
+  () => socketStore.currentGame?.state === 'finished',
+)
+
+const handleMultiplayerResign = () => {
+  const gameId = socketStore.currentGame?.id ?? Number(props.roomId)
+  if (!gameId || Number.isNaN(gameId)) return
+  socketStore.resignGame(gameId)
+}
+
 onMounted(() => {
   if (!props.multiPlayer) return
 
@@ -171,6 +181,13 @@ onMounted(() => {
                   v-if="!props.multiPlayer && isPlayerTurn"
                   class="mt-1 mb-1 px-3 py-1 text-xs rounded bg-red-600/80 text-white hover:bg-red-700"
                   @click="gameStore.resign('player')"
+                >
+                  Resign
+                </button>
+                <button
+                  v-if="props.multiPlayer && !isMultiplayerGameOver"
+                  class="mt-1 mb-1 px-3 py-1 text-xs rounded bg-red-600/80 text-white hover:bg-red-700"
+                  @click="handleMultiplayerResign"
                 >
                   Resign
                 </button>

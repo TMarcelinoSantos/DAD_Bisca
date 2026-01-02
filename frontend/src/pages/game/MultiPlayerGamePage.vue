@@ -175,11 +175,6 @@
                     </div>
                     <div class="flex gap-4 mt-4">
                         <button 
-                            @click="playAgain"
-                            class="py-2 px-6 rounded-lg bg-green-600 text-white hover:bg-green-700">
-                            Jogar novamente
-                        </button>
-                        <button 
                             @click="goDashboard"
                             class="py-2 px-6 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
                             Dashboard
