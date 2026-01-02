@@ -9,6 +9,7 @@ import PaymentPage from '@/pages/store/Payment.vue'
 import CoinsHistoryPage from '@/pages/store/HistoryCoins.vue'
 import SinglePlayerGamePage from '../pages/game/SinglePlayerGamePage.vue'
 import SinglePlayerMatchesPage from '../pages/game/SinglePlayerMatchesPage.vue'
+import HistoryPage from '@/pages/history/HistoryPage.vue'
 import AppManagement from '@/pages/admin/AppManagement.vue'
 import AdminProfilePage from '@/pages/admin/AdminProfilePage.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -90,6 +91,26 @@ const router = createRouter({
       path: '/about',
       name: 'about',
       component: AboutPage,
+    },
+    {
+      path: '/history',
+      name: 'history',
+      component: HistoryPage,
+    },
+    {
+      path: '/history/match/:matchId',
+      name: 'matchDetails',
+      component: () => import('@/pages/history/MatchDetailsPage.vue'),
+    },
+    {
+      path: '/leaderboard',
+      name: 'leaderboard',
+      component: () => import('@/pages/leaderboard/PersonalLeaderboardPage.vue'),
+    },
+    {
+      path: '/leaderboards',
+      name: 'globalLeaderboard',
+      component: () => import('@/pages/leaderboard/GlobalLeaderboardPage.vue'),
     },
     {
       path: '/appManagement',

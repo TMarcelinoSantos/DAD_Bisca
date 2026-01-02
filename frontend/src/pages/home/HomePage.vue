@@ -1,5 +1,18 @@
 <template>
-    <span class="text-4xl text-aligh-center font-bold mb-10">GAMES</span>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
+        <span class="text-4xl text-aligh-center font-bold">GAMES</span>
+        <div class="flex flex-wrap gap-2 sm:gap-3 justify-start sm:justify-end">
+            <Button @click="goToHistory" size="lg" variant="outline" class="hover:bg-purple-500 hover:text-slate-200">
+                View History
+            </Button>
+            <Button @click="goToPersonalLeaderboard" size="lg" variant="outline" class="hover:bg-purple-500 hover:text-slate-200">
+                Personal Leaderboard
+            </Button>
+            <Button @click="goToGlobalLeaderboard" size="lg" variant="outline" class="hover:bg-purple-500 hover:text-slate-200">
+                Global Leaderboard
+            </Button>
+        </div>
+    </div>
     <div class="flex flex-row justify-center items-stretch gap-5 mt-10">
         <Card class="w-full max-w-md">
             <CardHeader>
@@ -193,6 +206,18 @@ const startGame = () => {
 const startMatch = () => {
     gameStore.hand = selectedHand.value
     router.push({ name: 'singlematches' })
+}
+
+const goToHistory = () => {
+    router.push({ name: 'history' })
+}
+
+const goToPersonalLeaderboard = () => {
+    router.push({ name: 'leaderboard' })
+}
+
+const goToGlobalLeaderboard = () => {
+    router.push({ name: 'globalLeaderboard' })
 }
 
 const hostMultiplayerGame = () => {

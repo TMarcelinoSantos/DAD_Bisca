@@ -8,6 +8,11 @@ use App\Http\Controllers\SingleGameController;
 use App\Http\Controllers\SingleMatchesController;
 use App\Http\Controllers\RoundController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\MatchController;
+use App\Http\Controllers\GameController;
+use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\StatsController;
+use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\CoinsController;
 use App\Http\Controllers\CoinTransactionController;
 use App\Http\Controllers\CoinPurchaseController;
@@ -36,6 +41,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/users/{user}/photo-url', [UserController::class, 'patchPhotoURL']);
 
     Route::apiResource('users', UserController::class)->except(['store']);
+    Route::apiResource('matches', MatchController::class);
+    Route::apiResource('games', GameController::class);
+    Route::apiResource('matches.games', GameController::class)->shallow();
+
+    Route::get('users/me/history', [HistoryController::class, 'index']);
+    Route::get('users/me/history/{matchId}', [HistoryController::class, 'showMatch']);
+    Route::get('history/{user}', [HistoryController::class, 'userHistory']);
+
+    Route::get('users/me/stats', [StatsController::class, 'personalStats']);
 
     Route::post('/user/theme', [UserController::class, 'updateTheme']);
     Route::post('/user/avatar', [UserController::class, 'updateAvatar']);
@@ -62,5 +76,8 @@ Route::apiResources([
     'single_match' => SingleMatchesController::class,
     'rounds' => RoundController::class
 ]);
+
+// Public routes (no auth required)
+Route::get('/leaderboards', [LeaderboardController::class, 'global']);
 
 //Route::post('/single_match', [SingleMatchesController::class, 'store']);

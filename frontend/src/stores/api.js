@@ -55,6 +55,15 @@ export const useAPIStore = defineStore('api', () => {
     return axios.put(`${API_BASE_URL}/rounds/${roundId}`, data)
   }
 
+  // HISTORY
+  const getHistory = () => {
+    return axios.get(`${API_BASE_URL}/users/me/history`)
+  }
+
+  const getMatchDetails = (matchId) => {
+    return axios.get(`${API_BASE_URL}/users/me/history/${matchId}`)
+  }
+
   // AUTH
   const postLogin = async (credentials) => {
     const response = await axios.post(`${API_BASE_URL}/login`, credentials)
@@ -162,6 +171,16 @@ export const useAPIStore = defineStore('api', () => {
     return uploadPromise
   }
 
+  // STATS
+  const getPersonalStats = () => {
+    return axios.get(`${API_BASE_URL}/users/me/stats`)
+  }
+
+  // LEADERBOARDS
+  const getGlobalLeaderboards = (limit = 10) => {
+    return axios.get(`${API_BASE_URL}/leaderboards?limit=${limit}`)
+  }
+
   return {
     postGame,
     getGames,
@@ -191,5 +210,9 @@ export const useAPIStore = defineStore('api', () => {
     getMyCoinTransactions,
     getUserCoinTransactions,
     uploadProfilePhoto,
+    getHistory,
+    getMatchDetails,
+    getPersonalStats,
+    getGlobalLeaderboards,
   }
 })
