@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
 import BiscaGame from './BiscaGame.vue';
 import semFace from '@/cards/semFace.png'
 import { useGameStore } from '@/stores/game'
@@ -50,6 +50,12 @@ const onCardClick = (card) => {
 }
 
 const isCardPlayable = (id) => gameStore.getValidPlayerCards().includes(id)
+
+const isPlayerTurn = computed(() => gameStore.turn === 'player')
+const isOpponentTurn = computed(() => gameStore.turn === 'opponent')
+
+const playerPoints = computed(() => gameStore.playerTotalPoints)
+const opponentPoints = computed(() => gameStore.opponentTotalPoints)
 </script>
 
 <template>
@@ -58,13 +64,23 @@ const isCardPlayable = (id) => gameStore.getValidPlayerCards().includes(id)
         class="flex flex-col justify-around items-center w-full h-screen"
         :style="{ backgroundColor: '#0b7a3c', padding: '40px 20px' }"
     >
-        <div class="opponent-hand flex flex-wrap gap-1 justify-center items-center">
-            <img
-                v-for="(card,i) in opponentCards"
-                :key="i"
-                :src="card.src"
-                class="card card-img"
-            />
+        <div class="flex flex-col items-center">
+            <div class="mb-2 flex items-center gap-2 text-sm text-white/90">
+                <span
+                    class="inline-flex h-2.5 w-2.5 rounded-full"
+                    :class="isOpponentTurn ? 'bg-amber-300 shadow-[0_0_0_2px_rgba(250,204,21,0.6)]' : 'bg-slate-600'"
+                ></span>
+                <span class="font-semibold">Opponent</span>
+                <span class="text-xs text-white/75">Points: {{ opponentPoints }}</span>
+            </div>
+            <div class="opponent-hand flex flex-wrap gap-1 justify-center items-center">
+                <img
+                    v-for="(card,i) in opponentCards"
+                    :key="i"
+                    :src="card.src"
+                    class="card card-img"
+                />
+            </div>
         </div>
 
         <div class="w-full max-w-3xl flex items-start gap-6 px-4">  
@@ -105,19 +121,29 @@ const isCardPlayable = (id) => gameStore.getValidPlayerCards().includes(id)
             </div>
         </div>
 
-        <div class="player-hand flex flex-wrap gap-1 justify-center items-center">
-            <img
-                v-for="(card,i) in playerCards"
-                :key="i"
-                :src="card.src"
-                class="card card-img cursor-pointer"
-            @click="onCardClick(card)"
-                :class="{
-                'opacity-100 cursor-pointer': isCardPlayable(card.id),
-                'opacity-40 cursor-not-allowed': !isCardPlayable(card.id)
-                }"
-            />
-        </div>
+              <div class="flex flex-col items-center">
+                <div class="mt-4 flex items-center gap-2 text-sm text-white/90">
+                  <span
+                    class="inline-flex h-2.5 w-2.5 rounded-full"
+                    :class="isPlayerTurn ? 'bg-amber-300 shadow-[0_0_0_2px_rgba(250,204,21,0.6)]' : 'bg-slate-600'"
+                  ></span>
+                  <span class="font-semibold">You</span>
+                  <span class="text-xs text-white/75">Points: {{ playerPoints }}</span>
+                </div>
+                <div class="player-hand flex flex-wrap gap-1 justify-center items-center mt-1">
+                  <img
+                    v-for="(card,i) in playerCards"
+                    :key="i"
+                    :src="card.src"
+                    class="card card-img cursor-pointer"
+                    @click="onCardClick(card)"
+                    :class="{
+                      'opacity-100 cursor-pointer': isCardPlayable(card.id),
+                      'opacity-40 cursor-not-allowed': !isCardPlayable(card.id)
+                    }"
+                  />
+                </div>
+              </div>
     </div>
 
 </template>
