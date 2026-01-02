@@ -30,12 +30,13 @@ export const registerGameEvents = (io, socket) => {
 
     const roomName = (gameID) => `game:${gameID}`
 
-    socket.on('game:create', (cb) => {
+    socket.on('game:create', ({ type }, cb) => {
         try {
             const player = getPlayer()
             if (!player) throw new Error('Authentication required')
+            const gameType = type === '3' || type === '9' ? type : '9'
 
-            const game = createGame(player)
+            const game = createGame(player, gameType)
             const room = roomName(game.id)
             socket.join(room)
             cb && cb({ ok: true, game })

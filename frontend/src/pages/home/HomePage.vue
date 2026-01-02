@@ -57,6 +57,21 @@
                 </CardDescription>
             </CardHeader>
             <CardContent class="space-y-6">
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Choose Type</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <Button
+                            v-for="level in gameStore.hands"
+                            :key="level.value"
+                            size="sm"
+                            :variant="selectedMultiplayerHand === level.value ? 'default' : 'outline'"
+                            class="flex flex-col py-3 h-16"
+                            @click="selectedMultiplayerHand = level.value"
+                        >
+                            <span class="front-semibold">{{ level.label }}</span>
+                        </Button>
+                    </div>
+                </div>
                 <p
                     v-if="!isLoggedIn"
                     class="text-sm text-red-400 text-center"
@@ -196,6 +211,7 @@ const authStore = useAuthStore()
 
 const router = useRouter()
 const selectedHand = ref('')
+const selectedMultiplayerHand = ref('9')
 const isLoadingRooms = ref(false)
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 
@@ -226,7 +242,10 @@ const hostMultiplayerGame = () => {
         return
     }
 
-    socketStore.createGame((res) => {
+    // Set game type (3 or 9) for multiplayer based on host choice
+    gameStore.hand = selectedMultiplayerHand.value
+
+    socketStore.createGame(selectedMultiplayerHand.value, (res) => {
         if (res?.ok) {
             loadRooms()
         }
@@ -245,6 +264,9 @@ const joinMultiplayerGame = (gameId) => {
         router.push({ name: 'login' })
         return
     }
+
+    const confirmed = window.confirm('Do you want to join this multiplayer game?')
+    if (!confirmed) return
 
     socketStore.joinGame(gameId, (res) => {
         if (res?.ok) {

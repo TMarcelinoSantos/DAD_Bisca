@@ -60,7 +60,7 @@
         hasSavedGame.value = true
 
         const payload = {
-            type: gameStore.hand,
+            type: String(game.type ?? gameStore.hand),
             status: 'Ended',
             player1_user_id: player1Id,
             player2_user_id: player2Id,

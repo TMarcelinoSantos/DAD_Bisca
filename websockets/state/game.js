@@ -57,13 +57,14 @@ export const getJoinableGames = () => {
     )
 }
 
-export const createGame = (player1) => {
+export const createGame = (player1, type = '9') => {
     const gameID = nextGameID()
     const game = {
         id: gameID,
         player1: player1,
         player2: null,
         state: 'waiting',
+        type,
         createdAt: Date.now(),
         moves: [],
         board: {
