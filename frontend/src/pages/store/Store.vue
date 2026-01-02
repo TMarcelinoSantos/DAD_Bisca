@@ -404,12 +404,10 @@ function isOwned(themeName: string) {
   const custom = typeof currentUser.value?.custom === 'string' 
     ? JSON.parse(currentUser.value.custom) 
     : currentUser.value?.custom || {}
-  console.log('isOwned check:', themeName, custom.owned_card_themes, custom.owned_card_themes?.includes(themeName))
   return custom.owned_card_themes?.includes(themeName)
 }
 
 function isSelected(themeName: string) {
-  console.log('isSelected check:', themeName, currentUser.value?.card_theme, currentUser.value?.card_theme === themeName)
   return currentUser.value?.card_theme === themeName
 }
 
@@ -462,8 +460,6 @@ const buyConfirmed = async () => {
       price: 1 + (idx * 1),
       src: i.src
     }))
-    console.log('Card backs loaded:', cardBacks.value)
-    console.log('Current user custom:', currentUser.value?.custom)
   })
 
 </script>
