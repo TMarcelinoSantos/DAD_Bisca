@@ -218,7 +218,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useCostumizationsStore } from '@/stores/customizations'
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
@@ -302,6 +302,12 @@ function cancelPayment() {
   showPayment.value = false
 }
 
+watch(showPayment, (isOpen) => {
+  if (!isOpen) {
+    resetPaymentState()
+  }
+})
+
 const referenceLabel = computed(() => {
   if (paymentType.value === 'MBWAY') return 'Phone Number'
   if (paymentType.value === 'PAYPAL') return 'Email'
@@ -354,7 +360,9 @@ async function submitPayment() {
 
             await authStore.getUser()
             successMessage.value = `Payment successful! ${coinsFromEuros.value} coins added.`
-            cancelPayment()
+            setTimeout(() => {
+              cancelPayment() 
+            }, 800)
         }
 
     } catch (error: any) {
@@ -378,6 +386,15 @@ function cancelPurchase() {
   showConfirm.value = false
 }
 
+function resetPaymentState() {
+  paymentEuros.value = 1
+  paymentType.value = 'MBWAY'
+  reference.value = ''
+  errorMessage.value = ''
+  successMessage.value = ''
+  loading.value = false
+}
+
 const buyConfirmed = async () => {
   console.log('Purchase confirmed for', selected.value)
   const item = selected.value
@@ -399,7 +416,7 @@ const buyConfirmed = async () => {
 
     showConfirm.value = false
     selected.value = null
-    router.push({ name: 'customizations' })
+    router.push({ name: 'store' })
   }catch (error) {
     console.error("Erro ao comprar carta:", error)
     alert("Erro ao comprar a carta. Tenta novamente.")

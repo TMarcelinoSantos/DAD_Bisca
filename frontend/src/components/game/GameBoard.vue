@@ -1,10 +1,12 @@
 <script setup>
 import { computed } from 'vue'
 import BiscaGame from './BiscaGame.vue';
-import semFace from '@/cards/semFace.png'
+//import semFace from '@/cards/semFace.png'
 import { useGameStore } from '@/stores/game'
 import { useSocketStore } from '@/stores/socket';
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
 const gameStore = useGameStore()
 const socketStore = useSocketStore()
 
@@ -35,6 +37,12 @@ const props = defineProps({
     default: null
   },
 })
+
+const semFace = computed(() =>
+  authStore.currentUser?.card_theme 
+    ? '../src/cards/' + authStore.currentUser.card_theme
+    : '../src/cards/semFace.png'
+)
 
 const onCardClick = (card) => {
     if (!isCardPlayable(card.id)) return
@@ -77,7 +85,7 @@ const opponentPoints = computed(() => gameStore.opponentTotalPoints)
                 <img
                     v-for="(card,i) in opponentCards"
                     :key="i"
-                    :src="card.src"
+                    :src="semFace"
                     class="card card-img"
                 />
             </div>
