@@ -23,7 +23,14 @@
               <RouterLink to="/appManagement" class="hover:text-amber-200">App Management</RouterLink>
             </NavigationMenuLink>
           </NavigationMenuItem>
-          <NavigationMenuItem>
+          <NavigationMenuItem class="flex items-center gap-4">
+            <template v-if = "!authStore.isAdmin">
+              <span
+                class="inline-flex items-center gap-1 rounded-full border border-amber-200/30 bg-amber-100/10 px-3 py-1 text-sm text-amber-50"
+              >
+                {{ authStore.currentUser?.coins_balance ?? 0 }} 🪙
+              </span>
+            </template>
             <NavigationMenuTrigger class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10">
               <img
                 :src="authStore.currentUser?.avatar || '/default-avatar.png'"
