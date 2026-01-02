@@ -1,6 +1,17 @@
 const games = new Map()
 let currentGameID = 0
 
+// Per-game turn timers for multiplayer (server-side 20s rule)
+const turnTimers = new Map()
+
+// Socket.io instance (set from events layer) so we can
+// broadcast updates from server-side timeouts.
+let ioRef = null
+
+export const setGameIO = (io) => {
+    ioRef = io
+}
+
 const nextGameID = () => ++currentGameID
 
 export const joinGame = (gameID, player) => {
@@ -69,6 +80,50 @@ export const createGame = (player1) => {
     return game
 }
 
+const clearTurnTimer = (gameID) => {
+    const existing = turnTimers.get(gameID)
+    if (existing) {
+        clearTimeout(existing)
+        turnTimers.delete(gameID)
+    }
+}
+
+const scheduleTurnTimer = (game, timeoutMs = 20000) => {
+    clearTurnTimer(game.id)
+
+    if (game.state !== 'playing') return
+    const board = game.board
+    if (!board) return
+    if (isGameComplete(board)) return
+
+    const deadline = Date.now() + timeoutMs
+    board.turnDeadlineAt = deadline
+
+    const timerId = setTimeout(() => {
+        try {
+            const seat = board.turn
+            if (seat !== 'player' && seat !== 'opponent') return
+
+            const resigningPlayer =
+                seat === 'player' ? game.player1 : game.player2
+            if (!resigningPlayer) return
+
+            const updated = resignGame(game.id, resigningPlayer)
+
+            // Broadcast the timeout result to all clients in this game room
+            if (ioRef && updated) {
+                ioRef.to(`game:${updated.id}`).emit('game:updated', updated)
+            }
+        } catch (err) {
+            console.error('[TurnTimer] Error handling timeout', err)
+        } finally {
+            clearTurnTimer(game.id)
+        }
+    }, timeoutMs)
+
+    turnTimers.set(game.id, timerId)
+}
+
 export const updateGameBoard = (gameID, partialBoard) => {
     const game = games.get(gameID)
     if (!game) throw new Error('Game not found')
@@ -78,6 +133,65 @@ export const updateGameBoard = (gameID, partialBoard) => {
         ...partialBoard,
     }
 
+    if (game.state === 'playing') {
+        scheduleTurnTimer(game)
+    } else {
+        clearTurnTimer(gameID)
+    }
+
+    return game
+}
+
+export const resignGame = (gameID, player) => {
+    const game = games.get(gameID)
+    if (!game) throw new Error('Game not found')
+    if (game.state !== 'playing') throw new Error('Game is not in playing state')
+
+    const board = game.board
+    if (!board) throw new Error('Game board not initialized')
+
+    const seat =
+        game.player1 && game.player1.username === player.username
+            ? 'player'
+            : game.player2 && game.player2.username === player.username
+              ? 'opponent'
+              : null
+
+    if (!seat) throw new Error('Player not part of this game')
+
+    const winnerSeat = seat === 'player' ? 'opponent' : 'player'
+
+    const remaining = []
+    remaining.push(...board.deck)
+    remaining.push(...board.playerHand)
+    remaining.push(...board.opponentHand)
+    remaining.push(...(board.playedCards || []).map((c) => getCardId(c)))
+
+    if (board.trumpCard && !board.trumpHidden) {
+        remaining.push(getCardId(board.trumpCard))
+    }
+
+    if (winnerSeat === 'player') {
+        board.playerCardWon.push(...remaining)
+    } else {
+        board.opponentCardWon.push(...remaining)
+    }
+
+    const extraPoints = getBiscaPoints(remaining)
+    if (winnerSeat === 'player') {
+        board.playerTotalPoints += extraPoints
+    } else {
+        board.opponentTotalPoints += extraPoints
+    }
+
+    board.deck = []
+    board.playerHand = []
+    board.opponentHand = []
+    board.playedCards = []
+    board.trumpCard = null
+
+    finalizeGame(game)
+    clearTurnTimer(gameID)
     return game
 }
 // --- Bisca rules helpers (server-side multiplayer logic) ---
@@ -269,7 +383,12 @@ export const playerMove = (gameID, player, move) => {
         resolveTrick(game)
         if (isGameComplete(board)) {
             finalizeGame(game)
+            clearTurnTimer(gameID)
         }
+    }
+
+    if (game.state === 'playing') {
+        scheduleTurnTimer(game)
     }
 
     // keep move history for debugging/auditing
@@ -292,11 +411,13 @@ export const leaveGame = (gameID, player) => {
 
     if (!game.player1 && !game.player2) {
         games.delete(gameID)
+        clearTurnTimer(gameID)
         return null
     }
 
     if (game.state === 'playing') {
         game.state = 'finished'
+        clearTurnTimer(gameID)
     }
 
     return game

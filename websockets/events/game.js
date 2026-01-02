@@ -6,9 +6,13 @@ import {
     playerMove,
     getJoinableGames,
     updateGameBoard,
+    resignGame,
+    setGameIO,
 } from '../state/game.js'
 
 export const registerGameEvents = (io, socket) => {
+    // Ensure game state module can broadcast on timeout
+    setGameIO(io)
     const getPlayer = () => {
         const currentUser = getUser(socket.id)
         if (!currentUser) return null
@@ -80,6 +84,20 @@ export const registerGameEvents = (io, socket) => {
             if (!player) throw new Error('Authentication required')
 
             const game = updateGameBoard(gameID, board)
+            const room = roomName(gameID)
+            io.to(room).emit('game:updated', game)
+            cb && cb({ ok: true })
+        } catch (err) {
+            cb && cb({ ok: false, error: err.message })
+        }
+    })
+
+    socket.on('game:resign', ({ gameID }, cb) => {
+        try {
+            const player = getPlayer()
+            if (!player) throw new Error('Authentication required')
+
+            const game = resignGame(gameID, player)
             const room = roomName(gameID)
             io.to(room).emit('game:updated', game)
             cb && cb({ ok: true })

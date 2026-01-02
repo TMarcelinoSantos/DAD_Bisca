@@ -14,34 +14,45 @@
     const isGameOver = ref(false)
     const isLoading = ref(true)
 
-    // In multiplayer, rely on server state instead of local isGameComplete
+    const showGameOverPopup = () => {
+        if (isGameOver.value) return
+
+        const playerPoints = gameStore.playerTotalPoints
+        const opponentPoints = gameStore.opponentTotalPoints
+
+        if (playerPoints < opponentPoints)
+            toast.error(
+                `Game Completed - You lost ${playerPoints} to ${opponentPoints}`,
+            )
+        else if (playerPoints > opponentPoints)
+            toast.success(
+                `Game Completed - You won ${playerPoints} to ${opponentPoints}`,
+            )
+        else
+            toast(
+                `Game Completed - It's a tie ${playerPoints} to ${opponentPoints}`,
+            )
+
+        isGameOver.value = true
+    }
+
+    // Server-driven end (multiplayer always relies on server state)
     watch(
         () => socketStore.currentGame?.state,
         (state) => {
             if (state !== 'finished') return
-
-            const playerPoints = gameStore.playerTotalPoints
-            const opponentPoints = gameStore.opponentTotalPoints
-
-            if (playerPoints < opponentPoints)
-                toast.error(
-                    `Game Completed - You lost ${playerPoints} to ${opponentPoints}`,
-                )
-            else if (playerPoints > opponentPoints)
-                toast.success(
-                    `Game Completed - You won ${playerPoints} to ${opponentPoints}`,
-                )
-            else
-                toast(
-                    `Game Completed - It's a tie ${playerPoints} to ${opponentPoints}`,
-                )
-
-            isGameOver.value = true
+            showGameOverPopup()
         },
     )
 
     const goDashboard = () => {
         router.push({ name: 'home' })
+    }
+
+    const handleResign = () => {
+        const gameId = socketStore.currentGame?.id
+        if (!gameId || isGameOver.value) return
+        socketStore.resignGame(gameId)
     }
 
     onMounted(async () => {
@@ -76,6 +87,14 @@
         :multiPlayer="true"
         :roomId="String(socketStore.currentGame?.id ?? '')"
     />
+    <div v-if="!isLoading && !isGameOver" class="mt-4 flex justify-center">
+        <button
+            @click="handleResign"
+            class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 text-sm"
+        >
+            Resign
+        </button>
+    </div>
     <transition name="fade">
         <div v-if="isGameOver" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-11/12 max-w-sm p-6 relative">

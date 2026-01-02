@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import BiscaGame from './BiscaGame.vue';
 import semFace from '@/cards/semFace.png'
 import { useGameStore } from '@/stores/game'
@@ -56,6 +56,29 @@ const isOpponentTurn = computed(() => gameStore.turn === 'opponent')
 
 const playerPoints = computed(() => gameStore.playerTotalPoints)
 const opponentPoints = computed(() => gameStore.opponentTotalPoints)
+
+const remainingSeconds = computed(() => gameStore.remainingTurnSeconds)
+
+// Multiplayer countdown derived from server-side turnDeadlineAt
+const multiplayerSeconds = ref(null)
+
+onMounted(() => {
+  if (!props.multiPlayer) return
+
+  const intervalId = setInterval(() => {
+    const deadline = socketStore.currentGame?.board?.turnDeadlineAt
+    if (!deadline) {
+      multiplayerSeconds.value = null
+      return
+    }
+    const diff = Math.max(0, Math.ceil((deadline - Date.now()) / 1000))
+    multiplayerSeconds.value = diff
+  }, 500)
+
+  onUnmounted(() => {
+    clearInterval(intervalId)
+  })
+})
 </script>
 
 <template>
@@ -129,7 +152,28 @@ const opponentPoints = computed(() => gameStore.opponentTotalPoints)
                   ></span>
                   <span class="font-semibold">You</span>
                   <span class="text-xs text-white/75">Points: {{ playerPoints }}</span>
+                  <span
+                    v-if="isPlayerTurn && !props.multiPlayer"
+                    class="ml-2 text-xs"
+                    :class="remainingSeconds <= 5 ? 'text-red-200 font-semibold' : 'text-amber-100'"
+                  >
+                    {{ remainingSeconds }}s
+                  </span>
+                  <span
+                    v-if="isPlayerTurn && props.multiPlayer && multiplayerSeconds !== null"
+                    class="ml-2 text-xs"
+                    :class="multiplayerSeconds <= 5 ? 'text-red-200 font-semibold' : 'text-amber-100'"
+                  >
+                    {{ multiplayerSeconds }}s
+                  </span>
                 </div>
+                <button
+                  v-if="!props.multiPlayer && isPlayerTurn"
+                  class="mt-1 mb-1 px-3 py-1 text-xs rounded bg-red-600/80 text-white hover:bg-red-700"
+                  @click="gameStore.resign('player')"
+                >
+                  Resign
+                </button>
                 <div class="player-hand flex flex-wrap gap-1 justify-center items-center mt-1">
                   <img
                     v-for="(card,i) in playerCards"

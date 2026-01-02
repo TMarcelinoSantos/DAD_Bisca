@@ -32,11 +32,22 @@ export const useGameStore = defineStore('game', () => {
     const lastRoundWinner = ref(null)
     const lastGameWinner = ref(null)
 
+    // Tracks forced game endings (timeout / resign)
+    const forcedGameEnd = ref(false)
+
+    // Turn timer (single-player)
+    const TURN_LIMIT_SECONDS = 20
+    const remainingTurnSeconds = ref(TURN_LIMIT_SECONDS)
+    let turnTimerId = null
+
     // MULTIPLAYER
     const multiplayerGames = ref([])          // list from lobby (joinable games, etc.)
     const activeMultiplayerGame = ref(null)   // game object from websockets server
 
     const isMultiplayerGame = computed(() => !!activeMultiplayerGame.value)
+    // Explicit flag to control whether the local 20s timer
+    // should be active for the current board (single-player only).
+    const isTimerEnabled = ref(false)
 
     const setGames = (games) => {
         multiplayerGames.value = Array.isArray(games) ? games : []
@@ -48,6 +59,7 @@ export const useGameStore = defineStore('game', () => {
 
     const syncFromServerGame = (game) => {
         activeMultiplayerGame.value = game ?? null
+        isTimerEnabled.value = false
         if (!game?.board) return
 
         const board = game.board
@@ -60,7 +72,7 @@ export const useGameStore = defineStore('game', () => {
                 .filter(Boolean)
                 .map(c => ({ ...c }))
 
-        // Determine which seat is "me"
+        // Determine which seat is "me" 
         const mySeat = game._seat === 'player2' ? 'player2' : 'player1'
 
         const myHandIds = mySeat === 'player1' ? board.playerHand : board.opponentHand
@@ -107,6 +119,7 @@ export const useGameStore = defineStore('game', () => {
     const resetMultiplayer = () => {
         multiplayerGames.value = []
         activeMultiplayerGame.value = null
+        forcedGameEnd.value = false
     }
 
     const getBoardSnapshot = () => {
@@ -201,10 +214,14 @@ export const useGameStore = defineStore('game', () => {
         trumpCard.value = deck.value.pop()
         beganAt.value = new Date()
         turn.value = lastGameWinner.value ? lastGameWinner.value : 'player'
+        isTimerEnabled.value = true
 
         if (turn.value === 'opponent') {
             nextTurn()
         }
+
+        // Start turn timer once the initial board is ready
+        startTurnTimer()
     }
 
     // Multiplayer board initializer: same dealing logic, but no AI turn
@@ -224,6 +241,8 @@ export const useGameStore = defineStore('game', () => {
         trumpCard.value = deck.value.pop()
         beganAt.value = new Date()
         turn.value = 'player'
+        forcedGameEnd.value = false
+        isTimerEnabled.value = false
     }
 
     const getBiscaPoints = (cards) => {
@@ -336,6 +355,99 @@ export const useGameStore = defineStore('game', () => {
                 secondPlayer.value.push(trumpCard.value);
                 trumpCard.value.hidden = true
             }
+        }
+    }
+
+    const clearTurnTimer = () => {
+        if (turnTimerId) {
+            clearInterval(turnTimerId)
+            turnTimerId = null
+        }
+    }
+
+    const forceWinFor = (winner) => {
+        // Collect all remaining cards in the game and give them
+        // to the winner as per timeout/resign rule.
+        const winnerPile = winner === 'player' ? playerCardWon : opponentCardWon
+
+        const remaining = []
+
+        remaining.push(...deck.value)
+        remaining.push(...playerHand.value)
+        remaining.push(...opponentHand.value)
+
+        // Cards currently on the table
+        remaining.push(...playedCards.value.map(c => ({ ...c })))
+
+        // Visible trump still on table
+        if (trumpCard.value && !trumpCard.value.hidden) {
+            remaining.push(trumpCard.value)
+        }
+
+        winnerPile.value.push(...remaining)
+
+        const extraPoints = getBiscaPoints(remaining)
+        if (winner === 'player') {
+            playerTotalPoints.value += extraPoints
+        } else {
+            opponentTotalPoints.value += extraPoints
+        }
+
+        // Clear board state so game is effectively finished
+        deck.value = []
+        playerHand.value = []
+        opponentHand.value = []
+        playedCards.value = []
+        trumpCard.value = null
+
+        forcedGameEnd.value = true
+        clearTurnTimer()
+    }
+
+    const handleTurnTimeout = () => {
+        // Only enforce automatic timeout when timer is enabled (single-player).
+        if (!isTimerEnabled.value) return
+
+        if (turn.value === 'player') {
+            forceWinFor('opponent')
+        } else if (turn.value === 'opponent') {
+            forceWinFor('player')
+        }
+    }
+
+    const startTurnTimer = () => {
+        // Timer in this store is only for boards that enabled it.
+        if (!isTimerEnabled.value) return
+
+        clearTurnTimer()
+
+        // Don't start timer if game is already complete
+        if (deck.value.length === 0 &&
+            playerHand.value.length === 0 &&
+            opponentHand.value.length === 0 &&
+            playedCards.value.length === 0) {
+            return
+        }
+
+        remainingTurnSeconds.value = TURN_LIMIT_SECONDS
+
+        turnTimerId = setInterval(() => {
+            if (remainingTurnSeconds.value > 0) {
+                remainingTurnSeconds.value -= 1
+            }
+
+            if (remainingTurnSeconds.value <= 0) {
+                clearTurnTimer()
+                handleTurnTimeout()
+            }
+        }, 1000)
+    }
+
+    const resign = (who = 'player') => {
+        if (who === 'player') {
+            forceWinFor('opponent')
+        } else {
+            forceWinFor('player')
         }
     }
 
@@ -482,10 +594,12 @@ export const useGameStore = defineStore('game', () => {
     }
 
     const isGameComplete = computed(() => {
-        return deck.value.length === 0 &&
+        return forcedGameEnd.value || (
+            deck.value.length === 0 &&
             playerHand.value.length === 0 &&
             opponentHand.value.length === 0 &&
             playedCards.value.length === 0
+        )
     })
 
     const finalizeGame = (game) => {
@@ -542,8 +656,14 @@ export const useGameStore = defineStore('game', () => {
     watch(isGameComplete, (value) => {
         if (value) {
             endedAt.value = new Date()
+            clearTurnTimer()
         }
     })
+
+    // (Re)start timer whenever local turn changes in single-player
+    watch(turn, () => {
+        startTurnTimer()
+    }, { immediate: true })
 
 
     const saveRound = async ({played, playerHandSnapshot, opponentHandSnapshot, trumpCardSnapshot}) => {
@@ -586,6 +706,8 @@ export const useGameStore = defineStore('game', () => {
     }
 
     const playAgain = async () => {
+        clearTurnTimer()
+        forcedGameEnd.value = false
         playerHand.value = []
         opponentHand.value = []
         deck.value = []
@@ -643,6 +765,8 @@ export const useGameStore = defineStore('game', () => {
         currentMatchId.value = null
         currentGameId.value = null
 
+        clearTurnTimer()
+        forcedGameEnd.value = false
         playerHand.value = []
         opponentHand.value = []
         deck.value = []
@@ -770,5 +894,9 @@ export const useGameStore = defineStore('game', () => {
         syncFromServerGame,
         resetMultiplayer,
         getBoardSnapshot,
+
+        // Turn timer / resign
+        remainingTurnSeconds,
+        resign,
     }
 })

@@ -96,6 +96,15 @@ export const useSocketStore = defineStore('socket', () => {
         })
     }
 
+    const resignGame = (gameID, cb) => {
+        socket.emit('game:resign', { gameID }, (res) => {
+            if (!res?.ok) {
+                console.error('[Socket] game:resign failed', res?.error)
+            }
+            cb && cb(res)
+        })
+    }
+
     const syncGameState = (gameID) => {
         const id = Number(gameID)
         if (!Number.isFinite(id)) return
@@ -181,6 +190,7 @@ export const useSocketStore = defineStore('socket', () => {
         requestJoinableGames,
         joinGame,
         leaveGame,
+        resignGame,
         emitPlayCard,
         syncGameState,
         handleGameEvents,
