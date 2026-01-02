@@ -181,6 +181,11 @@ export const useAPIStore = defineStore('api', () => {
     return axios.get(`${API_BASE_URL}/leaderboards?limit=${limit}`)
   }
 
+  // STATISTICS
+  const getStatistics = () => {
+    return axios.get(`${API_BASE_URL}/statistics`)
+  }
+
   return {
     postGame,
     getGames,
@@ -214,5 +219,6 @@ export const useAPIStore = defineStore('api', () => {
     getMatchDetails,
     getPersonalStats,
     getGlobalLeaderboards,
+    getStatistics,
   }
 })

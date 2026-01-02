@@ -11,6 +11,9 @@
             <Button @click="goToGlobalLeaderboard" size="lg" variant="outline" class="hover:bg-purple-500 hover:text-slate-200">
                 Global Leaderboard
             </Button>
+            <Button @click="goToStatistics" size="lg" variant="outline" class="hover:bg-purple-500 hover:text-slate-200">
+                Statistics
+            </Button>
         </div>
     </div>
     <div class="flex flex-row justify-center items-stretch gap-5 mt-10">
@@ -235,6 +238,10 @@ const goToPersonalLeaderboard = () => {
 
 const goToGlobalLeaderboard = () => {
     router.push({ name: 'globalLeaderboard' })
+}
+
+const goToStatistics = () => {
+    router.push({ name: 'statistics' })
 }
 
 const hostMultiplayerGame = () => {

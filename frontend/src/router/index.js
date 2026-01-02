@@ -113,6 +113,11 @@ const router = createRouter({
       component: () => import('@/pages/leaderboard/GlobalLeaderboardPage.vue'),
     },
     {
+      path: '/statistics',
+      name: 'statistics',
+      component: () => import('@/pages/statistics/StatisticsPage.vue'),
+    },
+    {
       path: '/appManagement',
       name: 'appManagement',
       component: AppManagement,

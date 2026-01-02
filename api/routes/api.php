@@ -14,6 +14,7 @@ use App\Http\Controllers\MultiplayerGameControllerController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\LeaderboardController;
+use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\CoinsController;
 use App\Http\Controllers\CoinTransactionController;
 use App\Http\Controllers\CoinPurchaseController;
@@ -80,5 +81,6 @@ Route::apiResources([
 
 // Public routes (no auth required)
 Route::get('/leaderboards', [LeaderboardController::class, 'global']);
+Route::get('/statistics', [StatisticsController::class, 'index']);
 
 //Route::post('/single_match', [SingleMatchesController::class, 'store']);
