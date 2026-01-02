@@ -113,6 +113,37 @@ class UserController extends Controller
         ]);
     }
 
+    public function changeTheme(Request $request)
+    {
+        $request->validate([
+            'theme' => 'required|string',
+        ]);
+
+        $user = $request->user();
+        $cardName = $request->theme;
+
+        DB::transaction(function () use ($user, $cardName) {
+            $custom = is_array($user->custom) ? $user->custom : [];
+
+            if (!isset($custom['owned_card_themes'])) {
+                $custom['owned_card_themes'] = [];
+            }
+
+            if (!in_array($cardName, $custom['owned_card_themes'])) {
+                abort(409, 'Theme not owned');
+            }
+
+            $user->card_theme = $cardName;
+            $user->save();
+        });
+
+        return response()->json([
+            'message' => 'Card Theme changed successfully!',
+            'user' => $user
+        ]);
+    }
+
+
     public function updateAvatar(Request $request)
     {
             $request->validate([

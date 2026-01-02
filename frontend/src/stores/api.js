@@ -149,7 +149,11 @@ export const useAPIStore = defineStore('api', () => {
 
   //Card Themes
   const updateUserTheme = async (themeId, price) => {
-    return await axios.post(`${API_BASE_URL}/user/theme`, { theme: themeId, price})
+    return await axios.post(`${API_BASE_URL}/user/theme/buy`, { theme: themeId, price})
+  }
+
+  const changeCardTheme = async (themeId) => {
+    return await axios.post(`${API_BASE_URL}/user/theme`, { theme: themeId})
   }
 
   // Files
@@ -209,6 +213,7 @@ export const useAPIStore = defineStore('api', () => {
     getMyCoinTransactions,
     getUserCoinTransactions,
     updateUserTheme,
+    changeCardTheme,
     uploadProfilePhoto,
     getHistory,
     getMatchDetails,

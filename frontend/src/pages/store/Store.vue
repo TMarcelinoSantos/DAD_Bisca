@@ -84,18 +84,22 @@
                       :key="option.id"
                       class="basis-1/2 sm:basis-1/2 md:basis-1/3"
                     >
-                      <!-- use px so items aren't flush to the carousel edges -->
-                      <div class="px-6 py-2 flex flex-col items-center">
-                        <Card class="rounded-lg overflow-hidden w-28 h-40 flex items-center justify-center cursor-pointer shadow-lg z-10"
-                          @click="confirmPurchase({ id: option.id, name: option.name, price: option.price, img: option.src}, 'card' )"
+                      <div class="px-6 py-2 flex flex-col items-center relative">
+                        <Card class="rounded-lg w-28 h-40 flex items-center justify-center cursor-pointer shadow-lg z-10 relative"
+                          @click="isOwned(option.filename) ? selectCardTheme(option.filename) : confirmPurchase({ id: option.id, name: option.name, price: option.price, img: option.src}, 'card')"
                         >
                           <!-- card back image sized as a deck card -->
-                          <img :src="option.src" :alt="option.name" class="w-full h-full object-contain" />
+                          <img :src="option.src" :alt="option.name" class="w-full h-full object-contain rounded-lg" />
                         </Card>
+
+                        <div class="absolute top-2 right-4 z-20">
+                          <div v-if="isSelected(option.filename)" class="w-4 h-4 bg-green-600 rounded-full"></div>
+                          <div v-else-if="isOwned(option.filename)" class="w-4 h-4 bg-gray-400 rounded-full"></div>
+                        </div>
 
                         <div class="mt-3 text-center">
                           <div class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ option.name }}</div>
-                          <div class="mt-1 text-yellow-500 font-semibold">{{ option.price }} <span class="text-gray-600 text-xs">coins</span></div>
+                          <div v-if="!isOwned(option.filename)" class="mt-1 text-yellow-500 font-semibold">{{ option.price }} <span class="text-gray-600 text-xs">coins</span></div>
                         </div>
                       </div>
                     </CarouselItem>
@@ -239,7 +243,7 @@ const errorMessage = ref('')
 const paymentEuros = ref(1)
 const coinsFromPayment = computed(() => paymentEuros.value * 10)
 
-
+const currentUser = computed(() => authStore.currentUser)
 
 const showPayment = ref(false)
 const paymentType = ref<'MBWAY' | 'PAYPAL' | 'IBAN' | 'MB' | 'VISA'>('MBWAY')
@@ -395,6 +399,30 @@ function resetPaymentState() {
   loading.value = false
 }
 
+
+function isOwned(themeName: string) {
+  const custom = typeof currentUser.value?.custom === 'string' 
+    ? JSON.parse(currentUser.value.custom) 
+    : currentUser.value?.custom || {}
+  console.log('isOwned check:', themeName, custom.owned_card_themes, custom.owned_card_themes?.includes(themeName))
+  return custom.owned_card_themes?.includes(themeName)
+}
+
+function isSelected(themeName: string) {
+  console.log('isSelected check:', themeName, currentUser.value?.card_theme, currentUser.value?.card_theme === themeName)
+  return currentUser.value?.card_theme === themeName
+}
+
+async function selectCardTheme(themeName: string) {
+  try {
+    await customizationsStore.setCardTheme(themeName)
+    await authStore.getUser()
+  } catch (err) {
+    console.error('Error changing card theme:', err)
+  }
+}
+
+
 const buyConfirmed = async () => {
   console.log('Purchase confirmed for', selected.value)
   const item = selected.value
@@ -408,11 +436,13 @@ const buyConfirmed = async () => {
 
   try{
     if (item.type === 'card') {
-      const themeName = item.id.endsWith('.png') ? item.id : `${item.id}.png`;
+      const themeName = item.id + '.png';
+      console.log('Buying card theme:', themeName)
       await customizationsStore.buyCardTheme({img: themeName, price: item.price}) 
     }
 
     await authStore.getUser()
+    console.log('User after purchase:', authStore.currentUser)
 
     showConfirm.value = false
     selected.value = null
@@ -432,6 +462,8 @@ const buyConfirmed = async () => {
       price: 1 + (idx * 1),
       src: i.src
     }))
+    console.log('Card backs loaded:', cardBacks.value)
+    console.log('Current user custom:', currentUser.value?.custom)
   })
 
 </script>

@@ -25,6 +25,7 @@ class UserResource extends JsonResource
         'blocked' => $this->blocked,
         'coins_balance' => $this->coins_balance,
         'card_theme' => $this->card_theme,
+        'custom' => $this->custom ? json_decode($this->custom, true) : [],
         ];
     }
 }

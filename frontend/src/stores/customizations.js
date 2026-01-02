@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { useAPIStore } from './api'
 import { useAuthStore } from './auth'
 
-export const useCostumizationsStore = defineStore('costumization', () => {
+export const useCostumizationsStore = defineStore('costumizations', () => {
     const backCard = ref()
     const api = useAPIStore()
     const auth = useAuthStore()
@@ -41,10 +41,16 @@ export const useCostumizationsStore = defineStore('costumization', () => {
         await auth.getUser()
     }
 
+    const setCardTheme = async (themeName) => {
+        await api.changeCardTheme(themeName)
+        await auth.getUser()
+    }
+
     return {
         backCard,
         loadImagesBack,
         getBackCards,
         buyCardTheme,
+        setCardTheme
     }
 })
