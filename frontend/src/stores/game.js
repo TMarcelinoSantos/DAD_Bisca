@@ -120,6 +120,17 @@ export const useGameStore = defineStore('game', () => {
         multiplayerGames.value = []
         activeMultiplayerGame.value = null
         forcedGameEnd.value = false
+
+        // Clear board state and scores so a new multiplayer
+        // game does not reuse points or cards from the previous one.
+        playerHand.value = []
+        opponentHand.value = []
+        deck.value = []
+        playedCards.value = []
+        playerCardWon.value = []
+        opponentCardWon.value = []
+        playerTotalPoints.value = 0
+        opponentTotalPoints.value = 0
     }
 
     const getBoardSnapshot = () => {
@@ -232,6 +243,13 @@ export const useGameStore = defineStore('game', () => {
         deck.value = shuffled.slice()
         playerHand.value = []
         opponentHand.value = []
+
+        // Reset any previous multiplayer game state
+        playedCards.value = []
+        playerCardWon.value = []
+        opponentCardWon.value = []
+        playerTotalPoints.value = 0
+        opponentTotalPoints.value = 0
 
         for (let i = 0; i < parseInt(hand.value); i++) {
             playerHand.value.push(deck.value.pop())

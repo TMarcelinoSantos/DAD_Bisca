@@ -10,6 +10,7 @@ use App\Http\Controllers\RoundController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\MatchController;
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\MultiplayerGameControllerController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\LeaderboardController;
@@ -42,8 +43,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('users', UserController::class)->except(['store']);
     Route::apiResource('matches', MatchController::class);
-    Route::apiResource('games', GameController::class);
-    Route::apiResource('matches.games', GameController::class)->shallow();
+    Route::apiResource('games', MultiplayerGameControllerController::class);
+    Route::apiResource('matches.games', MultiplayerGameControllerController::class)->shallow();
 
     Route::get('users/me/history', [HistoryController::class, 'index']);
     Route::get('users/me/history/{matchId}', [HistoryController::class, 'showMatch']);
@@ -53,12 +54,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/user/theme', [UserController::class, 'updateTheme']);
     Route::post('/user/avatar', [UserController::class, 'updateAvatar']);
-    
+
     Route::post('/user/coins', [UserController::class, 'updateUserCoins']);
     Route::post('/user/coins/reward', [UserController::class, 'updateRewardCoins']);
 
     //Route::post('/coins/purchase', [CoinsController::class, 'store']);
-    Route::get('/coins/transactions/me', [CoinTransactionController::class, 'myTransactions']);    
+    Route::get('/coins/transactions/me', [CoinTransactionController::class, 'myTransactions']);
     Route::get('/coins/transactions/{userId}', [CoinTransactionController::class, 'userTransactions']);
     Route::post('/coin-purchases', [CoinPurchaseController::class, 'store']);
 });

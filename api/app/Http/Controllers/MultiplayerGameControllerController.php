@@ -3,16 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Games;
+use App\Models\MultiplayerGameController;
 
-class GameController extends Controller
+class MultiplayerGameControllerController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Games::all();
+        return MultiplayerGameController::all();
     }
 
     /**
@@ -37,7 +37,7 @@ class GameController extends Controller
             'custom'           => 'nullable|array',
         ]);
 
-        $game = Games::create($validated);
+        $game = MultiplayerGameController::create($validated);
 
         return response()->json($game, 201);
     }
@@ -47,7 +47,7 @@ class GameController extends Controller
      */
     public function show(string $id)
     {
-        $game = Games::findOrFail($id);
+        $game = MultiplayerGameController::findOrFail($id);
 
         return $game;
     }
@@ -57,7 +57,7 @@ class GameController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $game = Games::findOrFail($id);
+        $game = MultiplayerGameController::findOrFail($id);
 
         $validated = $request->validate([
             'type'             => 'nullable|in:3,9',
@@ -86,7 +86,7 @@ class GameController extends Controller
      */
     public function destroy(string $id)
     {
-        $game = Games::findOrFail($id);
+        $game = MultiplayerGameController::findOrFail($id);
         $game->delete();
 
         return response()->noContent();

@@ -35,7 +35,11 @@ export const joinGame = (gameID, player) => {
     }
 
     if (game.player1 && game.player2) {
+        // When both seats are filled, game starts
         game.state = 'playing'
+        if (!game.beganAt) {
+            game.beganAt = new Date().toISOString()
+        }
     }
 
     return game
@@ -298,6 +302,8 @@ const finalizeGame = (game) => {
     const board = game.board
     if (!board) return
 
+    const now = new Date()
+
     // total points for each side
     const playerPoints =
         board.playerTotalPoints ?? getBiscaPoints(board.playerCardWon || [])
@@ -339,6 +345,14 @@ const finalizeGame = (game) => {
         opponentPoints,
         playerMarks,
         opponentMarks,
+    }
+
+    // Mark game as finished in time terms as well
+    game.endedAt = now.toISOString()
+    if (game.beganAt) {
+        const start = new Date(game.beganAt)
+        const diffSeconds = Math.max(0, Math.round((now - start) / 1000))
+        game.totalTimeSeconds = diffSeconds
     }
 
     game.state = 'finished'

@@ -3,6 +3,7 @@
     import GameBoard from '@/components/game/GameBoard.vue'
     import { useSocketStore } from '@/stores/socket'
     import { useAuthStore } from '@/stores/auth'
+    import { useAPIStore } from '@/stores/api'
     import { onMounted, ref, watch } from 'vue'
     import { toast } from 'vue-sonner'
     import { useRouter } from 'vue-router'
@@ -11,8 +12,75 @@
     const gameStore = useGameStore()
     const socketStore = useSocketStore()
     const authStore = useAuthStore()
+    const apiStore = useAPIStore()
     const isGameOver = ref(false)
     const isLoading = ref(true)
+    const hasSavedGame = ref(false)
+
+    const saveMultiplayerGame = () => {
+        if (hasSavedGame.value) return
+
+        const game = socketStore.currentGame
+        const currentUser = authStore.currentUser
+
+        if (!game || !currentUser) return
+        if (!game.player1 || !game.player2 || !game.result) return
+
+        const { result } = game
+
+        const player1Id = game.player1.id
+        const player2Id = game.player2.id
+
+        const player1Points = result.playerPoints ?? 0
+        const player2Points = result.opponentPoints ?? 0
+
+        let winnerUserId = null
+        let loserUserId = null
+        let isDraw = 0
+
+        if (result.winner === 'player') {
+            winnerUserId = player1Id
+            loserUserId = player2Id
+        } else if (result.winner === 'opponent') {
+            winnerUserId = player2Id
+            loserUserId = player1Id
+        } else {
+            isDraw = 1
+        }
+
+        // Only one client should persist the game:
+        //  - if there is a winner -> that winner
+        //  - if it's a draw       -> player1 (host)
+        if (winnerUserId) {
+            if (currentUser.id !== winnerUserId) return
+        } else {
+            if (currentUser.id !== player1Id) return
+        }
+
+        hasSavedGame.value = true
+
+        const payload = {
+            type: gameStore.hand,
+            status: 'Ended',
+            player1_user_id: player1Id,
+            player2_user_id: player2Id,
+            began_at: game.beganAt ?? null,
+            ended_at: game.endedAt ?? null,
+            total_time: game.totalTimeSeconds ?? null,
+            winner_user_id: winnerUserId,
+            loser_user_id: loserUserId,
+            is_draw: isDraw,
+            player1_points: player1Points,
+            player2_points: player2Points,
+        }
+
+        toast.promise(apiStore.postGame(payload), {
+            loading: 'Saving multiplayer game...',
+            success: () => '[API] Multiplayer game saved successfully',
+            error: (data) =>
+                `[API] Error saving multiplayer game - ${data?.response?.data?.message}`,
+        })
+    }
 
     const showGameOverPopup = () => {
         if (isGameOver.value) return
@@ -41,6 +109,7 @@
         () => socketStore.currentGame?.state,
         (state) => {
             if (state !== 'finished') return
+            saveMultiplayerGame()
             showGameOverPopup()
         },
     )
