@@ -167,4 +167,28 @@ class UserController extends Controller
 
         return response()->json(['verified' => true], 200);
     }
+
+    public function updateBlocked(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'blocked' => ['required', 'boolean'],
+        ]);
+
+        $user->blocked = $data['blocked'];
+        $user->save();
+
+        return new UserResource($user);
+    }
+
+    public function updateType(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'type' => ['required', 'string', 'in:A,P'],
+        ]);
+
+        $user->type = $data['type'];
+        $user->save();
+
+        return new UserResource($user);
+    }
 }

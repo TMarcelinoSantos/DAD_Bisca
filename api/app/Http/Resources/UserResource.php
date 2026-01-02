@@ -22,6 +22,7 @@ class UserResource extends JsonResource
         'photo_avatar_filename' => $this->photo_avatar_filename,
         'avatar' => $this->photo_avatar_filename,
         'type' => $this->type,
+        'blocked' => $this->blocked,
         'coins_balance' => $this->coins_balance,
         'card_theme' => $this->card_theme,
         ];

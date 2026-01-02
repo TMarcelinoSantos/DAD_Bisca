@@ -77,6 +77,10 @@ export const useAPIStore = defineStore('api', () => {
     return axios.get(`${API_BASE_URL}/users`)
   }
 
+  const getUser = (userId) => {
+    return axios.get(`${API_BASE_URL}/users/${userId}`)
+  }
+
   const getAuthUser = () => {
     return axios.get(`${API_BASE_URL}/users/me`)
   }
@@ -87,6 +91,22 @@ export const useAPIStore = defineStore('api', () => {
 
   const patchUserPhoto = (id, filename) => {
     return axios.patch(`${API_BASE_URL}/users/${id}/photo-url`, filename)
+  }
+
+  const patchUserBlocked = (id, blocked) => {
+    return axios.patch(`${API_BASE_URL}/users/${id}/block`, { blocked })
+  }
+
+  const patchUserType = (id, type) => {
+    return axios.patch(`${API_BASE_URL}/users/${id}/updateType`, { type })
+  }
+
+  const blockUser = (userId) => {
+    return patchUserBlocked(userId, true)
+  }
+
+  const unblockUser = (userId) => {
+    return patchUserBlocked(userId, false)
   }
 
   const deleteUser = (userId) => {
@@ -105,8 +125,26 @@ export const useAPIStore = defineStore('api', () => {
     }
   } 
 
-  // Files
+  //Coins
+  // const purchaseCoins = (value, coins) => {
+  //   return axios.post(`${API_BASE_URL}/coins/purchase`, {value, coins})
+  // }
 
+  const purchaseCoins = (payload) =>{
+    return axios.post(`${API_BASE_URL}/coin-purchases`, payload)
+  }
+
+  const getMyCoinTransactions =() =>{
+    return axios.get(`${API_BASE_URL}/coins/transactions/me`)
+  }
+
+  const getUserCoinTransactions = (userId) => {
+    return axios.get(`${API_BASE_URL}/coins/transactions/${userId}`)
+  }
+
+
+
+  // Files
   const uploadProfilePhoto = async (file) => {
     const formData = new FormData()
     formData.append('photo', file)
@@ -135,16 +173,23 @@ export const useAPIStore = defineStore('api', () => {
     updateSingleMatch,
     postLogin,
     postLogout,
+    getUser,
     postUser,
     getUsers,
     getAuthUser,
     putUser,
     patchUserPhoto,
+    patchUserType,
+    blockUser,
+    unblockUser,
     deleteUser,
     verifyPassword,
     postRound,
     getRound,
     updateRound,
+    purchaseCoins,
+    getMyCoinTransactions,
+    getUserCoinTransactions,
     uploadProfilePhoto,
   }
 })

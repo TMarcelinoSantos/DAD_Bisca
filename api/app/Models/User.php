@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\CoinPurchase;
 
 class User extends Authenticatable
 {
@@ -26,6 +27,7 @@ class User extends Authenticatable
         'email',
         'password',
         'type',
+        'blocked',
         'coins_balance',
         'card_theme',
         'photo_avatar_filename',
@@ -51,7 +53,13 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'blocked' => 'boolean',
         ];
+    }
+
+    public function coinPurchases()
+    {
+        return $this->hasMany(CoinPurchase::class);
     }
 
 }

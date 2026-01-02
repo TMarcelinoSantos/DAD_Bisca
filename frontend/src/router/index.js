@@ -4,8 +4,13 @@ import AboutPage from '@/pages/about/AboutPage.vue'
 import LoginPage from '@/pages/login/LoginPage.vue'
 import RegisterPage from '@/pages/register/RegisterPage.vue'
 import ProfilePage from '@/pages/profile/ProfilePage.vue'
+import StorePage from '@/pages/store/Store.vue'
+import PaymentPage from '@/pages/store/Payment.vue'
+import CoinsHistoryPage from '@/pages/store/HistoryCoins.vue'
 import SinglePlayerGamePage from '../pages/game/SinglePlayerGamePage.vue'
 import SinglePlayerMatchesPage from '../pages/game/SinglePlayerMatchesPage.vue'
+import AppManagement from '@/pages/admin/AppManagement.vue'
+import AdminProfilePage from '@/pages/admin/AdminProfilePage.vue'
 import { useAuthStore } from '@/stores/auth'
 import MultiPlayerGamePage from '@/pages/game/MultiPlayerGamePage.vue'
 import MultiPlayerMatchPage from '@/pages/game/MultiPlayerMatchesPage.vue'
@@ -65,22 +70,58 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/store',
+      name: 'store',
+      component: StorePage,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/payment',
+      name: 'payment',
+      component: PaymentPage,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/coinshistory',
+      name: 'coinshistory',
+      component: CoinsHistoryPage,
+    },
+    {
       path: '/about',
       name: 'about',
       component: AboutPage,
     },
+    {
+      path: '/appManagement',
+      name: 'appManagement',
+      component: AppManagement,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
+      path: '/adminProfile',
+      name: 'adminProfile',
+      component: AdminProfilePage,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    }
   ],
 })
 
 // navigation guard: redirect to login if route requires auth and user not authenticated
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
+
   if (to.matched.some(record => record.meta?.requiresAuth)) {
-    if (auth.isLoggedIn) {
-      return next()
+    if (!auth.isLoggedIn) {
+      return next({ name: 'login' })
     }
-    return next({ name: 'login' })
   }
+
+  if (to.matched.some(record => record.meta?.requiresAdmin)) {
+    if (!auth.isAdmin) {
+      return next({ name: 'home' })
+    }
+  }
+
   next()
 })
 

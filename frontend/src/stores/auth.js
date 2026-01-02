@@ -13,6 +13,10 @@ export const useAuthStore = defineStore('auth', () => {
     return currentUser.value !== undefined
   })
 
+  const isAdmin = computed(() => {
+    return currentUser.value.type === 'A'
+  })
+
   const login = async (credentials) => {
     await apiStore.postLogin(credentials)
     await getUser()
@@ -38,6 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     currentUser,
     isLoggedIn,
+    isAdmin,
     login,
     logout,
     register,
