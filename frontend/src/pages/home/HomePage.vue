@@ -19,18 +19,13 @@
                     <label class="text-sm font-medium">Choose Type</label>
                     <div class="grid grid-cols-2 gap-2">
                         <Button v-for="level in gameStore.hands" :key="level.value" size="sm"
-                            :variant="selectedHand === level.value ? 'default' : 'outline'"
+                            :variant="selectedGameHand === level.value ? 'default' : 'outline'"
                             class="flex flex-col py-3 h-16"
-                            @click="selectedHand = level.value">
+                            @click="selectedGameHand = level.value">
                             <span class="front-semibold">{{ level.label }}</span>
                         </Button>
                     </div>
                 </div>
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">High Scores (local)</label>
-                    <!-- TODO: Add High Scores functionality -->
-                </div>
-
                 <div class="flex justify-center">
                     <Button
                       @click="startGame"
@@ -161,21 +156,17 @@
                     <label class="text-sm font-medium">Choose Type</label>
                     <div class="grid grid-cols-2 gap-2">
                         <Button v-for="level in gameStore.hands" :key="level.value" size="sm"
-                            :variant="selectedHand === level.value ? 'default' : 'outline'"
+                            :variant="selectedMatchHand === level.value ? 'default' : 'outline'"
                             class="flex flex-col py-3 h-16"
-                            @click="selectedHand = level.value">
+                            @click="selectedMatchHand = level.value">
                             <span class="front-semibold">{{ level.label }}</span>
                         </Button>
                     </div>
                 </div>
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">High Scores (local)</label>
-                    <!-- TODO: Add High Scores functionality -->
-                </div>
 
                 <div class="flex justify-center">
                     <Button @click="startMatch" size="lg" variant="secondary" class="hover:bg-purple-500 hover:text-slate-200" :disabled="isAdmin">
-                        Start Game
+                        Start Match
                     </Button>
                 </div>
             </CardContent>
@@ -221,7 +212,8 @@ const authStore = useAuthStore()
 const apiStore = useAPIStore()
 
 const router = useRouter()
-const selectedHand = ref('')
+const selectedGameHand = ref('')
+const selectedMatchHand = ref('')
 const selectedMultiplayerHand = ref('9')
 const isLoadingRooms = ref(false)
 const isLoggedIn = computed(() => authStore.isLoggedIn)
@@ -229,12 +221,12 @@ const isAdmin = computed(() => authStore.currentUser?.type === 'A')  // ← add
 
 const startGame = () => {
     if (isAdmin.value) return        // safety guard
-    gameStore.hand = selectedHand.value
+    gameStore.hand = selectedGameHand.value
     router.push({ name: 'singleplayer' })
 }
 
 const startMatch = () => {
-    gameStore.hand = selectedHand.value
+    gameStore.hand = selectedMatchHand.value
     router.push({ name: 'singlematches' })
 }
 
