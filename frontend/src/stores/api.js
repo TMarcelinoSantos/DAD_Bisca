@@ -184,8 +184,8 @@ export const useAPIStore = defineStore('api', () => {
   }
 
   // LEADERBOARDS
-  const getGlobalLeaderboards = (limit = 10) => {
-    return axios.get(`${API_BASE_URL}/leaderboards?limit=${limit}`)
+  const getGlobalLeaderboards = (params = {}) => {
+    return axios.get(`${API_BASE_URL}/leaderboards`, { params })
   }
 
   // STATISTICS
