@@ -13,7 +13,11 @@
     const gameWinner = ref(null)
     const matchWinner = ref(null)
 
-    watch(() => gameStore.isGameComplete, async(isComplete) => {
+    // React when a single-player game inside the match finishes
+    // (deck + hands empty or forced end via resign).
+    watch(
+        () => gameStore.isGameComplete,
+        async (isComplete) => {
         if (!isComplete) return
         
         const playerPoints = gameStore.getBiscaPoints(gameStore.playerCardWon)
@@ -28,9 +32,7 @@
             toast(`Game Completed - It's a tie ${playerPoints} to ${opponentPoints}`)
             gameWinner.value = "tie"
         }
-        if (gameStore.isAuthenticated){
-            await gameStore.saveGame()
-        } 
+        // Local-only matches: do not persist single games or matches
         gameStore.addMatchPoints()
         isGameOver.value = true
 
@@ -38,37 +40,34 @@
             toast.success("Match Completed — You WIN the match!")
             isMatchOver.value = true
             matchWinner.value = 'player'
-            if (gameStore.isAuthenticated) gameStore.saveMatch()
             return
         }else if (gameStore.opponentMarks >= 4) {
             toast.error("Match Completed — You LOST the match!")
             isMatchOver.value = true
             matchWinner.value = 'opponent'
-            if (gameStore.isAuthenticated) gameStore.saveMatch()
             return
         }
         console.log(`Starting new round. Current Score - Player: ${gameStore.playerMarks}, Opponent: ${gameStore.opponentMarks}`)
-        //gameStore.playAgain()
-        //await gameStore.startGame()
-        //gameStore.setBoard()
-                 
-    })
+    },
+    )
 
-    onMounted(async () => {
+    onMounted(() => {
+        // Fresh local match state; no database persistence
+        gameStore.resetMatch()
         gameStore.setBoard()
-        await gameStore.startMatch()
     })
 
-    const playAgain = async () =>{
-        gameStore.playAgain()
-        await gameStore.startMatch()
+    const playAgain = () =>{
+        // Continue the same match: keep marks, just deal a new game
+        gameStore.resetSingleMatchBoard()
         isMatchOver.value = false
         isGameOver.value = false
     }
 
-    const startNewMatch = async () => {
+    const startNewMatch = () => {
+        // Completely new match: reset marks and deal a fresh board
         gameStore.resetMatch()
-        await gameStore.startMatch()
+        gameStore.setBoard()
         isMatchOver.value = false
         isGameOver.value = false
     }

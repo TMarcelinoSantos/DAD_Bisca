@@ -820,6 +820,30 @@ export const useGameStore = defineStore('game', () => {
         lastGameWinner.value = null
     }
 
+    // Reset only the current single-player game board for a match,
+    // keeping accumulated match marks intact and without touching
+    // any database-related identifiers.
+    const resetSingleMatchBoard = () => {
+        clearTurnTimer()
+        forcedGameEnd.value = false
+        playerHand.value = []
+        opponentHand.value = []
+        deck.value = []
+        playedCards.value = []
+        playerCardWon.value = []
+        opponentCardWon.value = []
+        turn.value = 'player'
+        beganAt.value = undefined
+        endedAt.value = undefined
+        totalRounds.value = 0
+        playerTotalPoints.value = 0
+        opponentTotalPoints.value = 0
+        roundSaved.value = false
+        lastGameWinner.value = null
+
+        setBoard()
+    }
+
     const addMatchPoints = () => {
         // For multiplayer matches we rely on the board's total points,
         // which can be normalized by the server (e.g. resignation).
@@ -925,6 +949,7 @@ export const useGameStore = defineStore('game', () => {
         getBiscaPoints,
         addMatchPoints,
         resetMatch,
+        resetSingleMatchBoard,
         getWinType,
         playerMarks,
         opponentMarks,
