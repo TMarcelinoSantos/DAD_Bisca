@@ -101,10 +101,8 @@ onMounted(() => {
 
 <template>
 
-    <div
-        class="flex flex-col justify-around items-center w-full h-screen"
-        :style="{ backgroundColor: '#0b7a3c', padding: '40px 20px' }"
-    >
+    <div class="flex flex-col justify-around items-center w-full min-h-screen"
+        :style="{ backgroundColor: '#0b7a3c', padding: '100px 20px 120px 20px' }">
         <div class="flex flex-col items-center">
             <div class="mb-2 flex items-center gap-2 text-sm text-white/90">
                 <span

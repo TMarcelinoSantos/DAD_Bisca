@@ -1,6 +1,8 @@
 <template>
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-10">
-        <span class="text-4xl text-aligh-center font-bold">GAMES</span>
+    <div class="flex justify-center my-10">
+        <h1 class="text-4xl sm:text-5xl font-bold text-yellow-700 tracking-widest uppercase">
+            GAMES
+        </h1>
     </div>
     <div class="flex flex-row justify-center items-stretch gap-5 mt-10">
         <Card class="w-full max-w-md">
@@ -132,7 +134,12 @@
             </CardContent>
         </Card>
     </div>
-    <span class="text-4xl font-bold mb-10">MATCHES</span>
+    
+    <div class="flex justify-center my-10">
+        <h1 class="text-4xl sm:text-5xl font-bold text-yellow-700 tracking-widest uppercase">
+            MATCHES
+        </h1>
+    </div>
     <div class="flex flex-row justify-center items-stretch gap-5 mt-10">
         <Card class="w-full max-w-md">
             <CardHeader>

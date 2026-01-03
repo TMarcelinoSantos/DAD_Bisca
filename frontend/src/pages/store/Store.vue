@@ -223,7 +223,7 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Coins } from 'lucide-vue-next'
 
 import {
