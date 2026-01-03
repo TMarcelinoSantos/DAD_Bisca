@@ -14,6 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
   })
 
   const isAdmin = computed(() => {
+    if(currentUser.value===undefined) return false
     return currentUser.value.type === 'A'
   })
 

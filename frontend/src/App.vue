@@ -90,17 +90,17 @@
                     <RouterLink to="/store" class="hover:text-black">Store</RouterLink>
                   </NavigationMenuLink>
                 </li>
-                <li>
+                <li v-if="!authStore.isAdmin">
                   <NavigationMenuLink as-child>
                     <RouterLink to="/coinshistory" class="hover:text-black">Transactions</RouterLink>
                   </NavigationMenuLink>
                 </li>
-                <li>
+                <li v-if="!authStore.isAdmin">
                   <NavigationMenuLink as-child>
                     <RouterLink to="/history" class="hover:text-black">History</RouterLink>
                   </NavigationMenuLink>
                 </li>
-                <li>
+                <li v-if="!authStore.isAdmin">
                   <NavigationMenuLink as-child>
                     <RouterLink to="/leaderboard" class="hover:text-black">Leaderboard</RouterLink>
                   </NavigationMenuLink>

@@ -30,11 +30,13 @@ const router = createRouter({
           path: 'singleplayer',
           name: 'singleplayer',
           component: SinglePlayerGamePage,
+          meta: { notAdmin: true },
         },
         {
           path: 'multiplayergame',
           name: 'multiplayergame',
           component: MultiPlayerGamePage,
+          meta: { notAdmin: true },
         },
       ],
     },
@@ -45,11 +47,13 @@ const router = createRouter({
           path: 'singlematches',
           name: 'singlematches',
           component: SinglePlayerMatchesPage,
+          meta: { notAdmin: true },
         },
         {
           path: 'multiplayermatches',
           name: 'multiplayermatches',
           component: MultiPlayerMatchPage,
+          meta: { notAdmin: true },
         },
       ],
     },
@@ -134,7 +138,6 @@ const router = createRouter({
   ],
 })
 
-// navigation guard: redirect to login if route requires auth and user not authenticated
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
 
@@ -146,6 +149,13 @@ router.beforeEach((to, from, next) => {
 
   if (to.matched.some(record => record.meta?.requiresAdmin)) {
     if (!auth.isAdmin) {
+      return next({ name: 'home' })
+    }
+  }
+
+  // block admins from player-only routes
+  if (to.matched.some(record => record.meta?.notAdmin)) {
+    if (auth.isAdmin) {
       return next({ name: 'home' })
     }
   }
