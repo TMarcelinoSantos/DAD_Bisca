@@ -10,52 +10,103 @@
       </RouterLink>
     </div>
     <NavigationMenu>
-      <NavigationMenuList class="justify-around gap-20 text-amber-100">
-        <!-- LOGIN BUTTON -->
-        <NavigationMenuItem v-if="!authStore.isLoggedIn">
-          <NavigationMenuLink class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10">
-            <RouterLink to="/login" class="hover:text-amber-200">Login</RouterLink>
+      <NavigationMenuList class="justify-around gap-6 text-amber-100">
+        <!-- Platform stats - always visible -->
+        <NavigationMenuItem>
+          <NavigationMenuLink
+            class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10"
+          >
+            <RouterLink to="/statistics" class="hover:text-amber-200">Statistics</RouterLink>
           </NavigationMenuLink>
         </NavigationMenuItem>
+
+        <NavigationMenuItem>
+          <NavigationMenuLink
+            class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10"
+          >
+            <RouterLink to="/leaderboards" class="hover:text-amber-200">Global leaderboard</RouterLink>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+
+        <!-- AUTH-DEPENDENT ITEMS -->
+        <template v-if="!authStore.isLoggedIn">
+          <!-- LOGIN BUTTON -->
+          <NavigationMenuItem>
+            <NavigationMenuLink
+              class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10"
+            >
+              <RouterLink to="/login" class="hover:text-amber-200">Login</RouterLink>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+        </template>
+
         <template v-else>
-          <NavigationMenuItem v-if ="authStore.isAdmin">
-            <NavigationMenuLink class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10">
+          <!-- APP MANAGEMENT FOR ADMINS -->
+          <NavigationMenuItem v-if="authStore.isAdmin">
+            <NavigationMenuLink
+              class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10"
+            >
               <RouterLink to="/appManagement" class="hover:text-amber-200">App Management</RouterLink>
             </NavigationMenuLink>
           </NavigationMenuItem>
+
+          <!-- USER MENU -->
           <NavigationMenuItem class="flex items-center gap-4">
-            <template v-if = "!authStore.isAdmin">
+            <template v-if="!authStore.isAdmin">
               <span
                 class="inline-flex items-center gap-1 rounded-full border border-amber-200/30 bg-amber-100/10 px-3 py-1 text-sm text-amber-50"
               >
                 {{ authStore.currentUser?.coins_balance ?? 0 }} 🪙
               </span>
             </template>
-            <NavigationMenuTrigger class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10">
+
+            <NavigationMenuTrigger
+              class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10"
+            >
               <img
                 :src="authStore.currentUser?.avatar || '/default-avatar.png'"
                 alt="User Avatar"
                 class="inline-block h-6 w-6 rounded-full mr-2"
               />
-              {{ authStore.currentUser?.nickname || authStore.currentUser?.name}}</NavigationMenuTrigger>
-            <NavigationMenuContent class="bg-emerald-950/95 text-amber-100 border border-amber-400/30 shadow-2xl">
-              <li>
-                <!-- PROFILE -->
-                <NavigationMenuLink as-child>
-                  <RouterLink to="/profile" class="hover:text-black">Profile</RouterLink>
-                </NavigationMenuLink>
-                <!-- STORE -->
-                <NavigationMenuLink v-if="!authStore.isAdmin" as-child>
-                  <RouterLink to="/store" class="hover:text-black">Store</RouterLink>
-                </NavigationMenuLink>
-                <NavigationMenuLink as-child>
-                  <RouterLink to="/coinshistory">Coin History</RouterLink>
-                </NavigationMenuLink>
-                <!-- LOGOUT -->
-                <NavigationMenuLink as-child>
-                  <a @click.prevent="logout" class="cursor-pointer hover:text-black">Logout</a>
-                </NavigationMenuLink>
-              </li>
+              {{ authStore.currentUser?.nickname || authStore.currentUser?.name }}
+            </NavigationMenuTrigger>
+
+            <NavigationMenuContent
+              sideOffset="8"
+              class="bg-emerald-950/95 text-amber-100 border border-amber-400/30 shadow-2xl"
+            >
+              <ul class="flex flex-col gap-1 px-4 py-2">
+                <li>
+                  <NavigationMenuLink as-child>
+                    <RouterLink to="/profile" class="hover:text-black">Profile</RouterLink>
+                  </NavigationMenuLink>
+                </li>
+                <li v-if="!authStore.isAdmin">
+                  <NavigationMenuLink as-child>
+                    <RouterLink to="/store" class="hover:text-black">Store</RouterLink>
+                  </NavigationMenuLink>
+                </li>
+                <li>
+                  <NavigationMenuLink as-child>
+                    <RouterLink to="/coinshistory" class="hover:text-black">Transactions</RouterLink>
+                  </NavigationMenuLink>
+                </li>
+                <li>
+                  <NavigationMenuLink as-child>
+                    <RouterLink to="/history" class="hover:text-black">History</RouterLink>
+                  </NavigationMenuLink>
+                </li>
+                <li>
+                  <NavigationMenuLink as-child>
+                    <RouterLink to="/leaderboard" class="hover:text-black">Leaderboard</RouterLink>
+                  </NavigationMenuLink>
+                </li>
+                <li>
+                  <NavigationMenuLink as-child>
+                    <a @click.prevent="logout" class="cursor-pointer hover:text-black">Logout</a>
+                  </NavigationMenuLink>
+                </li>
+              </ul>
             </NavigationMenuContent>
           </NavigationMenuItem>
         </template>
