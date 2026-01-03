@@ -777,10 +777,7 @@ export const useGameStore = defineStore('game', () => {
     const currentMatchId = ref(null)
     const getWinType = ref(null)
 
-    const getPointsMatches = () =>{
-        const playerPoints = getBiscaPoints(playerCardWon.value)
-        const opponentPoints = getBiscaPoints(opponentCardWon.value)
-
+    const getPointsMatches = (playerPoints, opponentPoints) =>{
         const winnerPoints = playerPoints > opponentPoints ? playerPoints : opponentPoints
 
         if(playerPoints == opponentPoints) return 0
@@ -824,10 +821,20 @@ export const useGameStore = defineStore('game', () => {
     }
 
     const addMatchPoints = () => {
-        const playerPoints = getBiscaPoints(playerCardWon.value)
-        const opponentPoints = getBiscaPoints(opponentCardWon.value)
+        // For multiplayer matches we rely on the board's total points,
+        // which can be normalized by the server (e.g. resignation).
+        let playerPoints
+        let opponentPoints
 
-        const marks = getPointsMatches()
+        if (isMultiplayerGame.value) {
+            playerPoints = playerTotalPoints.value
+            opponentPoints = opponentTotalPoints.value
+        } else {
+            playerPoints = getBiscaPoints(playerCardWon.value)
+            opponentPoints = getBiscaPoints(opponentCardWon.value)
+        }
+
+        const marks = getPointsMatches(playerPoints, opponentPoints)
 
         if (playerPoints > opponentPoints) {
             playerMarks.value += marks

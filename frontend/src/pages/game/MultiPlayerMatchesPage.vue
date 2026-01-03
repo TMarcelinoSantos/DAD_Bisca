@@ -65,11 +65,9 @@ const saveMultiplayerGame = async () => {
     total_time: game.totalTimeSeconds ?? null,
     player1_points: result.playerPoints ?? 0,
     player2_points: result.opponentPoints ?? 0,
-    custom: {
-      context: 'multiplayer_match_round',
-      playerMarks: result.playerMarks ?? 0,
-      opponentMarks: result.opponentMarks ?? 0,
-    },
+    // For now, don't send structured custom data to avoid
+    // Array to string conversion issues on the backend.
+    custom: null,
   }
 
   try {
@@ -174,9 +172,6 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center bg-slate-900 text-white px-4 py-6">
-    <h1 class="text-2xl font-bold mb-4">Multiplayer Match (first to 4 marks)</h1>
-
     <GameBoard
       v-if="!isLoading"
       :opponentCards="gameStore.opponentHand"
@@ -192,14 +187,6 @@ onMounted(() => {
         <span class="font-semibold">Match Marks:</span>
         <span class="ml-2">You {{ gameStore.playerMarks }} - {{ gameStore.opponentMarks }} Opponent</span>
       </div>
-
-      <button
-        v-if="!isGameOver && !isMatchOver"
-        @click="handleResign"
-        class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 text-sm"
-      >
-        Resign
-      </button>
     </div>
 
     <!-- Per-game (round) result -->
@@ -279,5 +266,4 @@ onMounted(() => {
         </div>
       </div>
     </transition>
-  </div>
 </template>

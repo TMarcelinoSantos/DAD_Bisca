@@ -359,12 +359,17 @@ const hostMultiplayerMatchGame = async () => {
         return
     }
 
+    // Start a fresh multiplayer match: reset marks and board state
+    gameStore.resetMatch()
     gameStore.hand = selectedMultiplayerMatchHand.value
 
     // Create a room flagged as a "match" but stay in the lobby
     // until a second player joins and the game becomes "playing".
     socketStore.createGame(selectedMultiplayerMatchHand.value, 'match', (res) => {
-        if (!res?.ok) {
+        if (res?.ok) {
+            // Immediately refresh rooms so this new match appears in the list
+            loadMatchRooms()
+        } else {
             toast.error(res?.error || 'Failed to create multiplayer game for match')
         }
     })
@@ -403,6 +408,9 @@ const joinMultiplayerMatchGame = async (gameId) => {
         toast.error(msg)
         return
     }
+
+    // Joining an existing match room should also start with fresh local marks
+    gameStore.resetMatch()
 
     socketStore.joinGame(gameId, (res) => {
         if (res?.ok) {

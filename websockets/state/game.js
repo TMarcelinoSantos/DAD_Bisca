@@ -171,10 +171,19 @@ export const resignGame = (gameID, player) => {
 
     const winnerSeat = seat === 'player' ? 'opponent' : 'player'
 
+    // Resigning should concede the **current game** and award the
+    // remaining card points to the opponent, but without turning it
+    // into an automatic 4-mark "bandeira" in the match.
+
+    // Normalize piles
+    board.playerCardWon = board.playerCardWon || []
+    board.opponentCardWon = board.opponentCardWon || []
+
+    // Collect all remaining cards on the table, in hands, and deck
     const remaining = []
-    remaining.push(...board.deck)
-    remaining.push(...board.playerHand)
-    remaining.push(...board.opponentHand)
+    remaining.push(...(board.deck || []))
+    remaining.push(...(board.playerHand || []))
+    remaining.push(...(board.opponentHand || []))
     remaining.push(...(board.playedCards || []).map((c) => getCardId(c)))
 
     if (board.trumpCard && !board.trumpHidden) {
@@ -189,16 +198,22 @@ export const resignGame = (gameID, player) => {
 
     const extraPoints = getBiscaPoints(remaining)
     if (winnerSeat === 'player') {
-        board.playerTotalPoints += extraPoints
+        board.playerTotalPoints = (board.playerTotalPoints || 0) + extraPoints
     } else {
-        board.opponentTotalPoints += extraPoints
+        board.opponentTotalPoints = (board.opponentTotalPoints || 0) + extraPoints
     }
 
+    // Mark this game as having ended via resignation so that
+    // match mark calculation can be clamped to 1 mark.
+    board.resigned = true
+
+    // Clear remaining live board state
     board.deck = []
     board.playerHand = []
     board.opponentHand = []
     board.playedCards = []
     board.trumpCard = null
+    board.trumpHidden = true
 
     finalizeGame(game)
     clearTurnTimer(gameID)
@@ -304,7 +319,8 @@ const resolveTrick = (game) => {
     getDeckCard(game)
 }
 
-const computeMatchOutcome = (playerPoints, opponentPoints) => {
+const computeMatchOutcome = (playerPoints, opponentPoints, options = {}) => {
+    const { resigned = false } = options
     // winner only if someone has at least 61 points and strictly more than the other
     let winner = 'tie'
     if (playerPoints > opponentPoints && playerPoints >= 61) {
@@ -317,22 +333,30 @@ const computeMatchOutcome = (playerPoints, opponentPoints) => {
     let opponentMarks = 0
 
     if (winner !== 'tie') {
-        const winnerPoints = winner === 'player' ? playerPoints : opponentPoints
-
-        // 61–90 -> 1 mark
-        if (winnerPoints >= 61 && winnerPoints <= 90) {
+        // If the game ended by resignation, always award exactly 1 mark
+        // to the winner, regardless of how many points they accumulated
+        // from the remaining cards.
+        if (resigned) {
             if (winner === 'player') playerMarks = 1
             else opponentMarks = 1
-        }
-        // 91–119 -> 2 marks (capote)
-        else if (winnerPoints >= 91 && winnerPoints <= 119) {
-            if (winner === 'player') playerMarks = 2
-            else opponentMarks = 2
-        }
-        // 120 -> 4 marks (bandeira)
-        else if (winnerPoints >= 120) {
-            if (winner === 'player') playerMarks = 4
-            else opponentMarks = 4
+        } else {
+            const winnerPoints = winner === 'player' ? playerPoints : opponentPoints
+
+            // 61–90 -> 1 mark
+            if (winnerPoints >= 61 && winnerPoints <= 90) {
+                if (winner === 'player') playerMarks = 1
+                else opponentMarks = 1
+            }
+            // 91–119 -> 2 marks (capote)
+            else if (winnerPoints >= 91 && winnerPoints <= 119) {
+                if (winner === 'player') playerMarks = 2
+                else opponentMarks = 2
+            }
+            // 120 -> 4 marks (bandeira)
+            else if (winnerPoints >= 120) {
+                if (winner === 'player') playerMarks = 4
+                else opponentMarks = 4
+            }
         }
     }
 
@@ -357,7 +381,9 @@ const finalizeGame = (game) => {
     //  - $p = 120 \Rightarrow 4$ marks (bandeira)
     //  - draw (same points) -> 0 marks each
     const { winner, playerMarks, opponentMarks } =
-        computeMatchOutcome(playerPoints, opponentPoints)
+        computeMatchOutcome(playerPoints, opponentPoints, {
+            resigned: !!board.resigned,
+        })
 
     game.result = {
         winner,          // 'player' | 'opponent' | 'tie'
