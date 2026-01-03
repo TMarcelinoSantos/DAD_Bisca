@@ -1,8 +1,17 @@
 <template>
-    <div class="min-h-screen w-full overflow-x-hidden flex flex-col items-center justify-center px-3 sm:px-6 pb-6 pt-20 sm:pt-24 bg-[radial-gradient(circle_at_top,#14532d,#052e16)]">
-    <div class="w-full max-w-md sm:max-w-2xl bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl p-4 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.6)]">    
+    <div class="min-h-screen w-full overflow-x-hidden flex flex-col items-center justify-center px-3 sm:px-6 pb-6 pt-20 sm:pt-24 bg-transparent">
+    <div class="fixed inset-0 -z-10 pointer-events-none">
+              <Balatro
+                :is-rotate="false"
+                :mouse-interaction="false"
+                :pixel-filter="700"
+                :color1 = "'#5CA173'"
+                :color2 = "'#0D5E1C'"
+              />
+            </div>
+      <div class="w-full max-w-md sm:max-w-2xl bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl p-4 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.6)]">    
       <div class="text-center mb-6">
-        <h1 class="text-2xl sm:text-4xl font-bold text-yellow-200 tracking-[0.18em] sm:tracking-[0.4em] uppercase drop-shadow-[0_4px_6px_rgba(0,0,0,0.6)] mb-3 sm:mb-4">
+        <h1 class="text-2xl sm:text-4xl font-bold text-yellow-800 tracking-[0.18em] sm:tracking-[0.4em] uppercase drop-shadow-[0_4px_6px_rgba(0,0,0,0.6)] mb-3 sm:mb-4">
           Bisca(Te)
         </h1>
         <p class="text-sm font-bold fill-yellow-600 tracking-widest">Create your account to get started!</p>
@@ -55,7 +64,7 @@
 
             <Label class="block text-left text-gray-700 dark:text-gray-300 mb-2" for="photo">Photo (optional)</Label>
             <div class="flex items-center gap-6 mb-6">
-            <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-indigo-500 flex items-center justify-center bg-gray-200">
+            <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-yellow-700 flex items-center justify-center bg-gray-200">
                 <img
                 v-if="preview"
                 :src="preview"
@@ -85,7 +94,7 @@
             </div>
     
             <Button
-                class="w-full py-4 text-lg font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition"
+                class="w-full py-4 text-lg font-semibold bg-black text-white rounded-xl hover:bg-gray-800 transition"
                 type="submit"
                 > Create Account 
             </Button>
@@ -103,6 +112,7 @@ import { Label } from '@/components/ui/label'
 import {useAuthStore} from '@/stores/auth'
 import {useAPIStore} from '@/stores/api'
 import {toast} from 'vue-sonner'
+import Balatro from "@/components/ui/Balatro.vue"
 
 
 const router = useRouter()

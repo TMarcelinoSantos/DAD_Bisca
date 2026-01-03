@@ -1,8 +1,19 @@
 <template>
-  <div class="min-h-screen w-full overflow-x-hidden flex flex-col items-center justify-center px-3 sm:px-6 pb-6 pt-20 sm:pt-24 bg-[radial-gradient(circle_at_top,#14532d,#052e16)]">
+  <div
+    class="min-h-screen w-full overflow-x-hidden flex flex-col items-center justify-center px-3 sm:px-6 py-10 sm:py-14 bg-transparent"
+  >
+  <div class="fixed inset-0 -z-10 pointer-events-none">
+              <Balatro
+                :is-rotate="false"
+                :mouse-interaction="false"
+                :pixel-filter="700"
+                :color1 = "'#5CA173'"
+                :color2 = "'#0D5E1C'"
+              />
+            </div>
     <div class="w-full max-w-md sm:max-w-2xl bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl p-4 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.6)]">    
       <div class="text-center mb-6">
-        <h1 class="text-2xl sm:text-4xl font-bold text-yellow-200 tracking-[0.18em] sm:tracking-[0.4em] uppercase drop-shadow-[0_4px_6px_rgba(0,0,0,0.6)] mb-3 sm:mb-4">
+        <h1 class="text-2xl sm:text-4xl font-bold text-yellow-800 tracking-[0.18em] sm:tracking-[0.4em] uppercase drop-shadow-[0_4px_6px_rgba(0,0,0,0.6)] mb-3 sm:mb-4">
           Bisca(Te)
         </h1>
         <p class="text-sm font-bold fill-yellow-600 tracking-widest">Sign in to your account</p>
@@ -43,7 +54,7 @@
         <div>
           <Button
             type="submit"
-            class="w-full h-14 px-4 text-lg font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+            class="w-full h-14 px-4 text-lg font-semibold bg-black text-white rounded-xl hover:bg-gray-800 shadow-md focus:outline-none focus:ring-2 focus:ring-gray-800 transition"
           >
             Sign in
           </Button>
@@ -58,20 +69,13 @@
         </div>
       </form>
     </div>
-
-    <button
-      class="w-full max-w-sm py-4 text-lg font-semibold border border-gray-300 rounded-xl mt-6 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-      @click="goBack"
-    >
-      Go back
-    </button>
   </div>
 </template>
 <script setup>
 import { ref } from 'vue'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-
+import Balatro from "@/components/ui/Balatro.vue"
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -99,9 +103,5 @@ const handleSubmit = async () => {
       }
     )
   
-}
-
-const goBack = () => {
-  router.push({ name: 'home' })
 }
 </script>
