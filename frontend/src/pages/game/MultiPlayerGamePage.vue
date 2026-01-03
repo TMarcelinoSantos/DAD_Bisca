@@ -17,7 +17,7 @@
     const isLoading = ref(true)
     const hasSavedGame = ref(false)
 
-    const saveMultiplayerGame = () => {
+    const saveMultiplayerGame = async () => {
         if (hasSavedGame.value) return
 
         const game = socketStore.currentGame
@@ -74,12 +74,22 @@
             player2_points: player2Points,
         }
 
-        toast.promise(apiStore.postGame(payload), {
+        const savePromise = apiStore.postGame(payload)
+
+        toast.promise(savePromise, {
             loading: 'Saving multiplayer game...',
             success: () => '[API] Multiplayer game saved successfully',
             error: (data) =>
                 `[API] Error saving multiplayer game - ${data?.response?.data?.message}`,
         })
+
+        try {
+            await savePromise
+            // Refresh user so coins_balance (including payout) is up to date
+            await authStore.getUser()
+        } catch (e) {
+            // error already handled by toast.promise
+        }
     }
 
     const showGameOverPopup = () => {
@@ -107,9 +117,9 @@
     // Server-driven end (multiplayer always relies on server state)
     watch(
         () => socketStore.currentGame?.state,
-        (state) => {
+        async (state) => {
             if (state !== 'finished') return
-            saveMultiplayerGame()
+            await saveMultiplayerGame()
             showGameOverPopup()
         },
     )

@@ -139,6 +139,10 @@ export const useAPIStore = defineStore('api', () => {
     return axios.post(`${API_BASE_URL}/coin-purchases`, payload)
   }
 
+  const stakeMultiplayerGame = (stake = 2) => {
+    return axios.post(`${API_BASE_URL}/user/coins`, { stake })
+  }
+
   const getMyCoinTransactions =() =>{
     return axios.get(`${API_BASE_URL}/coins/transactions/me`)
   }
@@ -223,6 +227,7 @@ export const useAPIStore = defineStore('api', () => {
     getRound,
     updateRound,
     purchaseCoins,
+    stakeMultiplayerGame,
     getMyCoinTransactions,
     getUserCoinTransactions,
     updateUserTheme,

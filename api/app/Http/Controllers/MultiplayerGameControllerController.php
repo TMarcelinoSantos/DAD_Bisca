@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\MultiplayerGameController;
+use App\Models\User;
+use App\Models\CoinTransaction;
+use App\Models\CoinTransactionType;
 
 class MultiplayerGameControllerController extends Controller
 {
@@ -37,8 +41,75 @@ class MultiplayerGameControllerController extends Controller
             'custom'           => 'nullable|array',
         ]);
 
-        $game = MultiplayerGameController::create($validated);
+        $game = null;
 
+        DB::transaction(function () use (&$game, $validated) {
+            $game = MultiplayerGameController::create($validated);
+
+            $winnerId = $game->winner_user_id;
+
+            if (!$winnerId) {
+                return; // no winner, no payout
+            }
+
+            $winner = User::find($winnerId);
+            if (!$winner) {
+                return; // safety guard
+            }
+
+            // Determine winner points based on which seat they occupied
+            $winnerPoints = null;
+            if ($winnerId === $game->player1_user_id) {
+                $winnerPoints = $game->player1_points;
+            } elseif ($winnerId === $game->player2_user_id) {
+                $winnerPoints = $game->player2_points;
+            }
+
+            if ($winnerPoints === null) {
+                return;
+            }
+
+            // Determine payout based on Bisca scoring
+            $reward = 0;
+            $payoutKind = null; // 'basic' | 'capote' | 'bandeira'
+
+            if ($winnerPoints >= 120) {
+                $reward = 6;
+                $payoutKind = 'bandeira';
+            } elseif ($winnerPoints >= 91) {
+                $reward = 4;
+                $payoutKind = 'capote';
+            } elseif ($winnerPoints >= 61) {
+                $reward = 3;
+                $payoutKind = 'basic';
+            }
+
+            if ($reward <= 0) {
+                return; // winner did not reach minimum points for payout
+            }
+
+            $type = CoinTransactionType::firstOrCreate([
+                'name' => 'Game payout',
+                'type' => 'C',
+            ]);
+
+            CoinTransaction::create([
+                'transaction_datetime'     => now(),
+                'user_id'                  => $winner->id,
+                'game_id'                  => $game->id,
+                'coin_transaction_type_id' => $type->id,
+                'coins'                    => $reward,
+                'custom'                   => [
+                    'context'       => 'multiplayer_game_payout',
+                    'payout_kind'   => $payoutKind,
+                    'winner_points' => $winnerPoints,
+                ],
+            ]);
+
+            $winner->increment('coins_balance', $reward);
+        });
+
+        // Ensure we return the (possibly refreshed) game instance
         return response()->json($game, 201);
     }
 

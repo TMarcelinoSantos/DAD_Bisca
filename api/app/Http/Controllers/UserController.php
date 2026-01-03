@@ -75,7 +75,7 @@ class UserController extends Controller
         }
 
         DB::transaction(function () use ($user, $price, $cardName) {
-            
+
             $custom = is_array($user->custom) ? $user->custom : [];
 
             // 🔹 Garantir array
@@ -103,7 +103,7 @@ class UserController extends Controller
             $custom['owned_card_themes'][] = $cardName;
 
             $user->custom = $custom;
-            $user->card_theme = $cardName; 
+            $user->card_theme = $cardName;
             $user->save();
         });
 
@@ -158,7 +158,7 @@ class UserController extends Controller
         }
 
         $user->coins_balance -= $request->price;
-        $user->photo_avatar_filename = $request->img; 
+        $user->photo_avatar_filename = $request->img;
         $user->save();
 
         return response()->json([
@@ -167,21 +167,39 @@ class UserController extends Controller
         ]);
     }
 
-    
+
     public function updateUserCoins(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'stake' => 'required|integer|min:0',
         ]);
 
         $user = $request->user();
 
-        if ($user->coins_balance < $request->stake) {
+        if ($user->coins_balance < $data['stake']) {
             return response()->json(['message' => 'Saldo insuficiente'], 400);
         }
 
-        $user->coins_balance -= $request->stake;
-        $user->save();
+        DB::transaction(function () use ($user, $data) {
+            $stake = $data['stake'];
+
+            // Create / get type for multiplayer game stake (debit)
+            $type = CoinTransactionType::firstOrCreate(
+                ['name' => 'Multiplayer game stake', 'type' => 'D']
+            );
+
+            CoinTransaction::create([
+                'transaction_datetime'      => now(),
+                'user_id'                   => $user->id,
+                'coin_transaction_type_id'  => $type->id,
+                'coins'                     => -$stake,
+                'custom'                    => ['context' => 'multiplayer_entry'],
+            ]);
+
+            $user->decrement('coins_balance', $stake);
+        });
+
+        $user->refresh();
 
         return response()->json([
             'message' => 'Stake reduced!',

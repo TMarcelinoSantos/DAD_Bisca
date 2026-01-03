@@ -21,7 +21,8 @@ class CoinTransactionType extends Model
         'custom' => 'array',
     ];
 
-    public $timestamps = true;
+    // This table does not have created_at/updated_at columns
+    public $timestamps = false;
 
     public function transactions()
     {

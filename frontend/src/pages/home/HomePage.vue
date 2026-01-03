@@ -60,6 +60,10 @@
                 </CardDescription>
             </CardHeader>
             <CardContent class="space-y-6">
+                <p class="text-sm text-center text-amber-300">
+                    Entering a multiplayer game (hosting or joining) costs
+                    <span class="font-semibold">2 coins</span>.
+                </p>
                 <div class="space-y-2">
                     <label class="text-sm font-medium">Choose Type</label>
                     <div class="grid grid-cols-2 gap-2">
@@ -209,9 +213,13 @@ import { useRouter } from 'vue-router'
 import { useGameStore } from '@/stores/game'
 import { useSocketStore } from '@/stores/socket'
 import { useAuthStore } from '@/stores/auth'
+import { useAPIStore } from '@/stores/api'
+import { toast } from 'vue-sonner'
+
 const gameStore = useGameStore()
 const socketStore = useSocketStore()
 const authStore = useAuthStore()
+const apiStore = useAPIStore()
 
 const router = useRouter()
 const selectedHand = ref('')
@@ -244,9 +252,27 @@ const goToStatistics = () => {
     router.push({ name: 'statistics' })
 }
 
-const hostMultiplayerGame = () => {
+const hostMultiplayerGame = async () => {
     if (!isLoggedIn.value) {
         router.push({ name: 'login' })
+        return
+    }
+
+    const confirmed = window.confirm('Hosting a multiplayer game costs 2 coins. Continue?')
+    if (!confirmed) return
+
+    try {
+        const response = await apiStore.stakeMultiplayerGame(2)
+
+        // Update local user coins immediately from response
+        if (response?.data?.coins_balance !== undefined && authStore.currentUser) {
+            authStore.currentUser.coins_balance = response.data.coins_balance
+        } else {
+            await authStore.getUser()
+        }
+    } catch (err) {
+        const msg = err?.response?.data?.message || 'Unable to pay multiplayer entry fee.'
+        toast.error(msg)
         return
     }
 
@@ -256,6 +282,8 @@ const hostMultiplayerGame = () => {
     socketStore.createGame(selectedMultiplayerHand.value, (res) => {
         if (res?.ok) {
             loadRooms()
+        } else {
+            toast.error(res?.error || 'Failed to create multiplayer game')
         }
     })
 }
@@ -267,18 +295,35 @@ const loadRooms = () => {
     })
 }
 
-const joinMultiplayerGame = (gameId) => {
+const joinMultiplayerGame = async (gameId) => {
     if (!isLoggedIn.value) {
         router.push({ name: 'login' })
         return
     }
 
-    const confirmed = window.confirm('Do you want to join this multiplayer game?')
+    const confirmed = window.confirm('Joining this multiplayer game costs 2 coins. Continue?')
     if (!confirmed) return
+
+    try {
+        const response = await apiStore.stakeMultiplayerGame(2)
+
+        // Update local user coins immediately from response
+        if (response?.data?.coins_balance !== undefined && authStore.currentUser) {
+            authStore.currentUser.coins_balance = response.data.coins_balance
+        } else {
+            await authStore.getUser()
+        }
+    } catch (err) {
+        const msg = err?.response?.data?.message || 'Unable to pay multiplayer entry fee.'
+        toast.error(msg)
+        return
+    }
 
     socketStore.joinGame(gameId, (res) => {
         if (res?.ok) {
             router.push({ name: 'multiplayergame' })
+        } else {
+            toast.error(res?.error || 'Failed to join multiplayer game')
         }
     })
 }
