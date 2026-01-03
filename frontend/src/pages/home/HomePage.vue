@@ -111,7 +111,7 @@
                     <div class="space-y-2">
                         <label class="text-sm font-medium">Available Rooms</label>
                         <div
-                            v-if="socketStore.joinableGames.length === 0"
+                            v-if="simpleJoinableGames.length === 0"
                             class="text-sm text-gray-500 mt-1"
                         >
                             No rooms available. Host a new game.
@@ -121,7 +121,7 @@
                             class="mt-2 space-y-2 max-h-48 overflow-y-auto"
                         >
                             <li
-                                v-for="game in socketStore.joinableGames"
+                                v-for="game in simpleJoinableGames"
                                 :key="game.id"
                                 class="flex items-center justify-between rounded border border-emerald-700/60 bg-emerald-900/40 px-3 py-2 text-sm text-emerald-50"
                             >
@@ -187,11 +187,96 @@
                     MultiPlayer
                 </CardTitle>
                 <CardDescription class="text-center">
-                    Comming Soon!!
+                    Play a full multiplayer match. First to 4 marks wins.
                 </CardDescription>
             </CardHeader>
             <CardContent class="space-y-6">
+                <p class="text-sm text-center text-amber-300">
+                    Hosting or joining a multiplayer game inside a match costs
+                    <span class="font-semibold">2 coins</span>.
+                </p>
 
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Choose Type</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <Button
+                            v-for="level in gameStore.hands"
+                            :key="level.value"
+                            size="sm"
+                            :variant="selectedMultiplayerMatchHand === level.value ? 'default' : 'outline'"
+                            class="flex flex-col py-3 h-16"
+                            @click="selectedMultiplayerMatchHand = level.value"
+                        >
+                            <span class="front-semibold">{{ level.label }}</span>
+                        </Button>
+                    </div>
+                </div>
+
+                <p
+                    v-if="!isLoggedIn"
+                    class="text-sm text-red-400 text-center"
+                >
+                    Multiplayer matches are only available for logged in users. Please
+                    log in to host or join a match game.
+                </p>
+
+                <div class="space-y-4">
+                    <div class="flex justify-center gap-3">
+                        <Button
+                            size="lg"
+                            variant="secondary"
+                            class="hover:bg-emerald-500 hover:text-slate-200"
+                            :disabled="!isLoggedIn"
+                            @click="hostMultiplayerMatchGame"
+                        >
+                            Host Game
+                        </Button>
+                        <Button
+                            size="lg"
+                            variant="outline"
+                            class="border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-slate-200"
+                            :disabled="isLoadingMatchRooms || !isLoggedIn"
+                            @click="loadMatchRooms"
+                        >
+                            {{ isLoadingMatchRooms ? 'Loading...' : 'Refresh Rooms' }}
+                        </Button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium">Available Rooms</label>
+                        <div
+                            v-if="matchJoinableGames.length === 0"
+                            class="text-sm text-gray-500 mt-1"
+                        >
+                            No rooms available. Host a new game.
+                        </div>
+                        <ul
+                            v-else
+                            class="mt-2 space-y-2 max-h-48 overflow-y-auto"
+                        >
+                            <li
+                                v-for="game in matchJoinableGames"
+                                :key="game.id"
+                                class="flex items-center justify-between rounded border border-emerald-700/60 bg-emerald-900/40 px-3 py-2 text-sm text-emerald-50"
+                            >
+                                <span>
+                                    Room #{{ game.id }} ·
+                                    {{ game.type === '3' ? 'Bisca de 3' : 'Bisca de 9' }} ·
+                                    {{ (game.player1 && game.player1.username) || 'Waiting for players' }}
+                                </span>
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    class="hover:bg-emerald-500 hover:text-slate-200"
+                                    :disabled="!isLoggedIn"
+                                    @click="joinMultiplayerMatchGame(game.id)"
+                                >
+                                    Join
+                                </Button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </CardContent>
         </Card>
     </div>
@@ -224,8 +309,19 @@ const apiStore = useAPIStore()
 const router = useRouter()
 const selectedHand = ref('')
 const selectedMultiplayerHand = ref('9')
+const selectedMultiplayerMatchHand = ref('9')
 const isLoadingRooms = ref(false)
+const isLoadingMatchRooms = ref(false)
 const isLoggedIn = computed(() => authStore.isLoggedIn)
+
+// Separate views of joinable games: regular multiplayer vs match rooms
+const simpleJoinableGames = computed(() =>
+    socketStore.joinableGames.filter((g) => !g.mode || g.mode === 'game'),
+)
+
+const matchJoinableGames = computed(() =>
+    socketStore.joinableGames.filter((g) => g.mode === 'match'),
+)
 
 const startGame = () => {
     gameStore.hand = selectedHand.value
@@ -234,6 +330,88 @@ const startGame = () => {
 const startMatch = () => {
     gameStore.hand = selectedHand.value
     router.push({ name: 'singlematches' })
+}
+
+const hostMultiplayerMatchGame = async () => {
+    if (!isLoggedIn.value) {
+        router.push({ name: 'login' })
+        return
+    }
+
+    const confirmed = window.confirm(
+        'Hosting a multiplayer game in this match costs 2 coins. Continue?',
+    )
+    if (!confirmed) return
+
+    try {
+        const response = await apiStore.stakeMultiplayerGame(2)
+
+        if (response?.data?.coins_balance !== undefined && authStore.currentUser) {
+            authStore.currentUser.coins_balance = response.data.coins_balance
+        } else {
+            await authStore.getUser()
+        }
+    } catch (err) {
+        const msg =
+            err?.response?.data?.message ||
+            'Unable to pay multiplayer entry fee.'
+        toast.error(msg)
+        return
+    }
+
+    gameStore.hand = selectedMultiplayerMatchHand.value
+
+    // Create a room flagged as a "match" but stay in the lobby
+    // until a second player joins and the game becomes "playing".
+    socketStore.createGame(selectedMultiplayerMatchHand.value, 'match', (res) => {
+        if (!res?.ok) {
+            toast.error(res?.error || 'Failed to create multiplayer game for match')
+        }
+    })
+}
+
+const loadMatchRooms = () => {
+    isLoadingMatchRooms.value = true
+    socketStore.requestJoinableGames(() => {
+        isLoadingMatchRooms.value = false
+    })
+}
+
+const joinMultiplayerMatchGame = async (gameId) => {
+    if (!isLoggedIn.value) {
+        router.push({ name: 'login' })
+        return
+    }
+
+    const confirmed = window.confirm(
+        'Joining this multiplayer game in the match costs 2 coins. Continue?',
+    )
+    if (!confirmed) return
+
+    try {
+        const response = await apiStore.stakeMultiplayerGame(2)
+
+        if (response?.data?.coins_balance !== undefined && authStore.currentUser) {
+            authStore.currentUser.coins_balance = response.data.coins_balance
+        } else {
+            await authStore.getUser()
+        }
+    } catch (err) {
+        const msg =
+            err?.response?.data?.message ||
+            'Unable to pay multiplayer entry fee.'
+        toast.error(msg)
+        return
+    }
+
+    socketStore.joinGame(gameId, (res) => {
+        if (res?.ok) {
+            // Second player joins an existing match room and can enter immediately.
+            router.push({ name: 'multiplayermatches' })
+        } else {
+            toast.error(res?.error || 'Failed to join multiplayer game for match')
+        }
+    })
 }
 
 const goToHistory = () => {
@@ -332,11 +510,16 @@ onMounted(() => {
     loadRooms()
 })
 
-// When a hosted room becomes "playing" (second player joined), go to the game page
+// When a hosted room becomes "playing" (second player joined),
+// navigate to the correct page depending on whether it's a match or a normal game.
 watch(
     () => socketStore.currentGame,
     (game) => {
-        if (game && game.state === 'playing') {
+        if (!game || game.state !== 'playing') return
+
+        if (game.mode === 'match') {
+            router.push({ name: 'multiplayermatches' })
+        } else {
             router.push({ name: 'multiplayergame' })
         }
     },

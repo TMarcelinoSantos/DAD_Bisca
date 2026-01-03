@@ -745,6 +745,28 @@ export const useGameStore = defineStore('game', () => {
         setBoard()
     }
 
+    const resetMultiplayerBoard = () => {
+        clearTurnTimer()
+        forcedGameEnd.value = false
+        playerHand.value = []
+        opponentHand.value = []
+        deck.value = []
+        playedCards.value = []
+        playerCardWon.value = []
+        opponentCardWon.value = []
+        turn.value = 'player'
+        beganAt.value = undefined
+        endedAt.value = undefined
+        totalRounds.value = 0
+        playerTotalPoints.value = 0
+        opponentTotalPoints.value = 0
+        roundSaved.value = false
+        lastGameWinner.value = null
+
+        // Re-deal a fresh multiplayer board
+        setBoardMultiplayer()
+    }
+
     //-----------------------MATCHES---------------------------------
 
     const isAuthenticated = computed(() => !!authStore.currentUser)
@@ -916,5 +938,6 @@ export const useGameStore = defineStore('game', () => {
         // Turn timer / resign
         remainingTurnSeconds,
         resign,
+        resetMultiplayerBoard,
     }
 })

@@ -57,7 +57,7 @@ export const getJoinableGames = () => {
     )
 }
 
-export const createGame = (player1, type = '9') => {
+export const createGame = (player1, type = '9', mode = 'game') => {
     const gameID = nextGameID()
     const game = {
         id: gameID,
@@ -65,6 +65,7 @@ export const createGame = (player1, type = '9') => {
         player2: null,
         state: 'waiting',
         type,
+        mode, // 'game' for regular multiplayer, 'match' for multiplayer matches
         createdAt: Date.now(),
         moves: [],
         board: {
@@ -136,6 +137,10 @@ export const updateGameBoard = (gameID, partialBoard) => {
     game.board = {
         ...(game.board || {}),
         ...partialBoard,
+    }
+
+    if (game.player1 && game.player2) {
+        game.state = 'playing'
     }
 
     if (game.state === 'playing') {
@@ -299,19 +304,8 @@ const resolveTrick = (game) => {
     getDeckCard(game)
 }
 
-const finalizeGame = (game) => {
-    const board = game.board
-    if (!board) return
-
-    const now = new Date()
-
-    // total points for each side
-    const playerPoints =
-        board.playerTotalPoints ?? getBiscaPoints(board.playerCardWon || [])
-    const opponentPoints =
-        board.opponentTotalPoints ?? getBiscaPoints(board.opponentCardWon || [])
-
-    // who wins the game (61+ points)
+const computeMatchOutcome = (playerPoints, opponentPoints) => {
+    // winner only if someone has at least 61 points and strictly more than the other
     let winner = 'tie'
     if (playerPoints > opponentPoints && playerPoints >= 61) {
         winner = 'player'
@@ -319,26 +313,51 @@ const finalizeGame = (game) => {
         winner = 'opponent'
     }
 
-    // marks according to Bisca rules
     let playerMarks = 0
     let opponentMarks = 0
+
     if (winner !== 'tie') {
         const winnerPoints = winner === 'player' ? playerPoints : opponentPoints
 
+        // 61–90 -> 1 mark
         if (winnerPoints >= 61 && winnerPoints <= 90) {
-            // 1 mark
             if (winner === 'player') playerMarks = 1
             else opponentMarks = 1
-        } else if (winnerPoints >= 91 && winnerPoints <= 119) {
-            // 2 marks (capote)
+        }
+        // 91–119 -> 2 marks (capote)
+        else if (winnerPoints >= 91 && winnerPoints <= 119) {
             if (winner === 'player') playerMarks = 2
             else opponentMarks = 2
-        } else if (winnerPoints >= 120) {
-            // 4 marks (bandeira)
+        }
+        // 120 -> 4 marks (bandeira)
+        else if (winnerPoints >= 120) {
             if (winner === 'player') playerMarks = 4
             else opponentMarks = 4
         }
     }
+
+    return { winner, playerMarks, opponentMarks }
+}
+
+const finalizeGame = (game) => {
+    const board = game.board
+    if (!board) return
+
+    const now = new Date()
+
+    // Total points for each side
+    const playerPoints =
+        board.playerTotalPoints ?? getBiscaPoints(board.playerCardWon || [])
+    const opponentPoints =
+        board.opponentTotalPoints ?? getBiscaPoints(board.opponentCardWon || [])
+
+    // Apply match rules:
+    //  - $61 \le p \le 90 \Rightarrow 1$ mark
+    //  - $91 \le p \le 119 \Rightarrow 2$ marks (capote)
+    //  - $p = 120 \Rightarrow 4$ marks (bandeira)
+    //  - draw (same points) -> 0 marks each
+    const { winner, playerMarks, opponentMarks } =
+        computeMatchOutcome(playerPoints, opponentPoints)
 
     game.result = {
         winner,          // 'player' | 'opponent' | 'tie'
@@ -348,7 +367,6 @@ const finalizeGame = (game) => {
         opponentMarks,
     }
 
-    // Mark game as finished in time terms as well
     game.endedAt = now.toISOString()
     if (game.beganAt) {
         const start = new Date(game.beganAt)
