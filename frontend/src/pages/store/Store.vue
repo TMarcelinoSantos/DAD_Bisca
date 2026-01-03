@@ -5,8 +5,8 @@
 
           <Card class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
             <CardHeader class= "flex flex-col items-center gap-2 text-center">
-              <CardTitle>Coins</CardTitle>
-              <CardDescription>Choose a package</CardDescription>
+              <CardTitle class="text-3xl font-bold text-yellow-900">Coins</CardTitle>
+              <CardDescription class="text-sm text-yellow-800/80">Choose a package</CardDescription>
             </CardHeader>
 
             <CardContent>
@@ -72,11 +72,22 @@
 
           <Card class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
             <CardHeader class="flex flex-col items-center gap-2 text-center">
-              <CardTitle>Card Theme Options</CardTitle>
+              <CardTitle class="text-3xl font-bold text-yellow-900">Card Theme</CardTitle>
             </CardHeader>
             <CardContent>
               <!--Card Theme options-->
               <div class="w-10/12 mx-auto mt-8">
+                <div class="flex justify-center gap-6 mb-4 text-sm text-gray-700">
+                  <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-green-600"></span>
+                    <span>Selected</span>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-gray-400"></span>
+                    <span>Owned</span>
+                  </div>
+                </div>
                 <Carousel class="w-full max-w-xxs">
                   <CarouselContent>
                     <CarouselItem
@@ -446,8 +457,8 @@ const buyConfirmed = async () => {
     selected.value = null
     router.push({ name: 'store' })
   }catch (error) {
-    console.error("Erro ao comprar carta:", error)
-    alert("Erro ao comprar a carta. Tenta novamente.")
+    console.error("Error purchasing card:", error)
+    alert("Error purchasing the card. Try again.")
   }
 }
 
@@ -457,7 +468,7 @@ const buyConfirmed = async () => {
       id: i.id,
       filename: i.id + '.png',
       name: i.id.replace(/[-_]/g, ' '),
-      price: 1 + (idx * 1),
+      price: 0 + (idx * 2),
       src: i.src
     }))
   })
