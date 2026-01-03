@@ -56,8 +56,8 @@ export const useAPIStore = defineStore('api', () => {
   }
 
   // HISTORY
-  const getHistory = () => {
-    return axios.get(`${API_BASE_URL}/users/me/history`)
+  const getHistory = (params = {}) => {
+    return axios.get(`${API_BASE_URL}/users/me/history`, { params })
   }
 
   const getMatchDetails = (matchId) => {

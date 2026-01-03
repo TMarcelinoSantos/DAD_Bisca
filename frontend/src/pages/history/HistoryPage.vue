@@ -7,12 +7,12 @@
           <h2 class="text-2xl sm:text-3xl font-bold text-yellow-700 tracking-widest uppercase mb-6">
             Matches
           </h2>
-          <div v-if="history.matches.length === 0" class="text-center py-8">
+          <div v-if="history.matches?.data?.length === 0" class="text-center py-8">
             <p class="text-yellow-600 font-semibold">No matches found</p>
           </div>
           <div v-else class="space-y-3">
             <div
-              v-for="match in history.matches"
+              v-for="match in history.matches.data"
               :key="`match-${match.id}`"
               @click="viewMatchDetails(match.id)"
               class="bg-white dark:bg-gray-800 border border-yellow-600 rounded-xl p-4 hover:shadow-md hover:cursor-pointer transition"
@@ -71,6 +71,41 @@
               </div>
             </div>
           </div>
+
+          <!-- Matches Pagination -->
+          <div v-if="history.matches?.last_page > 1" class="mt-4 flex items-center justify-center gap-2 flex-wrap">
+            <button
+              @click="goToMatchesPage(1)"
+              :disabled="matchesPage === 1"
+              class="px-3 py-2 rounded border border-yellow-700 text-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-yellow-50"
+            >
+              First
+            </button>
+            <button
+              @click="goToMatchesPage(matchesPage - 1)"
+              :disabled="matchesPage === 1"
+              class="px-3 py-2 rounded border border-yellow-700 text-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-yellow-50"
+            >
+              Previous
+            </button>
+            <span class="text-yellow-700 font-semibold text-sm">
+              Page {{ matchesPage }} of {{ history.matches.last_page }}
+            </span>
+            <button
+              @click="goToMatchesPage(matchesPage + 1)"
+              :disabled="matchesPage === history.matches.last_page"
+              class="px-3 py-2 rounded border border-yellow-700 text-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-yellow-50"
+            >
+              Next
+            </button>
+            <button
+              @click="goToMatchesPage(history.matches.last_page)"
+              :disabled="matchesPage === history.matches.last_page"
+              class="px-3 py-2 rounded border border-yellow-700 text-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-yellow-50"
+            >
+              Last
+            </button>
+          </div>
         </div>
 
         <!-- Games Section -->
@@ -78,12 +113,12 @@
           <h2 class="text-2xl sm:text-3xl font-bold text-yellow-700 tracking-widest uppercase mb-6">
             Games
           </h2>
-          <div v-if="history.games.length === 0" class="text-center py-8">
+          <div v-if="history.games?.data?.length === 0" class="text-center py-8">
             <p class="text-yellow-600 font-semibold">No games found</p>
           </div>
           <div v-else class="space-y-3">
             <div
-              v-for="game in history.games"
+              v-for="game in history.games.data"
               :key="`game-${game.id}`"
               class="bg-white dark:bg-gray-800 border border-yellow-600 rounded-xl p-4 hover:shadow-md transition"
             >
@@ -144,6 +179,41 @@
               </div>
             </div>
           </div>
+
+          <!-- Games Pagination -->
+          <div v-if="history.games?.last_page > 1" class="mt-4 flex items-center justify-center gap-2 flex-wrap">
+            <button
+              @click="goToGamesPage(1)"
+              :disabled="gamesPage === 1"
+              class="px-3 py-2 rounded border border-yellow-700 text-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-yellow-50"
+            >
+              First
+            </button>
+            <button
+              @click="goToGamesPage(gamesPage - 1)"
+              :disabled="gamesPage === 1"
+              class="px-3 py-2 rounded border border-yellow-700 text-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-yellow-50"
+            >
+              Previous
+            </button>
+            <span class="text-yellow-700 font-semibold text-sm">
+              Page {{ gamesPage }} of {{ history.games.last_page }}
+            </span>
+            <button
+              @click="goToGamesPage(gamesPage + 1)"
+              :disabled="gamesPage === history.games.last_page"
+              class="px-3 py-2 rounded border border-yellow-700 text-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-yellow-50"
+            >
+              Next
+            </button>
+            <button
+              @click="goToGamesPage(history.games.last_page)"
+              :disabled="gamesPage === history.games.last_page"
+              class="px-3 py-2 rounded border border-yellow-700 text-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-yellow-50"
+            >
+              Last
+            </button>
+          </div>
         </div>
       </div>
 
@@ -168,10 +238,13 @@ const router = useRouter()
 const apiStore = useAPIStore()
 
 const history = ref({
-  matches: [],
-  games: []
+  matches: { data: [], last_page: 1 },
+  games: { data: [], last_page: 1 }
 })
+const matchesPage = ref(1)
+const gamesPage = ref(1)
 const loading = ref(true)
+const perPage = 10
 
 const formatDate = (date) => {
   if (!date) return 'N/A'
@@ -246,17 +319,31 @@ const getMatchBandeiras = (matchId) => {
   return Array.from(bandeiras)
 }
 
-const fetchHistory = async () => {
+const fetchHistory = async (matchesPageNum = 1, gamesPageNum = 1) => {
   try {
     loading.value = true
-    const response = await apiStore.getHistory()
+    const response = await apiStore.getHistory({
+      matches_page: matchesPageNum,
+      games_page: gamesPageNum,
+      per_page: perPage
+    })
     history.value = response.data
+    matchesPage.value = matchesPageNum
+    gamesPage.value = gamesPageNum
   } catch (error) {
     toast.error('Failed to load history')
     console.error(error)
   } finally {
     loading.value = false
   }
+}
+
+const goToMatchesPage = (pageNum) => {
+  fetchHistory(pageNum, gamesPage.value)
+}
+
+const goToGamesPage = (pageNum) => {
+  fetchHistory(matchesPage.value, pageNum)
 }
 
 const goBack = () => {

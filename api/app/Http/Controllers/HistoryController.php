@@ -25,6 +25,7 @@ class HistoryController extends Controller
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
+        $perPage = $request->input('per_page', 10);
         $canViewAll = ($user->type === 'A');
 
         // Base queries with eager loading of player relations
@@ -58,8 +59,8 @@ class HistoryController extends Controller
             });
         }
 
-        $matches = $matchesQuery->orderBy('began_at', 'desc')->get();
-        $games   = $gamesQuery->orderBy('began_at', 'desc')->get();
+        $matches = $matchesQuery->orderBy('began_at', 'desc')->paginate($perPage, ['*'], 'matches_page');
+        $games   = $gamesQuery->orderBy('began_at', 'desc')->paginate($perPage, ['*'], 'games_page');
 
         return response()->json([
             'matches' => $matches,
