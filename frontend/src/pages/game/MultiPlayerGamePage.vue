@@ -166,14 +166,6 @@
         :multiPlayer="true"
         :roomId="String(socketStore.currentGame?.id ?? '')"
     />
-    <div v-if="!isLoading && !isGameOver" class="mt-4 flex justify-center">
-        <button
-            @click="handleResign"
-            class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 text-sm"
-        >
-            Resign
-        </button>
-    </div>
     <transition name="fade">
         <div v-if="isGameOver" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-11/12 max-w-sm p-6 relative">
