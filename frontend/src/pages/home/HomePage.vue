@@ -1,199 +1,274 @@
 <template>
-    <div class="flex justify-center my-10">
-        <h1 class="text-4xl sm:text-5xl font-bold text-yellow-700 tracking-widest uppercase">
-            GAMES
-        </h1>
+  <div
+    class="min-h-screen w-full overflow-x-hidden flex flex-col items-center justify-center px-3 sm:px-6 pb-6 pt-20 sm:pt-24 bg-transparent"
+  >
+    <div class="fixed inset-0 -z-10 pointer-events-none">
+      <Balatro
+        :is-rotate="false"
+        :mouse-interaction="false"
+        :pixel-filter="700"
+        :color1="'#5CA173'"
+        :color2="'#0D5E1C'"
+      />
     </div>
-    <div class="flex flex-row justify-center items-stretch gap-5 mt-10">
-        <Card class="w-full max-w-md">
-            <CardHeader>
-                <CardTitle class="text-3xl font-bold text-center">
-                    Single Player
-                </CardTitle>
-                <CardDescription class="text-center">
-                    Test yourself!!!
-                </CardDescription>
-            </CardHeader>
-            <CardContent class="space-y-6">
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">Choose Type</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <Button v-for="level in gameStore.hands" :key="level.value" size="sm"
-                            :variant="selectedHand === level.value ? 'default' : 'outline'"
-                            class="flex flex-col py-3 h-16"
-                            @click="selectedHand = level.value">
-                            <span class="front-semibold">{{ level.label }}</span>
-                        </Button>
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">High Scores (local)</label>
-                    <!-- TODO: Add High Scores functionality -->
-                </div>
 
-                <div class="flex justify-center">
-                    <Button
-                      @click="startGame"
-                      size="lg"
-                      variant="secondary"
-                      class="hover:bg-purple-500 hover:text-slate-200"
-                      :disabled="isAdmin"
-                    >
-                        Start Game
-                    </Button>
-                </div>
-            </CardContent>
-        </Card>
-        <Card class="w-full max-w-md">
+    <div class="w-full max-w-6xl">
+      <!-- Header card -->
+      <div
+        class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl p-4 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.6)] mb-6"
+      >
+        <div class="text-center">
+          <h1
+            class="text-4xl sm:text-5xl font-bold text-yellow-700 tracking-widest uppercase mb-2"
+          >
+            Game Modes
+          </h1>
+          <p class="text-sm sm:text-base text-yellow-800/80">
+            Choose between single and multiplayer games and matches.
+          </p>
+        </div>
+      </div>
+
+      <!-- GAMES section -->
+      <div
+        class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl p-4 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.6)] mb-6"
+      >
+        <h2
+          class="text-2xl sm:text-3xl font-bold text-yellow-700 tracking-widest uppercase mb-4 text-center"
+        >
+          Games
+        </h2>
+        <div
+          class="flex flex-col md:flex-row justify-center items-stretch gap-5 mt-4"
+        >
+          <Card class="w-full max-w-md">
             <CardHeader>
-                <CardTitle class="text-3xl font-bold text-center">
-                    MultiPlayer
-                </CardTitle>
-                <CardDescription class="text-center">
-                    Play online with other players.
-                </CardDescription>
+              <CardTitle class="text-3xl font-bold text-center">
+                Single Player
+              </CardTitle>
+              <CardDescription class="text-center">
+                Test yourself!!!
+              </CardDescription>
             </CardHeader>
             <CardContent class="space-y-6">
-                <p class="text-sm text-center text-amber-300">
-                    Entering a multiplayer game (hosting or joining) costs
-                    <span class="font-semibold">2 coins</span>.
-                </p>
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">Choose Type</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <Button
-                            v-for="level in gameStore.hands"
-                            :key="level.value"
-                            size="sm"
-                            :variant="selectedMultiplayerHand === level.value ? 'default' : 'outline'"
-                            class="flex flex-col py-3 h-16"
-                            @click="selectedMultiplayerHand = level.value"
-                        >
-                            <span class="front-semibold">{{ level.label }}</span>
-                        </Button>
-                    </div>
+              <div class="space-y-2">
+                <label class="text-sm font-medium">Choose Type</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <Button
+                    v-for="level in gameStore.hands"
+                    :key="level.value"
+                    size="sm"
+                    :variant="
+                      selectedHand === level.value ? 'default' : 'outline'
+                    "
+                    class="flex flex-col py-3 h-16"
+                    @click="selectedHand = level.value"
+                  >
+                    <span class="front-semibold">{{ level.label }}</span>
+                  </Button>
                 </div>
-                <p
-                    v-if="!isLoggedIn"
-                    class="text-sm text-red-400 text-center"
+              </div>
+              <div class="space-y-2">
+                <label class="text-sm font-medium">High Scores (local)</label>
+                <!-- TODO: Add High Scores functionality -->
+              </div>
+
+              <div class="flex justify-center">
+                <Button
+                  @click="startGame"
+                  size="lg"
+                  variant="secondary"
+                  class="hover:bg-purple-500 hover:text-slate-200"
+                  :disabled="isAdmin"
                 >
-                    Multiplayer is only available for logged in users. Please
-                    log in to host or join a game.
-                </p>
-                <div class="space-y-4">
-                    <div class="flex justify-center gap-3">
-                        <Button
-                            size="lg"
-                            variant="secondary"
-                            class="hover:bg-emerald-500 hover:text-slate-200"
-                            :disabled="!isLoggedIn || isAdmin"
-                            @click="hostMultiplayerGame"
-                        >
-                            Host Game
-                        </Button>
-                        <Button
-                            size="lg"
-                            variant="outline"
-                            class="border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-slate-200"
-                            :disabled="isLoadingRooms || !isLoggedIn"
-                            @click="loadRooms"
-                        >
-                            {{ isLoadingRooms ? 'Loading...' : 'Refresh Rooms' }}
-                        </Button>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium">Available Rooms</label>
-                        <div
-                            v-if="socketStore.joinableGames.length === 0"
-                            class="text-sm text-gray-500 mt-1"
-                        >
-                            No rooms available. Host a new game.
-                        </div>
-                        <ul
-                            v-else
-                            class="mt-2 space-y-2 max-h-48 overflow-y-auto"
-                        >
-                            <li
-                                v-for="game in socketStore.joinableGames"
-                                :key="game.id"
-                                class="flex items-center justify-between rounded border border-emerald-700/60 bg-emerald-900/40 px-3 py-2 text-sm text-emerald-50"
-                            >
-                                <span>
-                                    Room #{{ game.id }} ·
-                                    {{ game.type === '3' ? 'Bisca de 3' : 'Bisca de 9' }} ·
-                                    {{ (game.player1 && game.player1.username) || 'Waiting for players' }}
-                                </span>
-                                <Button
-                                    size="sm"
-                                    variant="secondary"
-                                    class="hover:bg-emerald-500 hover:text-slate-200"
-                                    :disabled="!isLoggedIn"
-                                    @click="joinMultiplayerGame(game.id)"
-                                >
-                                    Join
-                                </Button>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                  Start Game
+                </Button>
+              </div>
             </CardContent>
-        </Card>
-    </div>
-    
-    <div class="flex justify-center my-10">
-        <h1 class="text-4xl sm:text-5xl font-bold text-yellow-700 tracking-widest uppercase">
-            MATCHES
-        </h1>
-    </div>
-    <div class="flex flex-row justify-center items-stretch gap-5 mt-10">
-        <Card class="w-full max-w-md">
+          </Card>
+
+          <Card class="w-full max-w-md">
             <CardHeader>
-                <CardTitle class="text-3xl font-bold text-center">
-                    Single Player
-                </CardTitle>
-                <CardDescription class="text-center">
-                    Test yourself!!!
-                </CardDescription>
+              <CardTitle class="text-3xl font-bold text-center">
+                MultiPlayer
+              </CardTitle>
+              <CardDescription class="text-center">
+                Play online with other players.
+              </CardDescription>
             </CardHeader>
             <CardContent class="space-y-6">
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">Choose Type</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <Button v-for="level in gameStore.hands" :key="level.value" size="sm"
-                            :variant="selectedHand === level.value ? 'default' : 'outline'"
-                            class="flex flex-col py-3 h-16"
-                            @click="selectedHand = level.value">
-                            <span class="front-semibold">{{ level.label }}</span>
-                        </Button>
-                    </div>
+              <p class="text-sm text-center text-amber-300">
+                Entering a multiplayer game (hosting or joining) costs
+                <span class="font-semibold">2 coins</span>.
+              </p>
+              <div class="space-y-2">
+                <label class="text-sm font-medium">Choose Type</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <Button
+                    v-for="level in gameStore.hands"
+                    :key="level.value"
+                    size="sm"
+                    :variant="
+                      selectedMultiplayerHand === level.value
+                        ? 'default'
+                        : 'outline'
+                    "
+                    class="flex flex-col py-3 h-16"
+                    @click="selectedMultiplayerHand = level.value"
+                  >
+                    <span class="front-semibold">{{ level.label }}</span>
+                  </Button>
                 </div>
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">High Scores (local)</label>
-                    <!-- TODO: Add High Scores functionality -->
+              </div>
+              <p
+                v-if="!isLoggedIn"
+                class="text-sm text-red-400 text-center"
+              >
+                Multiplayer is only available for logged in users. Please
+                log in to host or join a game.
+              </p>
+              <div class="space-y-4">
+                <div class="flex justify-center gap-3">
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    class="hover:bg-emerald-500 hover:text-slate-200"
+                    :disabled="!isLoggedIn || isAdmin"
+                    @click="hostMultiplayerGame"
+                  >
+                    Host Game
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    class="border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-slate-200"
+                    :disabled="isLoadingRooms || !isLoggedIn"
+                    @click="loadRooms"
+                  >
+                    {{ isLoadingRooms ? 'Loading...' : 'Refresh Rooms' }}
+                  </Button>
                 </div>
 
-                <div class="flex justify-center">
-                    <Button @click="startMatch" size="lg" variant="secondary" class="hover:bg-purple-500 hover:text-slate-200" :disabled="isAdmin">
-                        Start Game
-                    </Button>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium">Available Rooms</label>
+                  <div
+                    v-if="socketStore.joinableGames.length === 0"
+                    class="text-sm text-gray-500 mt-1"
+                  >
+                    No rooms available. Host a new game.
+                  </div>
+                  <ul
+                    v-else
+                    class="mt-2 space-y-2 max-h-48 overflow-y-auto"
+                  >
+                    <li
+                      v-for="game in socketStore.joinableGames"
+                      :key="game.id"
+                      class="flex items-center justify-between rounded border border-emerald-700/60 bg-emerald-900/40 px-3 py-2 text-sm text-emerald-50"
+                    >
+                      <span>
+                        Room #{{ game.id }} ·
+                        {{
+                          game.type === '3' ? 'Bisca de 3' : 'Bisca de 9'
+                        }}
+                        ·
+                        {{
+                          (game.player1 && game.player1.username) ||
+                          'Waiting for players'
+                        }}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        class="hover:bg-emerald-500 hover:text-slate-200"
+                        :disabled="!isLoggedIn"
+                        @click="joinMultiplayerGame(game.id)"
+                      >
+                        Join
+                      </Button>
+                    </li>
+                  </ul>
                 </div>
+              </div>
             </CardContent>
-        </Card>
-        <Card class="w-full max-w-md">
+          </Card>
+        </div>
+      </div>
+
+      <!-- MATCHES section -->
+      <div
+        class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl p-4 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.6)]"
+      >
+        <h2
+          class="text-2xl sm:text-3xl font-bold text-yellow-700 tracking-widest uppercase mb-4 text-center"
+        >
+          Matches
+        </h2>
+        <div
+          class="flex flex-col md:flex-row justify-center items-stretch gap-5 mt-4"
+        >
+          <Card class="w-full max-w-md">
             <CardHeader>
-                <CardTitle class="text-3xl font-bold text-center">
-                    MultiPlayer
-                </CardTitle>
-                <CardDescription class="text-center">
-                    Comming Soon!!
-                </CardDescription>
+              <CardTitle class="text-3xl font-bold text-center">
+                Single Player
+              </CardTitle>
+              <CardDescription class="text-center">
+                Test yourself!!!
+              </CardDescription>
             </CardHeader>
             <CardContent class="space-y-6">
+              <div class="space-y-2">
+                <label class="text-sm font-medium">Choose Type</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <Button
+                    v-for="level in gameStore.hands"
+                    :key="level.value"
+                    size="sm"
+                    :variant="
+                      selectedHand === level.value ? 'default' : 'outline'
+                    "
+                    class="flex flex-col py-3 h-16"
+                    @click="selectedHand = level.value"
+                  >
+                    <span class="front-semibold">{{ level.label }}</span>
+                  </Button>
+                </div>
+              </div>
+              <div class="space-y-2">
+                <label class="text-sm font-medium">High Scores (local)</label>
+                <!-- TODO: Add High Scores functionality -->
+              </div>
 
+              <div class="flex justify-center">
+                <Button
+                  @click="startMatch"
+                  size="lg"
+                  variant="secondary"
+                  class="hover:bg-purple-500 hover:text-slate-200"
+                  :disabled="isAdmin"
+                >
+                  Start Game
+                </Button>
+              </div>
             </CardContent>
-        </Card>
+          </Card>
+
+          <Card class="w-full max-w-md">
+            <CardHeader>
+              <CardTitle class="text-3xl font-bold text-center">
+                MultiPlayer
+              </CardTitle>
+              <CardDescription class="text-center">
+                Comming Soon!!
+              </CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-6">
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -214,6 +289,7 @@ import { useSocketStore } from '@/stores/socket'
 import { useAuthStore } from '@/stores/auth'
 import { useAPIStore } from '@/stores/api'
 import { toast } from 'vue-sonner'
+import Balatro from "@/components/ui/Balatro.vue"
 
 const gameStore = useGameStore()
 const socketStore = useSocketStore()

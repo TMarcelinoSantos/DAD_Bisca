@@ -1,5 +1,14 @@
 <template>
-  <div class="min-h-screen w-full overflow-x-hidden flex flex-col items-center justify-center px-3 sm:px-6 pb-6 pt-20 sm:pt-24 bg-[radial-gradient(circle_at_top,#14532d,#052e16)]">
+  <div class="min-h-screen w-full overflow-x-hidden flex flex-col items-center justify-center px-3 sm:px-6 pb-6 pt-20 sm:pt-24 bg-transparent">
+    <div class="fixed inset-0 -z-10 pointer-events-none">
+            <Balatro
+              :is-rotate="false"
+              :mouse-interaction="false"
+              :pixel-filter="700"
+              :color1 = "'#5CA173'"
+              :color2 = "'#0D5E1C'"
+            />
+          </div>
     <div class="w-full max-w-6xl">
       <!-- Header -->
       <div class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl p-4 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.6)] mb-6">
@@ -272,6 +281,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAPIStore } from '@/stores/api'
 import { toast } from 'vue-sonner'
+import Balatro from "@/components/ui/Balatro.vue"
 
 const router = useRouter()
 const apiStore = useAPIStore()

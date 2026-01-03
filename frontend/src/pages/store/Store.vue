@@ -1,7 +1,22 @@
 <template>
-    <div class="min-h-screen bg-[radial-gradient(circle_at_top,#14532d,#052e16)]">
+    <div class="min-h-screen bg-transparent">
+      <div class="fixed inset-0 -z-10 pointer-events-none">
+                          <Balatro
+                            :is-rotate="false"
+                            :mouse-interaction="false"
+                            :pixel-filter="700"
+                            :color1 = "'#5CA173'"
+                            :color2 = "'#0D5E1C'"
+                          />
+                        </div>
       <div class="max-w-4xl mx-auto p-6">
-        <h1 class="text-3xl font-bold mb-8">Store</h1>
+        <div class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl p-4 sm:p-6 shadow-[0_8px_30px_rgba(0,0,0,0.6)] mb-6">
+        <div class="text-center">
+          <h1 class="text-4xl sm:text-5xl font-bold text-yellow-700 tracking-widest uppercase mb-2">
+            STORE
+          </h1>
+        </div>
+        </div>
 
           <Card class="bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)] border-2 border-yellow-700 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
             <CardHeader class= "flex flex-col items-center gap-2 text-center">
@@ -239,6 +254,7 @@ import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAPIStore } from '@/stores/api'
 import axios from 'axios'
+import Balatro from "@/components/ui/Balatro.vue"
 
 const apiStore = useAPIStore()
 const authStore = useAuthStore()
