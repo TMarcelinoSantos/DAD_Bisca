@@ -42,8 +42,8 @@ export const useSocketStore = defineStore('socket', () => {
 
     // ---- GAME EMITS ----
 
-    const createGame = (type, cb) => {
-        socket.emit('game:create', { type }, (res) => {
+    const createGame = (type, mode = 'game', stake = null, cb) => {
+        socket.emit('game:create', { type, mode, stake }, (res) => {
             if (res?.ok) {
                 currentGame.value = res.game
                 gameStore.setActiveMultiplayerGame(res.game)

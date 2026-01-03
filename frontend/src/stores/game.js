@@ -745,6 +745,28 @@ export const useGameStore = defineStore('game', () => {
         setBoard()
     }
 
+    const resetMultiplayerBoard = () => {
+        clearTurnTimer()
+        forcedGameEnd.value = false
+        playerHand.value = []
+        opponentHand.value = []
+        deck.value = []
+        playedCards.value = []
+        playerCardWon.value = []
+        opponentCardWon.value = []
+        turn.value = 'player'
+        beganAt.value = undefined
+        endedAt.value = undefined
+        totalRounds.value = 0
+        playerTotalPoints.value = 0
+        opponentTotalPoints.value = 0
+        roundSaved.value = false
+        lastGameWinner.value = null
+
+        // Re-deal a fresh multiplayer board
+        setBoardMultiplayer()
+    }
+
     //-----------------------MATCHES---------------------------------
 
     const isAuthenticated = computed(() => !!authStore.currentUser)
@@ -755,10 +777,7 @@ export const useGameStore = defineStore('game', () => {
     const currentMatchId = ref(null)
     const getWinType = ref(null)
 
-    const getPointsMatches = () =>{
-        const playerPoints = getBiscaPoints(playerCardWon.value)
-        const opponentPoints = getBiscaPoints(opponentCardWon.value)
-
+    const getPointsMatches = (playerPoints, opponentPoints) =>{
         const winnerPoints = playerPoints > opponentPoints ? playerPoints : opponentPoints
 
         if(playerPoints == opponentPoints) return 0
@@ -801,11 +820,45 @@ export const useGameStore = defineStore('game', () => {
         lastGameWinner.value = null
     }
 
-    const addMatchPoints = () => {
-        const playerPoints = getBiscaPoints(playerCardWon.value)
-        const opponentPoints = getBiscaPoints(opponentCardWon.value)
+    // Reset only the current single-player game board for a match,
+    // keeping accumulated match marks intact and without touching
+    // any database-related identifiers.
+    const resetSingleMatchBoard = () => {
+        clearTurnTimer()
+        forcedGameEnd.value = false
+        playerHand.value = []
+        opponentHand.value = []
+        deck.value = []
+        playedCards.value = []
+        playerCardWon.value = []
+        opponentCardWon.value = []
+        turn.value = 'player'
+        beganAt.value = undefined
+        endedAt.value = undefined
+        totalRounds.value = 0
+        playerTotalPoints.value = 0
+        opponentTotalPoints.value = 0
+        roundSaved.value = false
+        lastGameWinner.value = null
 
-        const marks = getPointsMatches()
+        setBoard()
+    }
+
+    const addMatchPoints = () => {
+        // For multiplayer matches we rely on the board's total points,
+        // which can be normalized by the server (e.g. resignation).
+        let playerPoints
+        let opponentPoints
+
+        if (isMultiplayerGame.value) {
+            playerPoints = playerTotalPoints.value
+            opponentPoints = opponentTotalPoints.value
+        } else {
+            playerPoints = getBiscaPoints(playerCardWon.value)
+            opponentPoints = getBiscaPoints(opponentCardWon.value)
+        }
+
+        const marks = getPointsMatches(playerPoints, opponentPoints)
 
         if (playerPoints > opponentPoints) {
             playerMarks.value += marks
@@ -896,6 +949,7 @@ export const useGameStore = defineStore('game', () => {
         getBiscaPoints,
         addMatchPoints,
         resetMatch,
+        resetSingleMatchBoard,
         getWinType,
         playerMarks,
         opponentMarks,
@@ -916,5 +970,6 @@ export const useGameStore = defineStore('game', () => {
         // Turn timer / resign
         remainingTurnSeconds,
         resign,
+        resetMultiplayerBoard,
     }
 })

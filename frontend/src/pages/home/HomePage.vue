@@ -138,45 +138,40 @@
                   </Button>
                 </div>
 
-                <div class="space-y-2">
-                  <label class="text-sm font-medium">Available Rooms</label>
-                  <div
-                    v-if="socketStore.joinableGames.length === 0"
-                    class="text-sm text-gray-500 mt-1"
-                  >
-                    No rooms available. Host a new game.
-                  </div>
-                  <ul
-                    v-else
-                    class="mt-2 space-y-2 max-h-48 overflow-y-auto"
-                  >
-                    <li
-                      v-for="game in socketStore.joinableGames"
-                      :key="game.id"
-                      class="flex items-center justify-between rounded border border-emerald-700/60 bg-emerald-900/40 px-3 py-2 text-sm text-emerald-50"
-                    >
-                      <span>
-                        Room #{{ game.id }} ·
-                        {{
-                          game.type === '3' ? 'Bisca de 3' : 'Bisca de 9'
-                        }}
-                        ·
-                        {{
-                          (game.player1 && game.player1.username) ||
-                          'Waiting for players'
-                        }}
-                      </span>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        class="hover:bg-emerald-500 hover:text-slate-200"
-                        :disabled="!isLoggedIn"
-                        @click="joinMultiplayerGame(game.id)"
-                      >
-                        Join
-                      </Button>
-                    </li>
-                  </ul>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium">Available Rooms</label>
+                        <div
+                            v-if="simpleJoinableGames.length === 0"
+                            class="text-sm text-gray-500 mt-1"
+                        >
+                            No rooms available. Host a new game.
+                        </div>
+                        <ul
+                            v-else
+                            class="mt-2 space-y-2 max-h-48 overflow-y-auto"
+                        >
+                            <li
+                                v-for="game in simpleJoinableGames"
+                                :key="game.id"
+                                class="flex items-center justify-between rounded border border-emerald-700/60 bg-emerald-900/40 px-3 py-2 text-sm text-emerald-50"
+                            >
+                                <span>
+                                    Room #{{ game.id }} ·
+                                    {{ game.type === '3' ? 'Bisca de 3' : 'Bisca de 9' }} ·
+                                    {{ (game.player1 && game.player1.username) || 'Waiting for players' }}
+                                </span>
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    class="hover:bg-emerald-500 hover:text-slate-200"
+                                    :disabled="!isLoggedIn"
+                                    @click="joinMultiplayerGame(game.id)"
+                                >
+                                    Join
+                                </Button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
               </div>
             </CardContent>
@@ -219,7 +214,7 @@
                 </div>
 
                 <div class="flex justify-center">
-                    <Button @click="startMatch" size="lg" variant="secondary" class="hover:bg-purple-500 hover:text-slate-200" :disabled="isAdmin">
+                    <Button @click="startMatch" size="lg" variant="secondary" class="hover:bg-purple-500 hover:text-slate-200">
                         Start Match
                     </Button>
                 </div>
@@ -228,14 +223,96 @@
 
           <Card class="w-full max-w-md">
             <CardHeader>
-              <CardTitle class="text-3xl font-bold text-center">
-                MultiPlayer
-              </CardTitle>
-              <CardDescription class="text-center">
-                Comming Soon!!
-              </CardDescription>
+                <CardTitle class="text-3xl font-bold text-center">
+                    MultiPlayer
+                </CardTitle>
+                <CardDescription class="text-center">
+                    Play a full multiplayer match. First to 4 marks wins.
+                </CardDescription>
             </CardHeader>
             <CardContent class="space-y-6">
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Choose Type</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <Button
+                            v-for="level in gameStore.hands"
+                            :key="level.value"
+                            size="sm"
+                            :variant="selectedMultiplayerMatchHand === level.value ? 'default' : 'outline'"
+                            class="flex flex-col py-3 h-16"
+                            @click="selectedMultiplayerMatchHand = level.value"
+                        >
+                            <span class="front-semibold">{{ level.label }}</span>
+                        </Button>
+                    </div>
+                </div>
+
+                <p
+                    v-if="!isLoggedIn"
+                    class="text-sm text-red-400 text-center"
+                >
+                    Multiplayer matches are only available for logged in users. Please
+                    log in to host or join a match game.
+                </p>
+
+                <div class="space-y-4">
+                    <div class="flex justify-center gap-3">
+                        <Button
+                            size="lg"
+                            variant="secondary"
+                            class="hover:bg-emerald-500 hover:text-slate-200"
+                            :disabled="!isLoggedIn"
+                            @click="hostMultiplayerMatchGame"
+                        >
+                            Host Game
+                        </Button>
+                        <Button
+                            size="lg"
+                            variant="outline"
+                            class="border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-slate-200"
+                            :disabled="isLoadingMatchRooms || !isLoggedIn"
+                            @click="loadMatchRooms"
+                        >
+                            {{ isLoadingMatchRooms ? 'Loading...' : 'Refresh Rooms' }}
+                        </Button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium">Available Rooms</label>
+                        <div
+                            v-if="matchJoinableGames.length === 0"
+                            class="text-sm text-gray-500 mt-1"
+                        >
+                            No rooms available. Host a new game.
+                        </div>
+                        <ul
+                            v-else
+                            class="mt-2 space-y-2 max-h-48 overflow-y-auto"
+                        >
+                            <li
+                                v-for="game in matchJoinableGames"
+                                :key="game.id"
+                                class="flex items-center justify-between rounded border border-emerald-700/60 bg-emerald-900/40 px-3 py-2 text-sm text-emerald-50"
+                            >
+                                <span>
+                                    Room #{{ game.id }} ·
+                                    {{ game.type === '3' ? 'Bisca de 3' : 'Bisca de 9' }} ·
+                                    Stake: {{ game.stake ?? 2 }} coins ·
+                                    {{ (game.player1 && game.player1.username) || 'Waiting for players' }}
+                                </span>
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    class="hover:bg-emerald-500 hover:text-slate-200"
+                                    :disabled="!isLoggedIn"
+                                    @click="joinMultiplayerMatchGame(game.id)"
+                                >
+                                    Join
+                                </Button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </CardContent>
           </Card>
         </div>
@@ -273,9 +350,20 @@ const router = useRouter()
 const selectedGameHand = ref('')
 const selectedMatchHand = ref('')
 const selectedMultiplayerHand = ref('9')
+const selectedMultiplayerMatchHand = ref('9')
 const isLoadingRooms = ref(false)
+const isLoadingMatchRooms = ref(false)
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 const isAdmin = computed(() => authStore.currentUser?.type === 'A')  // ← add
+
+// Separate views of joinable games: regular multiplayer vs match rooms
+const simpleJoinableGames = computed(() =>
+    socketStore.joinableGames.filter((g) => !g.mode || g.mode === 'game'),
+)
+
+const matchJoinableGames = computed(() =>
+    socketStore.joinableGames.filter((g) => g.mode === 'match'),
+)
 
 const startGame = () => {
     if (isAdmin.value) return        // safety guard
@@ -288,8 +376,113 @@ const startMatch = () => {
     router.push({ name: 'singlematches' })
 }
 
-const hostMultiplayerGame = async () => {
-    if (isAdmin.value) return        // safety guard
+const hostMultiplayerMatchGame = async () => {
+    if (!isLoggedIn.value) {
+        router.push({ name: 'login' })
+        return
+    }
+
+    // Ask the host which stake they want for this match (1–100)
+    const input = window.prompt('Choose match stake (1–100 coins):', '2')
+    if (input === null) return
+
+    const stake = Number.parseInt(input, 10)
+    if (!Number.isFinite(stake) || stake < 1 || stake > 100) {
+        toast.error('Stake must be a number between 1 and 100.')
+        return
+    }
+
+    try {
+        const response = await apiStore.stakeMultiplayerGame(stake)
+
+        if (response?.data?.coins_balance !== undefined && authStore.currentUser) {
+            authStore.currentUser.coins_balance = response.data.coins_balance
+        } else {
+            await authStore.getUser()
+        }
+    } catch (err) {
+        const msg =
+            err?.response?.data?.message ||
+            'Unable to pay multiplayer entry fee.'
+        toast.error(msg)
+        return
+    }
+
+    // Start a fresh multiplayer match: reset marks and board state
+    gameStore.resetMatch()
+    gameStore.hand = selectedMultiplayerMatchHand.value
+
+    // Create a room flagged as a "match" but stay in the lobby
+    // until a second player joins and the game becomes "playing".
+    // Create a room flagged as a "match" with the chosen stake
+    socketStore.createGame(selectedMultiplayerMatchHand.value, 'match', stake, (res) => {
+        if (res?.ok) {
+            // Persist stake on the game object so joiners can see it
+            if (res.game) {
+                res.game.stake = stake
+            }
+            // Immediately refresh rooms so this new match appears in the list
+            loadMatchRooms()
+        } else {
+            toast.error(res?.error || 'Failed to create multiplayer game for match')
+        }
+    })
+}
+
+const loadMatchRooms = () => {
+    isLoadingMatchRooms.value = true
+    socketStore.requestJoinableGames(() => {
+        isLoadingMatchRooms.value = false
+    })
+}
+
+const joinMultiplayerMatchGame = async (gameId) => {
+    if (!isLoggedIn.value) {
+        router.push({ name: 'login' })
+        return
+    }
+
+    // Find the selected match to read its stake (default 2 if missing)
+    const game = socketStore.joinableGames.find((g) => g.id === gameId)
+    const stake = game?.stake ?? 2
+
+    const confirmed = window.confirm(
+        `Joining this match costs ${stake} coins. Continue?`,
+    )
+    if (!confirmed) return
+
+    try {
+        const response = await apiStore.stakeMultiplayerGame(stake)
+
+        if (response?.data?.coins_balance !== undefined && authStore.currentUser) {
+            authStore.currentUser.coins_balance = response.data.coins_balance
+        } else {
+            await authStore.getUser()
+        }
+    } catch (err) {
+        const msg =
+            err?.response?.data?.message ||
+            'Unable to pay multiplayer entry fee.'
+        toast.error(msg)
+        return
+    }
+
+    // Joining an existing match room should also start with fresh local marks
+    gameStore.resetMatch()
+
+    socketStore.joinGame(gameId, (res) => {
+        if (res?.ok) {
+            // Second player joins an existing match room and can enter immediately.
+            router.push({ name: 'multiplayermatches' })
+        } else {
+            toast.error(res?.error || 'Failed to join multiplayer game for match')
+        }
+    })
+}
+
+const goToHistory = () => {
+    router.push({ name: 'history' })
+}
 
     if (!isLoggedIn.value) {
         router.push({ name: 'login' })
@@ -370,11 +563,16 @@ onMounted(() => {
     loadRooms()
 })
 
-// When a hosted room becomes "playing" (second player joined), go to the game page
+// When a hosted room becomes "playing" (second player joined),
+// navigate to the correct page depending on whether it's a match or a normal game.
 watch(
     () => socketStore.currentGame,
     (game) => {
-        if (game && game.state === 'playing') {
+        if (!game || game.state !== 'playing') return
+
+        if (game.mode === 'match') {
+            router.push({ name: 'multiplayermatches' })
+        } else {
             router.push({ name: 'multiplayergame' })
         }
     },

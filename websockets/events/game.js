@@ -30,13 +30,19 @@ export const registerGameEvents = (io, socket) => {
 
     const roomName = (gameID) => `game:${gameID}`
 
-    socket.on('game:create', ({ type }, cb) => {
+    socket.on('game:create', ({ type, mode, stake }, cb) => {
         try {
             const player = getPlayer()
             if (!player) throw new Error('Authentication required')
             const gameType = type === '3' || type === '9' ? type : '9'
+            const gameMode = mode === 'match' ? 'match' : 'game'
 
-            const game = createGame(player, gameType)
+            const normalizedStake =
+                gameMode === 'match' && Number.isFinite(Number(stake))
+                    ? Number(stake)
+                    : null
+
+            const game = createGame(player, gameType, gameMode, normalizedStake)
             const room = roomName(game.id)
             socket.join(room)
             cb && cb({ ok: true, game })

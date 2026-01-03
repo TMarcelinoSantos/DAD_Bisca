@@ -16,6 +16,15 @@ export const useAPIStore = defineStore('api', () => {
     return axios.get(`${API_BASE_URL}/games`)
   }
 
+  // MULTIPLAYER MATCHES
+  const postMultiplayerMatch = (match) => {
+    return axios.post(`${API_BASE_URL}/matches`, match)
+  }
+
+  const updateMultiplayerMatch = (matchId, data) => {
+    return axios.put(`${API_BASE_URL}/matches/${matchId}`, data)
+  }
+
   //SINGLEGAME
   const postSingleGame = (game) => {
     return axios.post(`${API_BASE_URL}/games_single`, game)
@@ -208,6 +217,8 @@ export const useAPIStore = defineStore('api', () => {
   return {
     postGame,
     getGames,
+    postMultiplayerMatch,
+    updateMultiplayerMatch,
     postSingleGame,
     getSingleGames,
     updateSingleGame,
