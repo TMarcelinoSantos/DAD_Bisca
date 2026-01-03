@@ -47,7 +47,7 @@
                 Single Player
               </CardTitle>
               <CardDescription class="text-center">
-                Test yourself!!!
+                Play a game against the computer.
               </CardDescription>
             </CardHeader>
             <CardContent class="space-y-6">
@@ -202,7 +202,7 @@
                 Single Player
               </CardTitle>
               <CardDescription class="text-center">
-                Test yourself!!!
+                Play a match against the computer.
               </CardDescription>
             </CardHeader>
             <CardContent class="space-y-6">
