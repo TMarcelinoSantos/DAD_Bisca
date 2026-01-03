@@ -1,5 +1,14 @@
 <template>
-  <div class="min-h-screen w-full overflow-x-hidden flex flex-col items-center justify-center px-3 sm:px-6 pb-6 pt-20 sm:pt-24 bg-[radial-gradient(circle_at_top,#14532d,#052e16)]">
+  <div class="fixed inset-0 -z-10 pointer-events-none">
+      <Balatro
+        :is-rotate="false"
+        :mouse-interaction="false"
+        :pixel-filter="700"
+        :color1 = "'#5CA173'"
+        :color2 = "'#0D5E1C'"
+      />
+  </div>
+  <div class="relative z-10 min-h-screen w-full flex flex-col items-center justify-center px-3 sm:px-6 pb-6 pt-20 sm:pt-24">
     <div class="w-full max-w-5xl">
       <div class="flex flex-col lg:flex-row lg:flex-wrap gap-6">
         <!-- Matches Section -->
@@ -146,14 +155,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Go Back Button -->
-      <button
-        class="w-full mt-6 py-4 text-lg font-semibold border border-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)]"
-        @click="goBack"
-      >
-        Go back
-      </button>
     </div>
   </div>
 </template>
@@ -163,6 +164,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAPIStore } from '@/stores/api'
 import { toast } from 'vue-sonner'
+import Balatro from '@/components/ui/Balatro.vue'
 
 const router = useRouter()
 const apiStore = useAPIStore()
@@ -257,10 +259,6 @@ const fetchHistory = async () => {
   } finally {
     loading.value = false
   }
-}
-
-const goBack = () => {
-  router.push({ name: 'home' })
 }
 
 const viewMatchDetails = (matchId) => {

@@ -244,14 +244,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Go Back Button -->
-      <button
-        class="w-full mt-6 py-4 text-lg font-semibold border border-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition bg-[linear-gradient(145deg,#fdf5e6,#e7dcc3)]"
-        @click="goBack"
-      >
-        Go back
-      </button>
     </div>
   </div>
 </template>
@@ -310,10 +302,6 @@ const fetchStatistics = async () => {
 
 const goToAdminStats = () => {
   router.push({ name: 'adminStatistics' })
-}
-
-const goBack = () => {
-  router.push({ name: 'home' })
 }
 
 onMounted(() => {

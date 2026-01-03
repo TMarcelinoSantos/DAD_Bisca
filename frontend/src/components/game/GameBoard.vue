@@ -129,7 +129,7 @@ onMounted(() => {
                     <div class="absolute top-0 left-0 z-1">
                         <img
                             v-if="deck.length > 0"
-                            :src="deck[deck.length - 1].src"
+                            :src=semFace
                             class="card"
                         />
                     </div>
