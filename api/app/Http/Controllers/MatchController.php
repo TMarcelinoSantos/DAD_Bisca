@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Matches;
+use App\Models\User;
+use App\Models\CoinTransaction;
+use App\Models\CoinTransactionType;
 
 class MatchController extends Controller
 {
@@ -23,11 +27,11 @@ class MatchController extends Controller
         $validated = $request->validate([
             'type'             => 'required|in:3,9',
             'player1_user_id'  => 'required|exists:users,id',
-            'player2_user_id'  => 'nullable|exists:users,id',
-            'winner_user_id'   => 'nullable|exists:users,id',
-            'loser_user_id'    => 'nullable|exists:users,id',
+            'player2_user_id'  => 'required|exists:users,id',
+            'winner_user_id'   => 'required|exists:users,id',
+            'loser_user_id'    => 'required|exists:users,id',
             'status'           => 'required|in:Pending,Playing,Ended,Interrupted',
-            'stake'            => 'nullable|integer',
+            'stake'            => 'required|integer|min:1|max:100',
             'began_at'         => 'nullable|date',
             'ended_at'         => 'nullable|date',
             'total_time'       => 'nullable|numeric',
@@ -38,7 +42,39 @@ class MatchController extends Controller
             'custom'           => 'nullable|array',
         ]);
 
-        $match = Matches::create($validated);
+        $match = DB::transaction(function () use ($validated) {
+            $match = Matches::create($validated);
+
+            // Payout logic: winner receives both stakes minus 1 coin.
+            $stake = $match->stake;
+            $payout = max(0, 2 * $stake - 1);
+
+            if ($payout > 0 && $match->winner_user_id) {
+                $winner = User::find($match->winner_user_id);
+                if ($winner) {
+                    $type = CoinTransactionType::firstOrCreate([
+                        'name' => 'Match payout',
+                        'type' => 'C',
+                    ]);
+
+                    CoinTransaction::create([
+                        'transaction_datetime'     => now(),
+                        'user_id'                  => $winner->id,
+                        'match_id'                 => $match->id,
+                        'coin_transaction_type_id' => $type->id,
+                        'coins'                    => $payout,
+                        'custom'                   => [
+                            'context' => 'multiplayer_match_payout',
+                            'stake'   => $stake,
+                        ],
+                    ]);
+
+                    $winner->increment('coins_balance', $payout);
+                }
+            }
+
+            return $match;
+        });
 
         return response()->json($match, 201);
     }

@@ -57,7 +57,7 @@ export const getJoinableGames = () => {
     )
 }
 
-export const createGame = (player1, type = '9', mode = 'game') => {
+export const createGame = (player1, type = '9', mode = 'game', stake = null) => {
     const gameID = nextGameID()
     const game = {
         id: gameID,
@@ -66,6 +66,7 @@ export const createGame = (player1, type = '9', mode = 'game') => {
         state: 'waiting',
         type,
         mode, // 'game' for regular multiplayer, 'match' for multiplayer matches
+        stake, // optional stake for matches (coins per player)
         createdAt: Date.now(),
         moves: [],
         board: {

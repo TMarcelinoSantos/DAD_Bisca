@@ -338,13 +338,18 @@ const hostMultiplayerMatchGame = async () => {
         return
     }
 
-    const confirmed = window.confirm(
-        'Hosting a multiplayer game in this match costs 2 coins. Continue?',
-    )
-    if (!confirmed) return
+    // Ask the host which stake they want for this match (1–100)
+    const input = window.prompt('Choose match stake (1–100 coins):', '2')
+    if (input === null) return
+
+    const stake = Number.parseInt(input, 10)
+    if (!Number.isFinite(stake) || stake < 1 || stake > 100) {
+        toast.error('Stake must be a number between 1 and 100.')
+        return
+    }
 
     try {
-        const response = await apiStore.stakeMultiplayerGame(2)
+        const response = await apiStore.stakeMultiplayerGame(stake)
 
         if (response?.data?.coins_balance !== undefined && authStore.currentUser) {
             authStore.currentUser.coins_balance = response.data.coins_balance
@@ -365,8 +370,13 @@ const hostMultiplayerMatchGame = async () => {
 
     // Create a room flagged as a "match" but stay in the lobby
     // until a second player joins and the game becomes "playing".
-    socketStore.createGame(selectedMultiplayerMatchHand.value, 'match', (res) => {
+    // Create a room flagged as a "match" with the chosen stake
+    socketStore.createGame(selectedMultiplayerMatchHand.value, 'match', stake, (res) => {
         if (res?.ok) {
+            // Persist stake on the game object so joiners can see it
+            if (res.game) {
+                res.game.stake = stake
+            }
             // Immediately refresh rooms so this new match appears in the list
             loadMatchRooms()
         } else {
@@ -388,13 +398,17 @@ const joinMultiplayerMatchGame = async (gameId) => {
         return
     }
 
+    // Find the selected match to read its stake (default 2 if missing)
+    const game = socketStore.joinableGames.find((g) => g.id === gameId)
+    const stake = game?.stake ?? 2
+
     const confirmed = window.confirm(
-        'Joining this multiplayer game in the match costs 2 coins. Continue?',
+        `Joining this match costs ${stake} coins. Continue?`,
     )
     if (!confirmed) return
 
     try {
-        const response = await apiStore.stakeMultiplayerGame(2)
+        const response = await apiStore.stakeMultiplayerGame(stake)
 
         if (response?.data?.coins_balance !== undefined && authStore.currentUser) {
             authStore.currentUser.coins_balance = response.data.coins_balance

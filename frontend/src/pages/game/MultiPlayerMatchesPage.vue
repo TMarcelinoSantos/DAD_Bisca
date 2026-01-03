@@ -69,8 +69,8 @@ const saveMultiplayerMatch = async () => {
     winner_user_id: winnerUserId,
     loser_user_id: loserUserId,
     status: 'Ended',
-    // Match stake is currently fixed at 2 coins (see hostMultiplayerMatchGame)
-    stake: 2,
+    // Use the stake stored on the websocket game (fallback to 2 if missing)
+    stake: Number.isFinite(Number(game.stake)) ? Number(game.stake) : 2,
     began_at: game.beganAt ?? beganAt.toISOString(),
     ended_at: now.toISOString(),
     total_time: totalTimeSeconds,
