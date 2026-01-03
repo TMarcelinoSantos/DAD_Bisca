@@ -254,7 +254,7 @@ class UserController extends Controller
 
     public function updateBlocked(Request $request, User $user)
     {
-        if ($request->type !== 'A') {
+        if ($request->user()->type !== 'A') {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -270,7 +270,7 @@ class UserController extends Controller
 
     public function updateType(Request $request, User $user)
     {
-        if ($request->type !== 'A') {
+        if ($request->user()->type !== 'A') {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
