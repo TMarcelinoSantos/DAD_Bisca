@@ -89,16 +89,19 @@ const router = createRouter({
       path: '/history',
       name: 'history',
       component: HistoryPage,
+      meta: { requiresAuth: true },
     },
     {
       path: '/history/match/:matchId',
       name: 'matchDetails',
       component: () => import('@/pages/history/MatchDetailsPage.vue'),
+      meta: { requiresAuth: true },
     },
     {
       path: '/leaderboard',
       name: 'leaderboard',
       component: () => import('@/pages/leaderboard/PersonalLeaderboardPage.vue'),
+      meta: { requiresAuth: true },
     },
     {
       path: '/leaderboards',
