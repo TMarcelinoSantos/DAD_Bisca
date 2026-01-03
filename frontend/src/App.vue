@@ -64,7 +64,11 @@
               class="text-amber-100 bg-emerald-950 border border-amber-100 hover:text-white hover:bg-white/10"
             >
               <img
-                :src="authStore.currentUser?.avatar || '/default-avatar.png'"
+                :src="
+                  authStore.currentUser?.photo_avatar_filename
+                    ? `${serverBaseURL}/storage/photos/${authStore.currentUser.photo_avatar_filename}`
+                    : '/default-avatar.png'
+                "
                 alt="User Avatar"
                 class="inline-block h-6 w-6 rounded-full mr-2"
               />
@@ -134,7 +138,7 @@ import { toast } from 'vue-sonner'
 import 'vue-sonner/style.css'
 import { RouterLink, RouterView } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import { onMounted } from 'vue';
+import { onMounted, inject } from 'vue';   // ← add inject
 import { useSocketStore } from './stores/socket';
 
 import {useRouter} from 'vue-router'
@@ -142,6 +146,8 @@ import {useRouter} from 'vue-router'
 const authStore = useAuthStore()
 const router = useRouter()
 const socketStore = useSocketStore()
+
+const serverBaseURL = inject('serverBaseURL')
 
 const logout = () => {
   toast.promise(authStore.logout(), {
