@@ -1,6 +1,6 @@
 
 GROUP := "dad-group-23"
-VERSION := "2.0.0"
+VERSION := "2.1.0"
 
 
 kubectl-pods:
