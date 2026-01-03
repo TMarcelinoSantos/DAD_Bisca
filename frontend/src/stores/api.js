@@ -201,6 +201,10 @@ export const useAPIStore = defineStore('api', () => {
     return axios.get(`${API_BASE_URL}/admin/statistics/users/${userId}`)
   }
 
+  const getUserHistory = (userId, params = {}) => {
+    return axios.get(`${API_BASE_URL}/history/${userId}`, { params })
+  }
+
   return {
     postGame,
     getGames,
@@ -240,5 +244,6 @@ export const useAPIStore = defineStore('api', () => {
     getStatistics,
     getAdminUsersList,
     getAdminUserStatistics,
+    getUserHistory,
   }
 })

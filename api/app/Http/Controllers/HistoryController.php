@@ -136,6 +136,8 @@ class HistoryController extends Controller
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 
+        $perPage = $request->input('per_page', 10);
+
         // Matches for the requested user (with relations)
         $matches = MatchModel::with([
                 'player1:id,name,nickname',
@@ -150,7 +152,7 @@ class HistoryController extends Controller
                   ->orWhere('loser_user_id', $user->id);
             })
             ->orderBy('began_at', 'desc')
-            ->get();
+            ->paginate($perPage, ['*'], 'matches_page');
 
         // Standalone games (no match_id) for the requested user (with relations)
         $games = Game::with([
@@ -167,7 +169,7 @@ class HistoryController extends Controller
                   ->orWhere('loser_user_id', $user->id);
             })
             ->orderBy('began_at', 'desc')
-            ->get();
+            ->paginate($perPage, ['*'], 'games_page');
 
         return response()->json([
             'user'    => [
