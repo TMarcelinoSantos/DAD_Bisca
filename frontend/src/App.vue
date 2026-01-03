@@ -95,7 +95,7 @@
                     <RouterLink to="/coinshistory" class="hover:text-black">Transactions</RouterLink>
                   </NavigationMenuLink>
                 </li>
-                <li v-if="!authStore.isAdmin">
+                <li>
                   <NavigationMenuLink as-child>
                     <RouterLink to="/history" class="hover:text-black">History</RouterLink>
                   </NavigationMenuLink>
