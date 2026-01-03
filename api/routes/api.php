@@ -55,7 +55,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/user/theme', [UserController::class, 'changeTheme']);
     Route::post('/user/theme/buy', [UserController::class, 'updateTheme']);
-    Route::post('/user/avatar', [UserController::class, 'updateAvatar']);
 
     Route::post('/user/coins', [UserController::class, 'updateUserCoins']);
     Route::post('/user/coins/reward', [UserController::class, 'updateRewardCoins']);

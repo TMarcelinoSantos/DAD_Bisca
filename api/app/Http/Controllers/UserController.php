@@ -71,19 +71,19 @@ class UserController extends Controller
         $cardName = $request->theme;
 
         if ($user->coins_balance < $price) {
-            return response()->json(['message' => 'Saldo insuficiente'], 400);
+            return response()->json(['message' => 'Insufficient funds'], 400);
         }
 
         DB::transaction(function () use ($user, $price, $cardName) {
 
             $custom = is_array($user->custom) ? $user->custom : [];
 
-            // 🔹 Garantir array
+            // Garantir array
             if (!isset($custom['owned_card_themes'])) {
                 $custom['owned_card_themes'] = [];
             }
 
-            // 🔹 Evitar duplicados
+            // Evitar duplicados
             if (in_array($cardName, $custom['owned_card_themes'])) {
                 abort(409, 'Theme already owned');
             }
@@ -142,31 +142,6 @@ class UserController extends Controller
             'user' => $user
         ]);
     }
-
-
-    public function updateAvatar(Request $request)
-    {
-            $request->validate([
-            'img' => 'required|string',
-            'price' => 'required|integer|min:0',
-        ]);
-
-        $user = $request->user();
-
-        if ($user->coins_balance < $request->price) {
-            return response()->json(['message' => 'Saldo insuficiente'], 400);
-        }
-
-        $user->coins_balance -= $request->price;
-        $user->photo_avatar_filename = $request->img;
-        $user->save();
-
-        return response()->json([
-            'message' => 'Carta comprada com sucesso!',
-            'user' => $user
-        ]);
-    }
-
 
     public function updateUserCoins(Request $request)
     {
@@ -228,8 +203,8 @@ class UserController extends Controller
     {
         $data = $request->validate(['photo_avatar_filename' => 'required|string']);
         if ($user->photo_avatar_filename) {
-            if (Storage::disk('public')->exists('photos/' . $user->photo_avatar_filename)) {
-                Storage::disk('public')->delete('photos/' . $user->photo_avatar_filename);
+            if (Storage::disk('public')->exists('photos_avatars/' . $user->photo_avatar_filename)) {
+                Storage::disk('public')->delete('photos_avatars/' . $user->photo_avatar_filename);
             }
         }
         $user->photo_avatar_filename = $data['photo_avatar_filename'];

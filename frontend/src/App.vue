@@ -66,7 +66,7 @@
               <img
                 :src="
                   authStore.currentUser?.photo_avatar_filename
-                    ? `${serverBaseURL}/storage/photos/${authStore.currentUser.photo_avatar_filename}`
+                    ? `${serverBaseURL}/storage/photos_avatars/${authStore.currentUser.photo_avatar_filename}`
                     : '/default-avatar.png'
                 "
                 alt="User Avatar"

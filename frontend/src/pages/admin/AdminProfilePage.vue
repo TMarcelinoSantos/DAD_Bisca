@@ -21,7 +21,7 @@
                          <Avatar class="w-32 h-32 ring-2 ring-primary">
                          <AvatarImage
                              v-if="selectedUser.photo_avatar_filename"
-                             :src="`${serverBaseURL}/storage/photos/${selectedUser.photo_avatar_filename}`"
+                             :src="`${serverBaseURL}/storage/photos_avatars/${selectedUser.photo_avatar_filename}`"
                          />
                          <AvatarFallback class="text-4xl">
                              {{ selectedUser.name?.charAt(0).toUpperCase() }}

@@ -17,7 +17,7 @@
                                 <Avatar class="w-32 h-32 ring-2 ring-primary">
                                 <AvatarImage
                                     v-if="authStore.currentUser.photo_avatar_filename"
-                                    :src="`${serverBaseURL}/storage/photos/${authStore.currentUser.photo_avatar_filename}`"
+                                    :src="`${serverBaseURL}/storage/photos_avatars/${authStore.currentUser.photo_avatar_filename}`"
                                 />
                                 <AvatarFallback class="text-4xl">
                                     {{ authStore.currentUser.name?.charAt(0).toUpperCase() }}
