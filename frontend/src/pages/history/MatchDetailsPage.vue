@@ -207,11 +207,13 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAPIStore } from '@/stores/api'
+import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const route = useRoute()
 const apiStore = useAPIStore()
+const authStore = useAuthStore()
 
 const match = ref(null)
 const games = ref([])
@@ -326,6 +328,11 @@ const goBack = () => {
 }
 
 onMounted(() => {
+  if (!authStore.isLoggedIn) {
+    toast.error('Please login to view match details')
+    router.push({ name: 'login' })
+    return
+  }
   fetchMatchDetails()
 })
 </script>

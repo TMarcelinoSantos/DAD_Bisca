@@ -232,10 +232,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAPIStore } from '@/stores/api'
+import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const apiStore = useAPIStore()
+const authStore = useAuthStore()
 
 const history = ref({
   matches: { data: [], last_page: 1 },
@@ -355,6 +357,11 @@ const viewMatchDetails = (matchId) => {
 }
 
 onMounted(() => {
+  if (!authStore.isLoggedIn) {
+    toast.error('Please login to view your history')
+    router.push({ name: 'login' })
+    return
+  }
   fetchHistory()
 })
 </script>

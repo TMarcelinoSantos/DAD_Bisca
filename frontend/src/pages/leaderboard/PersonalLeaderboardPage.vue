@@ -216,10 +216,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAPIStore } from '@/stores/api'
+import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const apiStore = useAPIStore()
+const authStore = useAuthStore()
 
 const stats = ref(null)
 const loading = ref(true)
@@ -242,6 +244,11 @@ const goBack = () => {
 }
 
 onMounted(() => {
+  if (!authStore.isLoggedIn) {
+    toast.error('Please login to view your stats')
+    router.push({ name: 'login' })
+    return
+  }
   fetchStats()
 })
 </script>
