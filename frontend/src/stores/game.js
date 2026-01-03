@@ -164,18 +164,24 @@ export const useGameStore = defineStore('game', () => {
     }
 
     const loadImagesAsDeck = () => {
-        const modules = import.meta.glob('../cards/*.{png,jpg,jpeg}', { eager: true })
-        const imgs = Object.entries(modules)
-            .map(([path, mod]) => {
-                const file = path.split('/').pop()
-                const id = file.replace(/\.[^/.]+$/, '')
-                const src = mod.default
-                return {path, id, src }
-            })
-            .filter(i => !/semFace/i.test(i.path))
-            .map(i => ({ id: i.id, src: i.src }))
+        // Cards are now served from the public/cards folder.
+        // Build the deck by convention from known suits/ranks
+        // and point src to the static URL used by the dev server.
+        const suits = ['c', 'e', 'o', 'p']
+        const ranks = ['1', '2', '3', '4', '5', '6', '7', '11', '12', '13']
 
-        return imgs
+        const cards = []
+        for (const suit of suits) {
+            for (const rank of ranks) {
+                const id = `${suit}${rank}`
+                cards.push({
+                    id,
+                    src: `/cards/${id}.png`,
+                })
+            }
+        }
+
+        return cards
     }
 
     let allCardsCache = null
@@ -212,6 +218,16 @@ export const useGameStore = defineStore('game', () => {
     const setBoard = () => {
         const imgs = loadImagesAsDeck()
         const shuffled = shuffle(imgs)
+
+        // Reset any previous single-player game state so points,
+        // won-card piles, and forced-end flags don't leak into
+        // the new game.
+        playedCards.value = []
+        playerCardWon.value = []
+        opponentCardWon.value = []
+        playerTotalPoints.value = 0
+        opponentTotalPoints.value = 0
+        forcedGameEnd.value = false
 
         deck.value = shuffled.slice()
         playerHand.value = []

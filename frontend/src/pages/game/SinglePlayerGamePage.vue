@@ -36,8 +36,7 @@
     }
 
     onMounted(async () => {
-        await gameStore.startGame()
-        gameStore.setBoard()
+        await gameStore.playAgain()
     })
 
 </script>

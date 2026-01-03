@@ -39,9 +39,9 @@ const props = defineProps({
 })
 
 const semFace = computed(() =>
-  authStore.currentUser?.card_theme 
-    ? '../src/cards/' + authStore.currentUser.card_theme
-    : '../src/cards/semFace.png'
+  authStore.currentUser?.card_theme
+    ? `/cards/${authStore.currentUser.card_theme}`
+    : '/cards/semFace.png'
 )
 
 const onCardClick = (card) => {
@@ -70,6 +70,9 @@ const remainingSeconds = computed(() => gameStore.remainingTurnSeconds)
 // Multiplayer countdown derived from server-side turnDeadlineAt
 const multiplayerSeconds = ref(null)
 
+// Keep reference to interval so it can be cleared on unmount
+const multiplayerIntervalId = ref(null)
+
 const isMultiplayerGameOver = computed(
   () => socketStore.currentGame?.state === 'finished',
 )
@@ -83,19 +86,37 @@ const handleMultiplayerResign = () => {
 onMounted(() => {
   if (!props.multiPlayer) return
 
-  const intervalId = setInterval(() => {
-    const deadline = socketStore.currentGame?.board?.turnDeadlineAt
-    if (!deadline) {
+  // Update multiplayer countdown based on server-side deadline
+  multiplayerIntervalId.value = setInterval(() => {
+    const rawDeadline = socketStore.currentGame?.board?.turnDeadlineAt
+
+    if (rawDeadline == null) {
       multiplayerSeconds.value = null
       return
     }
+
+    // Coerce possible formats (number timestamp or ISO/string)
+    let deadline = rawDeadline
+    if (typeof rawDeadline === 'string') {
+      const numeric = Number(rawDeadline)
+      deadline = Number.isNaN(numeric) ? Date.parse(rawDeadline) : numeric
+    }
+
+    if (typeof deadline !== 'number' || Number.isNaN(deadline)) {
+      multiplayerSeconds.value = null
+      return
+    }
+
     const diff = Math.max(0, Math.ceil((deadline - Date.now()) / 1000))
     multiplayerSeconds.value = diff
   }, 500)
+})
 
-  onUnmounted(() => {
-    clearInterval(intervalId)
-  })
+onUnmounted(() => {
+  if (multiplayerIntervalId.value) {
+    clearInterval(multiplayerIntervalId.value)
+    multiplayerIntervalId.value = null
+  }
 })
 </script>
 
@@ -129,7 +150,7 @@ onMounted(() => {
                     <div class="absolute top-0 left-0 z-1">
                         <img
                             v-if="deck.length > 0"
-                            :src=semFace
+                      :src="semFace"
                             class="card"
                         />
                     </div>
@@ -154,7 +175,7 @@ onMounted(() => {
                 <img 
                     v-for="(card,i) in gameStore.playedCards"
                     :key="i"
-                    :src="card.src"
+                :src="card?.src || semFace"
                     class="card card-img"
                 />
             </div>
@@ -201,12 +222,12 @@ onMounted(() => {
                   <img
                     v-for="(card,i) in playerCards"
                     :key="i"
-                    :src="card.src"
+                    :src="card?.src || semFace"
                     class="card card-img cursor-pointer"
                     @click="onCardClick(card)"
                     :class="{
-                      'opacity-100 cursor-pointer': isCardPlayable(card.id),
-                      'opacity-40 cursor-not-allowed': !isCardPlayable(card.id)
+                      'opacity-100 cursor-pointer':isCardPlayable(card.id),
+                      'opacity-40 cursor-not-allowed':!isCardPlayable(card.id)
                     }"
                   />
                 </div>
