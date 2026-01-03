@@ -53,7 +53,7 @@ const router = createRouter({
           path: 'multiplayermatches',
           name: 'multiplayermatches',
           component: MultiPlayerMatchPage,
-          meta: { notAdmin: true },
+          meta: { notAdmin: true , notBlocked: true},
         },
       ],
     },
@@ -156,6 +156,12 @@ router.beforeEach((to, from, next) => {
   // block admins from player-only routes
   if (to.matched.some(record => record.meta?.notAdmin)) {
     if (auth.isAdmin) {
+      return next({ name: 'home' })
+    }
+  }
+
+  if (to.matched.some(record => record.meta?.notblocked)) {
+    if (auth.isBlocked) {
       return next({ name: 'home' })
     }
   }
