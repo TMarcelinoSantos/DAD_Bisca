@@ -81,7 +81,13 @@
                  </CardContent>
                     <div class="mt-6 items-center justify-center flex">
                         <!--DELETE BUTTON-->
-                        <Button class="hover:bg-red-700" @click="showDeleteModal = true"> Delete Account </Button>
+                        <Button
+                          v-if="authStore.currentUser && selectedUser.id !== authStore.currentUser.id"
+                          class="hover:bg-red-700"
+                          @click="showDeleteModal = true"
+                        >
+                          Delete Account
+                        </Button>
                     </div> 
              </Card>
              
@@ -186,6 +192,7 @@
 import { ref, inject, watch, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAPIStore } from '@/stores/api'
+import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -202,6 +209,7 @@ import {
 } from '@/components/ui/table'
 
 const apiStore = useAPIStore()
+const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
