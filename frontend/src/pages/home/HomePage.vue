@@ -176,7 +176,7 @@
 
                 <div class="flex justify-center">
                     <Button @click="startMatch" size="lg" variant="secondary" class="hover:bg-purple-500 hover:text-slate-200">
-                        Start Game
+                        Start Match
                     </Button>
                 </div>
             </CardContent>
@@ -191,11 +191,6 @@
                 </CardDescription>
             </CardHeader>
             <CardContent class="space-y-6">
-                <p class="text-sm text-center text-amber-300">
-                    Hosting or joining a multiplayer game inside a match costs
-                    <span class="font-semibold">2 coins</span>.
-                </p>
-
                 <div class="space-y-2">
                     <label class="text-sm font-medium">Choose Type</label>
                     <div class="grid grid-cols-2 gap-2">
@@ -262,6 +257,7 @@
                                 <span>
                                     Room #{{ game.id }} ·
                                     {{ game.type === '3' ? 'Bisca de 3' : 'Bisca de 9' }} ·
+                                    Stake: {{ game.stake ?? 2 }} coins ·
                                     {{ (game.player1 && game.player1.username) || 'Waiting for players' }}
                                 </span>
                                 <Button
