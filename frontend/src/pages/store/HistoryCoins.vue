@@ -35,6 +35,13 @@
             </div>
 
             <div v-else class="overflow-x-auto">
+              <div class="flex items-center gap-4 mb-4">
+                <label class="font-medium">Filter by Type:</label>
+                <select v-model="typeFilter" class="border rounded p-1">
+                  <option :value="null">All</option>
+                  <option v-for="type in transactionTypes" :key="type" :value="type">{{ type }}</option>
+                </select>
+              </div>
             <Table>
                 <TableHeader class="bg-yellow-800 text-yellow-50">
                 <TableRow>
@@ -96,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { Button } from '@/components/ui/button'
 import Balatro from '@/components/ui/Balatro.vue'
 import {
@@ -118,6 +125,8 @@ const error = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
+const typeFilter = ref<string | null>(null)
+
 const fetchTransactions = async () => {
   isLoading.value = true
   try {
@@ -133,12 +142,12 @@ const fetchTransactions = async () => {
 onMounted(fetchTransactions)
 
 const totalPages = computed(() =>
-  Math.ceil(transactions.value.length / itemsPerPage)
+  Math.ceil(filteredTransactions.value.length / itemsPerPage)
 )
 
 const paginatedTransactions = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
-  return transactions.value.slice(start, start + itemsPerPage)
+  return filteredTransactions.value.slice(start, start + itemsPerPage)
 })
 
 const pageStart = computed(() =>
@@ -146,6 +155,20 @@ const pageStart = computed(() =>
 )
 
 const pageEnd = computed(() =>
-  Math.min(pageStart.value + itemsPerPage - 1, transactions.value.length)
+  Math.min(pageStart.value + itemsPerPage - 1, filteredTransactions.value.length)
 )
+
+const filteredTransactions = computed(() => {
+  if (!typeFilter.value) return transactions.value
+  return transactions.value.filter(tx => tx.type?.name === typeFilter.value)
+})
+
+const transactionTypes = computed(() => {
+  const types = transactions.value.map(tx => tx.type?.name).filter(Boolean)
+  return Array.from(new Set(types)) as string[]
+})
+
+watch(typeFilter, () => {
+  currentPage.value = 1
+})
 </script>

@@ -84,18 +84,22 @@
                       :key="option.id"
                       class="basis-1/2 sm:basis-1/2 md:basis-1/3"
                     >
-                      <!-- use px so items aren't flush to the carousel edges -->
-                      <div class="px-6 py-2 flex flex-col items-center">
-                        <Card class="rounded-lg overflow-hidden w-28 h-40 flex items-center justify-center cursor-pointer shadow-lg z-10"
-                          @click="confirmPurchase({ id: option.id, name: option.name, price: option.price, img: option.src}, 'card' )"
+                      <div class="px-6 py-2 flex flex-col items-center relative">
+                        <Card class="rounded-lg w-28 h-40 flex items-center justify-center cursor-pointer shadow-lg z-10 relative"
+                          @click="isOwned(option.filename) ? selectCardTheme(option.filename) : confirmPurchase({ id: option.id, name: option.name, price: option.price, img: option.src}, 'card')"
                         >
                           <!-- card back image sized as a deck card -->
-                          <img :src="option.src" :alt="option.name" class="w-full h-full object-contain" />
+                          <img :src="option.src" :alt="option.name" class="w-full h-full object-contain rounded-lg" />
                         </Card>
+
+                        <div class="absolute top-2 right-4 z-20">
+                          <div v-if="isSelected(option.filename)" class="w-4 h-4 bg-green-600 rounded-full"></div>
+                          <div v-else-if="isOwned(option.filename)" class="w-4 h-4 bg-gray-400 rounded-full"></div>
+                        </div>
 
                         <div class="mt-3 text-center">
                           <div class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ option.name }}</div>
-                          <div class="mt-1 text-yellow-500 font-semibold">{{ option.price }} <span class="text-gray-600 text-xs">coins</span></div>
+                          <div v-if="!isOwned(option.filename)" class="mt-1 text-yellow-500 font-semibold">{{ option.price }} <span class="text-gray-600 text-xs">coins</span></div>
                         </div>
                       </div>
                     </CarouselItem>
@@ -218,7 +222,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useCostumizationsStore } from '@/stores/customizations'
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
@@ -239,7 +243,7 @@ const errorMessage = ref('')
 const paymentEuros = ref(1)
 const coinsFromPayment = computed(() => paymentEuros.value * 10)
 
-
+const currentUser = computed(() => authStore.currentUser)
 
 const showPayment = ref(false)
 const paymentType = ref<'MBWAY' | 'PAYPAL' | 'IBAN' | 'MB' | 'VISA'>('MBWAY')
@@ -302,6 +306,12 @@ function cancelPayment() {
   showPayment.value = false
 }
 
+watch(showPayment, (isOpen) => {
+  if (!isOpen) {
+    resetPaymentState()
+  }
+})
+
 const referenceLabel = computed(() => {
   if (paymentType.value === 'MBWAY') return 'Phone Number'
   if (paymentType.value === 'PAYPAL') return 'Email'
@@ -354,7 +364,9 @@ async function submitPayment() {
 
             await authStore.getUser()
             successMessage.value = `Payment successful! ${coinsFromEuros.value} coins added.`
-            cancelPayment()
+            setTimeout(() => {
+              cancelPayment() 
+            }, 800)
         }
 
     } catch (error: any) {
@@ -378,6 +390,37 @@ function cancelPurchase() {
   showConfirm.value = false
 }
 
+function resetPaymentState() {
+  paymentEuros.value = 1
+  paymentType.value = 'MBWAY'
+  reference.value = ''
+  errorMessage.value = ''
+  successMessage.value = ''
+  loading.value = false
+}
+
+
+function isOwned(themeName: string) {
+  const custom = typeof currentUser.value?.custom === 'string' 
+    ? JSON.parse(currentUser.value.custom) 
+    : currentUser.value?.custom || {}
+  return custom.owned_card_themes?.includes(themeName)
+}
+
+function isSelected(themeName: string) {
+  return currentUser.value?.card_theme === themeName
+}
+
+async function selectCardTheme(themeName: string) {
+  try {
+    await customizationsStore.setCardTheme(themeName)
+    await authStore.getUser()
+  } catch (err) {
+    console.error('Error changing card theme:', err)
+  }
+}
+
+
 const buyConfirmed = async () => {
   console.log('Purchase confirmed for', selected.value)
   const item = selected.value
@@ -391,15 +434,17 @@ const buyConfirmed = async () => {
 
   try{
     if (item.type === 'card') {
-      const themeName = item.id.endsWith('.png') ? item.id : `${item.id}.png`;
+      const themeName = item.id + '.png';
+      console.log('Buying card theme:', themeName)
       await customizationsStore.buyCardTheme({img: themeName, price: item.price}) 
     }
 
     await authStore.getUser()
+    console.log('User after purchase:', authStore.currentUser)
 
     showConfirm.value = false
     selected.value = null
-    router.push({ name: 'customizations' })
+    router.push({ name: 'store' })
   }catch (error) {
     console.error("Erro ao comprar carta:", error)
     alert("Erro ao comprar a carta. Tenta novamente.")

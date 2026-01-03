@@ -8,6 +8,10 @@ use App\Models\User;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use App\Models\CoinTransaction;
+use App\Models\CoinTransactionType;
+
 
 class UserController extends Controller
 {
@@ -63,20 +67,82 @@ class UserController extends Controller
         ]);
 
         $user = $request->user();
+        $price = $request->price;
+        $cardName = $request->theme;
 
-        if ($user->coins_balance < $request->price) {
+        if ($user->coins_balance < $price) {
             return response()->json(['message' => 'Saldo insuficiente'], 400);
         }
 
-        $user->coins_balance -= $request->price;
-        $user->card_theme = $request->theme; 
-        $user->save();
+        DB::transaction(function () use ($user, $price, $cardName) {
+            
+            $custom = is_array($user->custom) ? $user->custom : [];
+
+            // 🔹 Garantir array
+            if (!isset($custom['owned_card_themes'])) {
+                $custom['owned_card_themes'] = [];
+            }
+
+            // 🔹 Evitar duplicados
+            if (in_array($cardName, $custom['owned_card_themes'])) {
+                abort(409, 'Theme already owned');
+            }
+
+            $user->decrement('coins_balance', $price);
+
+            $type = CoinTransactionType::firstOrCreate(
+                ['name' => 'Buy card theme', 'type' => 'D']
+            );
+            CoinTransaction::create([
+                'transaction_datetime' => now(),
+                'user_id' => $user->id,
+                'coin_transaction_type_id' => $type->id,
+                'coins' => -$price,
+            ]);
+
+            $custom['owned_card_themes'][] = $cardName;
+
+            $user->custom = $custom;
+            $user->card_theme = $cardName; 
+            $user->save();
+        });
 
         return response()->json([
-            'message' => 'Carta comprada com sucesso!',
+            'message' => 'Card Theme purchased successfully!',
             'user' => $user
         ]);
     }
+
+    public function changeTheme(Request $request)
+    {
+        $request->validate([
+            'theme' => 'required|string',
+        ]);
+
+        $user = $request->user();
+        $cardName = $request->theme;
+
+        DB::transaction(function () use ($user, $cardName) {
+            $custom = is_array($user->custom) ? $user->custom : [];
+
+            if (!isset($custom['owned_card_themes'])) {
+                $custom['owned_card_themes'] = [];
+            }
+
+            if (!in_array($cardName, $custom['owned_card_themes'])) {
+                abort(409, 'Theme not owned');
+            }
+
+            $user->card_theme = $cardName;
+            $user->save();
+        });
+
+        return response()->json([
+            'message' => 'Card Theme changed successfully!',
+            'user' => $user
+        ]);
+    }
+
 
     public function updateAvatar(Request $request)
     {

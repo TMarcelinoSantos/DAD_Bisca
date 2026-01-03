@@ -31,6 +31,7 @@ class User extends Authenticatable
         'coins_balance',
         'card_theme',
         'photo_avatar_filename',
+        'custom'
     ];
 
     /**
@@ -54,6 +55,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'blocked' => 'boolean',
+            'custom' => 'array',
         ];
     }
 
