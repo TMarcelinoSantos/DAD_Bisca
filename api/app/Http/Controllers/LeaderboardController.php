@@ -22,7 +22,7 @@ class LeaderboardController extends Controller
      */
     public function global(Request $request)
     {
-        $limit = $request->query('limit', 10);
+        $perPage = $request->query('limit', 5);
 
         // Game wins leaderboard
         $gameWinsLeaderboard = User::select('users.id', 'users.nickname', 'users.name')
@@ -34,8 +34,7 @@ class LeaderboardController extends Controller
             ->groupBy('users.id', 'users.nickname', 'users.name')
             ->havingRaw('COUNT(games.id) > 0')
             ->orderByRaw('total_wins DESC, first_win_at ASC')
-            ->limit($limit)
-            ->get();
+            ->paginate($perPage, ['*'], 'game_wins_page');
 
         // Match wins leaderboard
         $matchWinsLeaderboard = User::select('users.id', 'users.nickname', 'users.name')
@@ -47,8 +46,7 @@ class LeaderboardController extends Controller
             ->groupBy('users.id', 'users.nickname', 'users.name')
             ->havingRaw('COUNT(matches.id) > 0')
             ->orderByRaw('total_wins DESC, first_win_at ASC')
-            ->limit($limit)
-            ->get();
+            ->paginate($perPage, ['*'], 'match_wins_page');
 
         // Capotes leaderboard
         $capotesLeaderboard = User::select('users.id', 'users.nickname', 'users.name')
@@ -67,8 +65,7 @@ class LeaderboardController extends Controller
             ->groupBy('users.id', 'users.nickname', 'users.name')
             ->havingRaw('COUNT(games.id) > 0')
             ->orderByRaw('total_capotes DESC, first_capote_at ASC')
-            ->limit($limit)
-            ->get();
+            ->paginate($perPage, ['*'], 'capotes_page');
 
         // Bandeiras leaderboard
         $bandeiraLeaderboard = User::select('users.id', 'users.nickname', 'users.name')
@@ -87,13 +84,11 @@ class LeaderboardController extends Controller
             ->groupBy('users.id', 'users.nickname', 'users.name')
             ->havingRaw('COUNT(games.id) > 0')
             ->orderByRaw('total_bandeiras DESC, first_bandeira_at ASC')
-            ->limit($limit)
-            ->get();
+            ->paginate($perPage, ['*'], 'bandeiras_page');
 
-        // Transform to include ranking
-        $gameWinsLeaderboard = $gameWinsLeaderboard->map(function ($user, $index) {
+        // Transform to include ranking in data
+        $gameWinsLeaderboard->getCollection()->transform(function ($user) {
             return [
-                'rank'       => $index + 1,
                 'id'         => $user->id,
                 'nickname'   => $user->nickname,
                 'name'       => $user->name,
@@ -102,9 +97,8 @@ class LeaderboardController extends Controller
             ];
         });
 
-        $matchWinsLeaderboard = $matchWinsLeaderboard->map(function ($user, $index) {
+        $matchWinsLeaderboard->getCollection()->transform(function ($user) {
             return [
-                'rank'       => $index + 1,
                 'id'         => $user->id,
                 'nickname'   => $user->nickname,
                 'name'       => $user->name,
@@ -113,9 +107,8 @@ class LeaderboardController extends Controller
             ];
         });
 
-        $capotesLeaderboard = $capotesLeaderboard->map(function ($user, $index) {
+        $capotesLeaderboard->getCollection()->transform(function ($user) {
             return [
-                'rank'       => $index + 1,
                 'id'         => $user->id,
                 'nickname'   => $user->nickname,
                 'name'       => $user->name,
@@ -124,9 +117,8 @@ class LeaderboardController extends Controller
             ];
         });
 
-        $bandeiraLeaderboard = $bandeiraLeaderboard->map(function ($user, $index) {
+        $bandeiraLeaderboard->getCollection()->transform(function ($user) {
             return [
-                'rank'       => $index + 1,
                 'id'         => $user->id,
                 'nickname'   => $user->nickname,
                 'name'       => $user->name,

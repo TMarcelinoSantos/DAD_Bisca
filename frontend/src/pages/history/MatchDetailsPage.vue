@@ -207,11 +207,13 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAPIStore } from '@/stores/api'
+import { useAuthStore } from '@/stores/auth'
 import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const route = useRoute()
 const apiStore = useAPIStore()
+const authStore = useAuthStore()
 
 const match = ref(null)
 const games = ref([])
@@ -313,9 +315,25 @@ const fetchMatchDetails = async () => {
     const response = await apiStore.getMatchDetails(matchId)
     match.value = response.data.match
     games.value = response.data.games
+    
+    // Check if user is viewing another user's match
+    const currentUserId = authStore.currentUser?.id
+    const player1Id = match.value.player1_user_id
+    const player2Id = match.value.player2_user_id
+    
+    // If the current user is not a participant in this match
+    if (currentUserId !== player1Id && currentUserId !== player2Id) {
+      // Check if user is an admin
+      if (authStore.currentUser?.type !== 'A') {
+        toast.error('You must be an admin to view other users\' matches')
+        router.push({ name: 'login' })
+        return
+      }
+    }
   } catch (error) {
     toast.error('Failed to load match details')
     console.error(error)
+    router.push({ name: 'history' })
   } finally {
     loading.value = false
   }
@@ -326,6 +344,11 @@ const goBack = () => {
 }
 
 onMounted(() => {
+  if (!authStore.isLoggedIn) {
+    toast.error('Please login to view match details')
+    router.push({ name: 'login' })
+    return
+  }
   fetchMatchDetails()
 })
 </script>

@@ -56,8 +56,8 @@ export const useAPIStore = defineStore('api', () => {
   }
 
   // HISTORY
-  const getHistory = () => {
-    return axios.get(`${API_BASE_URL}/users/me/history`)
+  const getHistory = (params = {}) => {
+    return axios.get(`${API_BASE_URL}/users/me/history`, { params })
   }
 
   const getMatchDetails = (matchId) => {
@@ -184,8 +184,8 @@ export const useAPIStore = defineStore('api', () => {
   }
 
   // LEADERBOARDS
-  const getGlobalLeaderboards = (limit = 10) => {
-    return axios.get(`${API_BASE_URL}/leaderboards?limit=${limit}`)
+  const getGlobalLeaderboards = (params = {}) => {
+    return axios.get(`${API_BASE_URL}/leaderboards`, { params })
   }
 
   // STATISTICS
@@ -199,6 +199,10 @@ export const useAPIStore = defineStore('api', () => {
 
   const getAdminUserStatistics = (userId) => {
     return axios.get(`${API_BASE_URL}/admin/statistics/users/${userId}`)
+  }
+
+  const getUserHistory = (userId, params = {}) => {
+    return axios.get(`${API_BASE_URL}/history/${userId}`, { params })
   }
 
   return {
@@ -240,5 +244,6 @@ export const useAPIStore = defineStore('api', () => {
     getStatistics,
     getAdminUsersList,
     getAdminUserStatistics,
+    getUserHistory,
   }
 })
