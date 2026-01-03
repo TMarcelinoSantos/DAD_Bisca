@@ -18,6 +18,11 @@ export const useAuthStore = defineStore('auth', () => {
     return currentUser.value.type === 'A'
   })
 
+  const isBlocked = computed(() => {
+    if(currentUser.value===undefined) return false
+    return currentUser.value.blocked
+  })
+
   const login = async (credentials) => {
     await apiStore.postLogin(credentials)
     await getUser()
@@ -44,6 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
     currentUser,
     isLoggedIn,
     isAdmin,
+    isBlocked,
     login,
     logout,
     register,

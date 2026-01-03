@@ -124,7 +124,7 @@
                     size="lg"
                     variant="secondary"
                     class="hover:bg-emerald-500 hover:text-slate-200"
-                    :disabled="!isLoggedIn || isAdmin"
+                    :disabled="!isLoggedIn || isAdmin || authStore.isBlocked"
                     @click="hostMultiplayerGame"
                   >
                     Host Game
@@ -166,7 +166,7 @@
                         size="sm"
                         variant="secondary"
                         class="hover:bg-emerald-500 hover:text-slate-200"
-                        :disabled="!isLoggedIn || isAdmin"
+                        :disabled="!isLoggedIn || isAdmin || authStore.isBlocked"
                         @click="joinMultiplayerGame(game.id)"
                       >
                         Join
@@ -274,7 +274,7 @@
                     size="lg"
                     variant="secondary"
                     class="hover:bg-emerald-500 hover:text-slate-200"
-                    :disabled="!isLoggedIn || isAdmin"
+                    :disabled="!isLoggedIn || isAdmin || authStore.isBlocked"
                     @click="hostMultiplayerMatchGame"
                   >
                     Host Game
@@ -317,7 +317,7 @@
                         size="sm"
                         variant="secondary"
                         class="hover:bg-emerald-500 hover:text-slate-200"
-                        :disabled="!isLoggedIn || isAdmin"
+                        :disabled="!isLoggedIn || isAdmin || authStore.isBlocked"
                         @click="joinMultiplayerMatchGame(game.id)"
                       >
                         Join
