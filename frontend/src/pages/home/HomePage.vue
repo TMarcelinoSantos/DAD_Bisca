@@ -30,7 +30,13 @@
                 </div>
 
                 <div class="flex justify-center">
-                    <Button @click="startGame" size="lg" variant="secondary" class="hover:bg-purple-500 hover:text-slate-200">
+                    <Button
+                      @click="startGame"
+                      size="lg"
+                      variant="secondary"
+                      class="hover:bg-purple-500 hover:text-slate-200"
+                      :disabled="isAdmin"
+                    >
                         Start Game
                     </Button>
                 </div>
@@ -78,7 +84,7 @@
                             size="lg"
                             variant="secondary"
                             class="hover:bg-emerald-500 hover:text-slate-200"
-                            :disabled="!isLoggedIn"
+                            :disabled="!isLoggedIn || isAdmin"
                             @click="hostMultiplayerGame"
                         >
                             Host Game
@@ -161,7 +167,7 @@
                 </div>
 
                 <div class="flex justify-center">
-                    <Button @click="startMatch" size="lg" variant="secondary" class="hover:bg-purple-500 hover:text-slate-200">
+                    <Button @click="startMatch" size="lg" variant="secondary" class="hover:bg-purple-500 hover:text-slate-200" :disabled="isAdmin">
                         Start Game
                     </Button>
                 </div>
@@ -212,17 +218,22 @@ const selectedHand = ref('')
 const selectedMultiplayerHand = ref('9')
 const isLoadingRooms = ref(false)
 const isLoggedIn = computed(() => authStore.isLoggedIn)
+const isAdmin = computed(() => authStore.currentUser?.type === 'A')  // ← add
 
 const startGame = () => {
+    if (isAdmin.value) return        // safety guard
     gameStore.hand = selectedHand.value
     router.push({ name: 'singleplayer' })
 }
+
 const startMatch = () => {
     gameStore.hand = selectedHand.value
     router.push({ name: 'singlematches' })
 }
 
 const hostMultiplayerGame = async () => {
+    if (isAdmin.value) return        // safety guard
+
     if (!isLoggedIn.value) {
         router.push({ name: 'login' })
         return
