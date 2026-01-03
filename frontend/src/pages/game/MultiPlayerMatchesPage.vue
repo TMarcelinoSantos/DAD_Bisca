@@ -20,63 +20,73 @@ const isGameOver = ref(false)
 const isMatchOver = ref(false)
 const gameWinner = ref(null)
 const matchWinner = ref(null)
-const hasSavedGame = ref(false)
+const hasSavedMatch = ref(false)
 
-// Persist one finished multiplayer game (round of the match)
-const saveMultiplayerGame = async () => {
-  if (hasSavedGame.value) return
+// Persist the whole multiplayer MATCH (once, by the winner only)
+const saveMultiplayerMatch = async () => {
+  if (hasSavedMatch.value) return
 
   const game = socketStore.currentGame
   const currentUser = authStore.currentUser
-
   if (!game || !currentUser) return
-  if (!game.player1 || !game.player2 || !game.result) return
-
-  const { result } = game
+  if (!game.player1 || !game.player2) return
 
   const player1Id = game.player1.id
   const player2Id = game.player2.id
 
-  let winnerUserId = null
-  let loserUserId = null
-  let isDraw = 0
+  // Local marks from *this* client's perspective
+  const myMarks = gameStore.playerMarks
+  const oppMarks = gameStore.opponentMarks
 
-  if (result.winner === 'player') {
-    winnerUserId = player1Id
-    loserUserId = player2Id
-  } else if (result.winner === 'opponent') {
-    winnerUserId = player2Id
-    loserUserId = player1Id
+  // Only the actual winner (strictly more marks) persists the match
+  if (myMarks <= oppMarks) return
+
+  const myId = currentUser.id
+  const oppId = myId === player1Id ? player2Id : player1Id
+
+  const winnerUserId = myId
+  const loserUserId = oppId
+
+  // Normalize marks into player1 / player2 columns
+  let player1Marks
+  let player2Marks
+  if (myId === player1Id) {
+    player1Marks = myMarks
+    player2Marks = oppMarks
   } else {
-    isDraw = 1
+    player1Marks = oppMarks
+    player2Marks = myMarks
   }
+
+  const now = new Date()
+  const beganAt = game.beganAt ? new Date(game.beganAt) : now
+  const totalTimeSeconds = Math.max(0, Math.round((now - beganAt) / 1000))
 
   const payload = {
     type: game.type,
     player1_user_id: player1Id,
     player2_user_id: player2Id,
-    is_draw: !!isDraw,
     winner_user_id: winnerUserId,
     loser_user_id: loserUserId,
-    match_id: null, // multiplayer match persistence can be added later
     status: 'Ended',
-    began_at: game.beganAt ?? null,
-    ended_at: game.endedAt ?? null,
-    total_time: game.totalTimeSeconds ?? null,
-    player1_points: result.playerPoints ?? 0,
-    player2_points: result.opponentPoints ?? 0,
-    // For now, don't send structured custom data to avoid
-    // Array to string conversion issues on the backend.
+    // Match stake is currently fixed at 2 coins (see hostMultiplayerMatchGame)
+    stake: 2,
+    began_at: game.beganAt ?? beganAt.toISOString(),
+    ended_at: now.toISOString(),
+    total_time: totalTimeSeconds,
+    player1_marks: player1Marks,
+    player2_marks: player2Marks,
+    player1_points: null,
+    player2_points: null,
     custom: null,
   }
 
   try {
-    await apiStore.postGame(payload)
-    hasSavedGame.value = true
-    // Refresh user coins so any payouts are visible
+    await apiStore.postMultiplayerMatch(payload)
+    hasSavedMatch.value = true
     await authStore.getUser()
   } catch (err) {
-    const msg = err?.response?.data?.message || 'Failed to save multiplayer game.'
+    const msg = err?.response?.data?.message || 'Failed to save multiplayer match.'
     toast.error(msg)
   }
 }
@@ -98,7 +108,7 @@ const handleGameFinished = async () => {
     gameWinner.value = 'tie'
   }
 
-  await saveMultiplayerGame()
+  // No per-game /games API call here – we only persist the MATCH.
 
   // Accumulate match marks using the shared match logic
   gameStore.addMatchPoints()
@@ -107,9 +117,11 @@ const handleGameFinished = async () => {
   if (gameStore.playerMarks >= 4) {
     matchWinner.value = 'player'
     isMatchOver.value = true
+    await saveMultiplayerMatch()
   } else if (gameStore.opponentMarks >= 4) {
     matchWinner.value = 'opponent'
     isMatchOver.value = true
+    await saveMultiplayerMatch()
   }
 }
 
@@ -132,18 +144,12 @@ const continueMatch = () => {
 
   isGameOver.value = false
   gameWinner.value = null
-  hasSavedGame.value = false
+  // NOTE: do NOT reset hasSavedMatch here; we only save once at the end.
 
   const isHost = game.player1 && game.player1.id === currentUser.id
-  if (!isHost) {
-    // Only player1 (host) re-deals and syncs the board
-    return
-  }
+  if (!isHost) return
 
-  // Locally re-deal a new multiplayer board (keeps match marks)
   gameStore.resetMultiplayerBoard()
-
-  // Push new board to server so both players see next game
   socketStore.syncGameState(game.id)
 }
 
@@ -161,7 +167,6 @@ watch(
   },
 )
 
-// Initial guard/load
 onMounted(() => {
   if (!socketStore.currentGame) {
     router.push({ name: 'home' })
