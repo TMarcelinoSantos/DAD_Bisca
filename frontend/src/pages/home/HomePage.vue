@@ -166,7 +166,7 @@
                         size="sm"
                         variant="secondary"
                         class="hover:bg-emerald-500 hover:text-slate-200"
-                        :disabled="!isLoggedIn"
+                        :disabled="!isLoggedIn || isAdmin"
                         @click="joinMultiplayerGame(game.id)"
                       >
                         Join
@@ -274,7 +274,7 @@
                     size="lg"
                     variant="secondary"
                     class="hover:bg-emerald-500 hover:text-slate-200"
-                    :disabled="!isLoggedIn"
+                    :disabled="!isLoggedIn || isAdmin"
                     @click="hostMultiplayerMatchGame"
                   >
                     Host Game
@@ -317,7 +317,7 @@
                         size="sm"
                         variant="secondary"
                         class="hover:bg-emerald-500 hover:text-slate-200"
-                        :disabled="!isLoggedIn"
+                        :disabled="!isLoggedIn || isAdmin"
                         @click="joinMultiplayerMatchGame(game.id)"
                       >
                         Join
